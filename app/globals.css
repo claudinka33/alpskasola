@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body {
+  background: #ffffff;
+  color: #0C2340;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mountain-bg {
+  background: linear-gradient(180deg, #d6e7f5 0%, #e8f1fa 40%, #f5fafe 100%);
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid #FF6B1A;
+  outline-offset: 2px;
+}
