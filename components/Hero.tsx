@@ -3,7 +3,7 @@ import { ArrowRight, Play, Shield, Medal, Heart, Waves, Star } from "lucide-reac
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden mountain-bg pb-32 lg:pb-40">
+    <section className="relative overflow-hidden mountain-bg pb-40 lg:pb-52">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(15)].map((_, i) => (
           <div
@@ -77,7 +77,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Slika - zatakne se za gore */}
+          {/* Slika - gre za gore, da jo na dnu prekrijejo */}
           <div className="relative z-0 self-end lg:translate-y-20">
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/20">
               <img
@@ -98,21 +98,11 @@ export default function Hero() {
                 <span className="text-xs text-slate-500">Poletna ponudba</span>
               </div>
             </div>
-
-            <div className="hidden lg:flex absolute -right-2 -bottom-6 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 items-center gap-3 animate-float" style={{ animationDelay: "1.5s" }}>
-              <div className="bg-amber-50 text-amber-700 p-2 rounded-lg">
-                <Star size={22} fill="currentColor" />
-              </div>
-              <div>
-                <strong className="block text-sm font-semibold text-brand-navy">4.9 / 5.0</strong>
-                <span className="text-xs text-slate-500">Ocena staršev</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      <svg className="absolute bottom-0 left-0 right-0 w-full pointer-events-none z-20" viewBox="0 0 800 120" preserveAspectRatio="xMidYMax slice" style={{ height: "120px" }}>
+      <svg className="absolute bottom-0 left-0 right-0 w-full pointer-events-none z-20" viewBox="0 0 800 120" preserveAspectRatio="xMidYMax slice" style={{ height: "170px" }}>
         <defs>
           <linearGradient id="mtnBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7a9fc4" /><stop offset="100%" stopColor="#a6c0db" /></linearGradient>
           <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4a6b8f" /><stop offset="100%" stopColor="#6b89aa" /></linearGradient>
@@ -121,10 +111,6 @@ export default function Hero() {
         <path d="M0,120 L0,60 L80,20 L150,50 L220,15 L300,55 L380,25 L480,60 L560,20 L640,55 L720,30 L800,65 L800,120 Z" fill="url(#mtnBack)" />
         <path d="M0,120 L0,80 L70,50 L160,75 L240,40 L340,80 L440,50 L540,80 L620,55 L720,85 L800,65 L800,120 Z" fill="url(#mtnMid)" />
         <path d="M0,120 L0,100 L100,75 L200,95 L300,70 L400,100 L500,75 L600,100 L700,80 L800,105 L800,120 Z" fill="url(#mtnFront)" />
-        <polygon points="80,20 67,33 76,33 71,46 89,46 84,33 93,33" fill="white" opacity="0.9" />
-        <polygon points="220,15 207,30 217,30 212,44 232,44 227,30 237,30" fill="white" opacity="0.9" />
-        <polygon points="380,25 367,40 377,40 372,53 392,53 387,40 397,40" fill="white" opacity="0.9" />
-        <polygon points="560,20 547,35 557,35 552,48 572,48 567,35 577,35" fill="white" opacity="0.9" />
       </svg>
     </section>
   );
