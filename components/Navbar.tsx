@@ -1,123 +1,100 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, X, Phone, ArrowRight } from "lucide-react";
 
-const menuItems = [
-  { label: "O nas", href: "/o-nas" },
-  { label: "Smučanje", href: "/sola-smucanja" },
-  { label: "Akademija", href: "/smucarska-akademija" },
-  { label: "Tekmovalne ekipe", href: "/ski-racing-team" },
-  { label: "Plavanje", href: "/plavalni-tecaj" },
-  { label: "Abeceda", href: "/sportna-abeceda" },
+const navLinks = [
+  { href: "/o-nas", label: "O nas" },
+  { href: "/sola-smucanja", label: "Smučanje" },
+  { href: "/smucarska-akademija", label: "Akademija" },
+  { href: "/ski-racing-team", label: "Tekmovalne ekipe" },
+  { href: "/plavalni-tecaj", label: "Plavanje" },
+  { href: "/sportna-abeceda", label: "Abeceda" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-sm"
-          : "bg-white/80 backdrop-blur-sm"
-      }`}
-    >
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/60">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <Image
-              src="https://assets.cdn.filesafe.space/x59KaDfsCMuhMlks5lOI/media/6a1438ede05851175c7a0326.png"
+        <div className="flex items-center justify-between h-20 lg:h-24">
+          <Link href="/" className="flex items-center shrink-0">
+            <img
+              src="/alpska-logo.png"
               alt="Alpska šola"
-              width={48}
-              height={48}
-              className="h-12 w-auto"
-              priority
+              className="h-14 lg:h-16 w-auto"
             />
           </Link>
 
-          {/* Desktop menu */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {menuItems.map((item) => (
+          <div className="hidden lg:flex items-center gap-7">
+            {navLinks.map((link) => (
               <Link
-                key={item.href}
-                href={item.href}
+                key={link.href}
+                href={link.href}
                 className="text-sm font-medium text-brand-navy hover:text-brand-orange transition-colors"
               >
-                {item.label}
+                {link.label}
               </Link>
             ))}
-          </nav>
+          </div>
 
-          {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-4">
             <a
               href="tel:064230888"
-              className="hidden md:flex items-center gap-2 text-sm text-slate-600 hover:text-brand-orange transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-600 hover:text-brand-orange"
             >
-              <Phone size={16} />
-              <span className="font-semibold text-brand-navy">064 230 888</span>
+              <Phone size={14} />
+              <strong className="text-brand-navy">064 230 888</strong>
             </a>
             <Link
               href="/prijava"
-              className="hidden md:inline-flex items-center gap-2 bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-brand-orange-dark transition-colors shadow-md shadow-brand-orange/20"
+              className="inline-flex items-center gap-2 bg-brand-orange text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-brand-orange-dark transition-colors"
             >
-              Prijavi se <ArrowRight size={16} />
+              Prijavi se <ArrowRight size={14} />
             </Link>
-            <button
-              onClick={() => setOpen(!open)}
-              className="lg:hidden p-2 text-brand-navy"
-              aria-label="Meni"
-            >
-              {open ? <X size={24} /> : <Menu size={24} />}
-            </button>
           </div>
+
+          <button
+            onClick={() => setOpen(!open)}
+            className="lg:hidden p-2 text-brand-navy"
+            aria-label="Meni"
+          >
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
-        {/* Mobile menu */}
         {open && (
-          <div className="lg:hidden border-t border-slate-100 py-4 animate-fade-in">
-            <nav className="flex flex-col gap-2">
-              {menuItems.map((item) => (
+          <div className="lg:hidden border-t border-slate-200 py-4">
+            <div className="flex flex-col gap-1">
+              {navLinks.map((link) => (
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  key={link.href}
+                  href={link.href}
                   onClick={() => setOpen(false)}
-                  className="px-4 py-3 text-sm font-medium text-brand-navy hover:bg-orange-50 hover:text-brand-orange rounded-lg transition-colors"
+                  className="text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50"
                 >
-                  {item.label}
+                  {link.label}
                 </Link>
               ))}
-              <div className="border-t border-slate-100 mt-2 pt-3 flex flex-col gap-2 px-4">
-                <a
-                  href="tel:064230888"
-                  className="flex items-center gap-2 py-2 text-sm text-slate-600"
-                >
-                  <Phone size={16} className="text-brand-orange" />
-                  <span className="font-semibold">064 230 888</span>
-                </a>
-                <Link
-                  href="/prijava"
-                  onClick={() => setOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 bg-brand-orange text-white px-4 py-3 rounded-lg text-sm font-semibold"
-                >
-                  Prijavi se <ArrowRight size={16} />
-                </Link>
-              </div>
-            </nav>
+              <a
+                href="tel:064230888"
+                className="flex items-center gap-2 text-base font-medium text-brand-navy py-2.5 px-2 mt-2 border-t border-slate-100"
+              >
+                <Phone size={16} /> 064 230 888
+              </a>
+              <Link
+                href="/prijava"
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center justify-center gap-2 bg-brand-orange text-white px-5 py-3 rounded-lg text-sm font-bold mt-2"
+              >
+                Prijavi se <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
         )}
       </div>
-    </header>
+    </nav>
   );
 }

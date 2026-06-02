@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Play, Shield, Medal, Heart, Snowflake, Star, Mountain } from "lucide-react";
+import { ArrowRight, Play, Shield, Medal, Heart, Snowflake, Star } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -29,9 +29,7 @@ export default function Hero() {
         preserveAspectRatio="xMidYMid slice"
       >
         <ellipse cx="120" cy="40" rx="60" ry="14" fill="white" opacity="0.6" />
-        <ellipse cx="180" cy="35" rx="50" ry="12" fill="white" opacity="0.7" />
         <ellipse cx="500" cy="50" rx="70" ry="15" fill="white" opacity="0.5" />
-        <ellipse cx="560" cy="45" rx="55" ry="13" fill="white" opacity="0.6" />
         <ellipse cx="700" cy="30" rx="50" ry="11" fill="white" opacity="0.5" />
       </svg>
 
@@ -41,7 +39,7 @@ export default function Hero() {
           <div className="relative z-10 max-w-xl">
             <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full text-xs font-semibold text-brand-navy mb-6 border border-slate-200/60 shadow-sm">
               <span className="w-2 h-2 bg-brand-orange rounded-full animate-pulse-orange" />
-              Sezona 2025/26 — prijave so odprte
+              ★ POLETNI HIT — Plavalni tečaj 2026
             </div>
 
             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-extrabold text-brand-navy leading-[1] tracking-tight mb-5">
@@ -54,17 +52,15 @@ export default function Hero() {
             </h1>
 
             <p className="text-base lg:text-lg text-slate-600 mb-7 max-w-lg leading-relaxed">
-              Največja šola smučanja v Sloveniji. 15+ let izkušenj na belih
-              strminah, 35+ usposobljenih učiteljev in 15.000+ otrok, ki so pri
-              nas naredili prve smučarske korake.
+              Največja šola smučanja v Sloveniji. 15+ let izkušenj, 35+ usposobljenih učiteljev in 15.000+ otrok. Poleti pa plavanje za vse stopnje.
             </p>
 
             <div className="flex flex-wrap gap-3 mb-8">
               <Link
-                href="/prijava"
-                className="inline-flex items-center gap-2 bg-brand-orange text-white px-6 py-3.5 rounded-xl text-sm font-semibold hover:bg-brand-orange-dark transition-all shadow-lg shadow-brand-orange/30 hover:-translate-y-0.5 hover:shadow-xl"
+                href="/plavalni-tecaj"
+                className="inline-flex items-center gap-2 bg-brand-orange text-white px-6 py-3.5 rounded-xl text-sm font-semibold hover:bg-brand-orange-dark transition-all shadow-lg shadow-brand-orange/30 hover:-translate-y-0.5"
               >
-                Prijavi se na tečaj <ArrowRight size={16} />
+                Plavalni tečaji <ArrowRight size={16} />
               </Link>
               <Link
                 href="/o-nas"
@@ -90,22 +86,18 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right visual - placeholder za sliko */}
-          <div className="relative h-[400px] lg:h-[500px] hidden lg:block">
-            <div className="absolute inset-0 rounded-2xl bg-white/60 backdrop-blur-sm border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-3 text-brand-navy">
-              <Mountain size={48} className="text-brand-orange" />
-              <strong className="text-sm font-semibold">
-                Prostor za hero sliko
-              </strong>
-              <span className="text-xs text-slate-500 text-center px-6">
-                Priporočamo panoramo Rogle ali otroke na smučišču
-                <br />
-                (vertikalno, ~600×750px)
-              </span>
+          {/* Right - slika plavanje */}
+          <div className="relative h-[280px] sm:h-[360px] lg:h-[460px]">
+            <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/20">
+              <img
+                src="/plavalni-tecaj.png"
+                alt="Plavalni tečaj"
+                className="w-full h-full object-cover"
+              />
             </div>
 
-            <div className="absolute -left-8 top-16 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float">
-              <div className="bg-orange-50 text-brand-orange p-2 rounded-lg">
+            <div className="absolute -left-4 top-12 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float">
+              <div className="bg-blue-50 text-blue-700 p-2 rounded-lg">
                 <Snowflake size={22} />
               </div>
               <div>
@@ -119,10 +111,10 @@ export default function Hero() {
             </div>
 
             <div
-              className="absolute -right-4 bottom-20 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float"
+              className="absolute -right-2 bottom-16 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float"
               style={{ animationDelay: "1.5s" }}
             >
-              <div className="bg-blue-50 text-blue-700 p-2 rounded-lg">
+              <div className="bg-amber-50 text-amber-700 p-2 rounded-lg">
                 <Star size={22} fill="currentColor" />
               </div>
               <div>
@@ -138,7 +130,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Mountains SVG - manjše, špice nad herojem */}
+      {/* Mountains - manjše */}
       <svg
         className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
         viewBox="0 0 800 120"
