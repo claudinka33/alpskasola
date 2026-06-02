@@ -15,14 +15,36 @@ const znanja = [
   { value: "tekmovalno", label: "Tekmovalna raven" },
 ];
 
+const paketiRojstniDan = [
+  { value: "vodna", label: "Vodna zabava (Terme Zreče)" },
+  { value: "sportna", label: "Športna norišnica na prostem" },
+  { value: "nogomet", label: "Nogometna zabava pravih prvakov" },
+];
+
+const aktivnostiSportna = [
+  "Med dvema ognjema",
+  "Mini rokomet",
+  "Poligon z ovirami",
+  "Štafetne igre",
+  "Metanje na tarčo",
+  "Spretnostni izzivi",
+  "Ravnotežne igre",
+  "Igre z frizbijem",
+  "Iskanje zaklada",
+  "Ekipne misije",
+  "Vleka vrvi",
+  "Igra z vodnimi baloni",
+];
+
 type Program = { slug: string; naziv: string };
 
 function PrijavnaStranContent() {
   const searchParams = useSearchParams();
   const initialProgram = searchParams.get("program") || "";
+  const initialPaket = searchParams.get("paket") || "";
 
   const [programi, setProgrami] = useState<Program[]>([]);
-  const [stanje, setStanje] = useState<"obrazec" | "poslano" | "napaka">("obrazec");
+  const [stanje, setStanje] = useState<"obrazec" | "poslano">("obrazec");
   const [napaka, setNapaka] = useState("");
   const [posiljam, setPosiljam] = useState(false);
   const [form, setForm] = useState({
@@ -39,7 +61,15 @@ function PrijavnaStranContent() {
     posta: "",
     opomba: "",
     soglasje: false,
+    // Rojstnodnevna polja
+    rd_paket: initialPaket,
+    rd_datum: "",
+    rd_stevilo_otrok: "",
+    rd_aktivnosti: [] as string[],
   });
+
+  const jeRojstniDan = form.program === "praznovanje-rojstnega-dne";
+  const jeSportna = form.rd_paket === "sportna";
 
   useEffect(() => {
     fetch("/api/programi")
@@ -57,7 +87,17 @@ function PrijavnaStranContent() {
     }
   }, [initialProgram]);
 
-  const update = (k: string, v: string | boolean) => setForm({ ...form, [k]: v });
+  const update = (k: string, v: any) => setForm({ ...form, [k]: v });
+
+  const toggleAktivnost = (a: string) => {
+    const exists = form.rd_aktivnosti.includes(a);
+    setForm({
+      ...form,
+      rd_aktivnosti: exists
+        ? form.rd_aktivnosti.filter((x) => x !== a)
+        : [...form.rd_aktivnosti, a],
+    });
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,11 +110,24 @@ function PrijavnaStranContent() {
       return;
     }
 
+    // Sestavi opombo z rojstnodnevnimi podatki
+    let opombaFull = form.opomba;
+    if (jeRojstniDan) {
+      const paketLabel = paketiRojstniDan.find((p) => p.value === form.rd_paket)?.label;
+      opombaFull = `🎂 ROJSTNI DAN
+Paket: ${paketLabel || "—"}
+Želen datum: ${form.rd_datum || "—"}
+Število otrok: ${form.rd_stevilo_otrok || "—"}
+${form.rd_aktivnosti.length > 0 ? "Izbrane aktivnosti: " + form.rd_aktivnosti.join(", ") : ""}
+
+${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
+    }
+
     try {
       const res = await fetch("/api/prijave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, opomba: opombaFull }),
       });
       const data = await res.json();
       if (!res.ok) setNapaka(data.error || "Napaka.");
@@ -120,6 +173,7 @@ function PrijavnaStranContent() {
       <section className="bg-white py-12 lg:py-16">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
           <form onSubmit={onSubmit} className="bg-white border border-slate-200/70 rounded-2xl p-6 lg:p-10">
+            {/* Program */}
             <div className="mb-6">
               <h2 className="text-lg font-bold text-brand-navy mb-3">1. Program</h2>
               <select required value={form.program} onChange={(e) => update("program", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
@@ -128,22 +182,72 @@ function PrijavnaStranContent() {
               </select>
             </div>
 
+            {/* ROJSTNI DAN polja */}
+            {jeRojstniDan && (
+              <div className="mb-6 bg-purple-50 border-2 border-purple-200 rounded-xl p-5">
+                <h2 className="text-lg font-bold text-brand-navy mb-3 flex items-center gap-2">
+                  🎂 Rojstnodnevne podrobnosti
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-brand-navy mb-1.5">Paket *</label>
+                    <select required value={form.rd_paket} onChange={(e) => update("rd_paket", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
+                      <option value="">— izberi paket —</option>
+                      {paketiRojstniDan.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <F label="Želen datum praznovanja *" type="date" value={form.rd_datum} onChange={(v) => update("rd_datum", v)} required />
+                    <F label="Pričakovano število otrok *" type="number" value={form.rd_stevilo_otrok} onChange={(v) => update("rd_stevilo_otrok", v)} required />
+                  </div>
+
+                  {jeSportna && (
+                    <div>
+                      <label className="block text-sm font-semibold text-brand-navy mb-2">
+                        Katere aktivnosti želi slavljenec? (izberite več)
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {aktivnostiSportna.map((a) => (
+                          <label key={a} className="flex items-start gap-2 cursor-pointer bg-white rounded-lg p-2.5 border border-slate-200 hover:border-brand-orange">
+                            <input
+                              type="checkbox"
+                              checked={form.rd_aktivnosti.includes(a)}
+                              onChange={() => toggleAktivnost(a)}
+                              className="mt-0.5 w-4 h-4 accent-brand-orange shrink-0"
+                            />
+                            <span className="text-xs text-slate-700">{a}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Otrok */}
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-brand-navy mb-3">2. Otrok</h2>
+              <h2 className="text-lg font-bold text-brand-navy mb-3">
+                {jeRojstniDan ? "2. Slavljenec" : "2. Otrok"}
+              </h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 <F label="Ime *" value={form.otrok_ime} onChange={(v) => update("otrok_ime", v)} required />
                 <F label="Priimek *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
                 <F label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
-                <div>
-                  <label className="block text-sm font-semibold text-brand-navy mb-1.5">Predznanje</label>
-                  <select value={form.otrok_znanje} onChange={(e) => update("otrok_znanje", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
-                    <option value="">— izberi —</option>
-                    {znanja.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
-                  </select>
-                </div>
+                {!jeRojstniDan && (
+                  <div>
+                    <label className="block text-sm font-semibold text-brand-navy mb-1.5">Predznanje</label>
+                    <select value={form.otrok_znanje} onChange={(e) => update("otrok_znanje", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
+                      <option value="">— izberi —</option>
+                      {znanja.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
 
+            {/* Starš */}
             <div className="mb-6">
               <h2 className="text-lg font-bold text-brand-navy mb-3">3. Starš</h2>
               <div className="grid sm:grid-cols-2 gap-4">
@@ -156,9 +260,10 @@ function PrijavnaStranContent() {
               </div>
             </div>
 
+            {/* Opomba */}
             <div className="mb-6">
               <h2 className="text-lg font-bold text-brand-navy mb-3">4. Opomba</h2>
-              <textarea value={form.opomba} onChange={(e) => update("opomba", e.target.value)} rows={4} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y" />
+              <textarea value={form.opomba} onChange={(e) => update("opomba", e.target.value)} rows={4} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y" placeholder="Alergije, posebnosti, želje..." />
             </div>
 
             <label className="flex items-start gap-3 mb-6 cursor-pointer">

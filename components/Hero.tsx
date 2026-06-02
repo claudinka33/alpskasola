@@ -3,7 +3,7 @@ import { ArrowRight, Play, Shield, Medal, Heart, Snowflake, Star, Mountain } fro
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden mountain-bg">
+    <section className="relative overflow-hidden mountain-bg pb-32 lg:pb-40">
       {/* Floating snowflakes */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(15)].map((_, i) => (
@@ -35,7 +35,7 @@ export default function Hero() {
         <ellipse cx="700" cy="30" rx="50" ry="11" fill="white" opacity="0.5" />
       </svg>
 
-      <div className="relative max-w-7xl mx-auto px-4 lg:px-8 pt-12 pb-32 lg:pb-44">
+      <div className="relative max-w-7xl mx-auto px-4 lg:px-8 pt-12">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left content */}
           <div className="relative z-10 max-w-xl">
@@ -92,7 +92,6 @@ export default function Hero() {
 
           {/* Right visual - placeholder za sliko */}
           <div className="relative h-[400px] lg:h-[500px] hidden lg:block">
-            {/* Main image placeholder */}
             <div className="absolute inset-0 rounded-2xl bg-white/60 backdrop-blur-sm border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-3 text-brand-navy">
               <Mountain size={48} className="text-brand-orange" />
               <strong className="text-sm font-semibold">
@@ -105,7 +104,6 @@ export default function Hero() {
               </span>
             </div>
 
-            {/* Floating card 1 - Rogla */}
             <div className="absolute -left-8 top-16 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float">
               <div className="bg-orange-50 text-brand-orange p-2 rounded-lg">
                 <Snowflake size={22} />
@@ -120,7 +118,6 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Floating card 2 - Rating */}
             <div
               className="absolute -right-4 bottom-20 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float"
               style={{ animationDelay: "1.5s" }}
@@ -141,12 +138,12 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Mountains SVG at the bottom */}
+      {/* Mountains SVG - manjše, špice nad herojem */}
       <svg
         className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
-        viewBox="0 0 800 200"
+        viewBox="0 0 800 120"
         preserveAspectRatio="xMidYMax slice"
-        style={{ height: "200px" }}
+        style={{ height: "120px" }}
       >
         <defs>
           <linearGradient id="mtnBack" x1="0" y1="0" x2="0" y2="1">
@@ -163,38 +160,21 @@ export default function Hero() {
           </linearGradient>
         </defs>
         <path
-          d="M0,200 L0,100 L80,40 L150,80 L220,30 L300,90 L380,50 L480,100 L560,40 L640,90 L720,60 L800,110 L800,200 Z"
+          d="M0,120 L0,60 L80,20 L150,50 L220,15 L300,55 L380,25 L480,60 L560,20 L640,55 L720,30 L800,65 L800,120 Z"
           fill="url(#mtnBack)"
         />
         <path
-          d="M0,200 L0,140 L70,90 L160,130 L240,70 L340,140 L440,90 L540,140 L620,100 L720,150 L800,120 L800,200 Z"
+          d="M0,120 L0,80 L70,50 L160,75 L240,40 L340,80 L440,50 L540,80 L620,55 L720,85 L800,65 L800,120 Z"
           fill="url(#mtnMid)"
         />
         <path
-          d="M0,200 L0,170 L100,130 L200,160 L300,120 L400,170 L500,130 L600,170 L700,140 L800,180 L800,200 Z"
+          d="M0,120 L0,100 L100,75 L200,95 L300,70 L400,100 L500,75 L600,100 L700,80 L800,105 L800,120 Z"
           fill="url(#mtnFront)"
         />
-        {/* Snow caps */}
-        <polygon
-          points="80,40 65,55 75,55 70,70 90,70 85,55 95,55"
-          fill="white"
-          opacity="0.9"
-        />
-        <polygon
-          points="220,30 205,48 215,48 210,65 230,65 225,48 235,48"
-          fill="white"
-          opacity="0.9"
-        />
-        <polygon
-          points="380,50 365,67 375,67 370,82 390,82 385,67 395,67"
-          fill="white"
-          opacity="0.9"
-        />
-        <polygon
-          points="560,40 545,58 555,58 550,73 570,73 565,58 575,58"
-          fill="white"
-          opacity="0.9"
-        />
+        <polygon points="80,20 67,33 76,33 71,46 89,46 84,33 93,33" fill="white" opacity="0.9" />
+        <polygon points="220,15 207,30 217,30 212,44 232,44 227,30 237,30" fill="white" opacity="0.9" />
+        <polygon points="380,25 367,40 377,40 372,53 392,53 387,40 397,40" fill="white" opacity="0.9" />
+        <polygon points="560,20 547,35 557,35 552,48 572,48 567,35 577,35" fill="white" opacity="0.9" />
       </svg>
     </section>
   );
