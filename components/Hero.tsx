@@ -78,7 +78,7 @@ export default function Hero() {
           </div>
 
           {/* Slika - postavljena višje, brez stickerjev čez */}
-          <div className="relative lg:-mt-8">
+       <div className="relative z-0 lg:-mt-8">
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/20">
               <img
                 src="/plavalni-tecaj.png"
@@ -112,8 +112,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <svg className="absolute bottom-0 left-0 right-0 w-full pointer-events-none" viewBox="0 0 800 120" preserveAspectRatio="xMidYMax slice" style={{ height: "120px" }}>
-        <defs>
+      <svg className="absolute bottom-0 left-0 right-0 w-full pointer-events-none z-20" viewBox="0 0 800 120" preserveAspectRatio="xMidYMax slice" style={{ height: "200px" }}>
           <linearGradient id="mtnBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7a9fc4" /><stop offset="100%" stopColor="#a6c0db" /></linearGradient>
           <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4a6b8f" /><stop offset="100%" stopColor="#6b89aa" /></linearGradient>
           <linearGradient id="mtnFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2d4866" /><stop offset="100%" stopColor="#4a6b8f" /></linearGradient>
