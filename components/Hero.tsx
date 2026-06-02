@@ -4,7 +4,6 @@ import { ArrowRight, Play, Shield, Medal, Heart, Waves, Star } from "lucide-reac
 export default function Hero() {
   return (
     <section className="relative overflow-hidden mountain-bg pb-32 lg:pb-40">
-      {/* Floating snowflakes */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(15)].map((_, i) => (
           <div
@@ -22,17 +21,13 @@ export default function Hero() {
         ))}
       </div>
 
-      <svg
-        className="absolute top-8 left-0 right-0 w-full opacity-50 pointer-events-none"
-        viewBox="0 0 800 80"
-        preserveAspectRatio="xMidYMid slice"
-      >
+      <svg className="absolute top-8 left-0 right-0 w-full opacity-50 pointer-events-none" viewBox="0 0 800 80" preserveAspectRatio="xMidYMid slice">
         <ellipse cx="120" cy="40" rx="60" ry="14" fill="white" opacity="0.6" />
         <ellipse cx="500" cy="50" rx="70" ry="15" fill="white" opacity="0.5" />
         <ellipse cx="700" cy="30" rx="50" ry="11" fill="white" opacity="0.5" />
       </svg>
 
-      <div className="relative max-w-7xl mx-auto px-4 lg:px-8 pt-12">
+      <div className="relative max-w-7xl mx-auto px-4 lg:px-8 pt-8 lg:pt-12">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="relative z-10 max-w-xl">
             <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full text-xs font-semibold text-brand-navy mb-6 border border-slate-200/60 shadow-sm">
@@ -50,9 +45,8 @@ export default function Hero() {
             </h1>
 
             <p className="text-base lg:text-lg text-slate-600 mb-7 max-w-lg leading-relaxed">
-              Največja šola smučanja v Sloveniji. 15+ let izkušenj, 35+
-              usposobljenih učiteljev in 15.000+ otrok. Poleti pa plavanje za
-              vse stopnje.
+              Največja šola smučanja v Sloveniji. 15+ let izkušenj, 35+ usposobljenih
+              učiteljev in 15.000+ otrok. Poleti pa plavanje za vse stopnje.
             </p>
 
             <div className="flex flex-wrap gap-3 mb-8">
@@ -72,22 +66,19 @@ export default function Hero() {
 
             <div className="flex flex-wrap gap-5">
               <div className="flex items-center gap-2 text-xs text-slate-600">
-                <Shield size={16} className="text-brand-orange" />
-                <span>Varnost na prvem mestu</span>
+                <Shield size={16} className="text-brand-orange" /> <span>Varnost na prvem mestu</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-600">
-                <Medal size={16} className="text-brand-orange" />
-                <span>15+ let izkušenj</span>
+                <Medal size={16} className="text-brand-orange" /> <span>15+ let izkušenj</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-600">
-                <Heart size={16} className="text-brand-orange" />
-                <span>10.000+ zaupanj</span>
+                <Heart size={16} className="text-brand-orange" /> <span>10.000+ zaupanj</span>
               </div>
             </div>
           </div>
 
-          {/* Slika 16:9 */}
-          <div className="relative">
+          {/* Slika - postavljena višje, brez stickerjev čez */}
+          <div className="relative lg:-mt-8">
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/20">
               <img
                 src="/plavalni-tecaj.png"
@@ -96,7 +87,7 @@ export default function Hero() {
               />
             </div>
 
-            <div className="absolute -left-4 top-6 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float">
+            <div className="hidden lg:flex absolute -left-6 -top-4 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 items-center gap-3 animate-float">
               <div className="bg-blue-50 text-blue-700 p-2 rounded-lg">
                 <Waves size={22} />
               </div>
@@ -104,23 +95,16 @@ export default function Hero() {
                 <strong className="block text-sm font-semibold text-brand-navy">
                   Plavalni tečaj
                 </strong>
-                <span className="text-xs text-slate-500">
-                  Poletna ponudba
-                </span>
+                <span className="text-xs text-slate-500">Poletna ponudba</span>
               </div>
             </div>
 
-            <div
-              className="absolute -right-2 -bottom-4 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float"
-              style={{ animationDelay: "1.5s" }}
-            >
+            <div className="hidden lg:flex absolute -right-2 -bottom-6 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 items-center gap-3 animate-float" style={{ animationDelay: "1.5s" }}>
               <div className="bg-amber-50 text-amber-700 p-2 rounded-lg">
                 <Star size={22} fill="currentColor" />
               </div>
               <div>
-                <strong className="block text-sm font-semibold text-brand-navy">
-                  4.9 / 5.0
-                </strong>
+                <strong className="block text-sm font-semibold text-brand-navy">4.9 / 5.0</strong>
                 <span className="text-xs text-slate-500">Ocena staršev</span>
               </div>
             </div>
@@ -128,25 +112,11 @@ export default function Hero() {
         </div>
       </div>
 
-      <svg
-        className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
-        viewBox="0 0 800 120"
-        preserveAspectRatio="xMidYMax slice"
-        style={{ height: "120px" }}
-      >
+      <svg className="absolute bottom-0 left-0 right-0 w-full pointer-events-none" viewBox="0 0 800 120" preserveAspectRatio="xMidYMax slice" style={{ height: "120px" }}>
         <defs>
-          <linearGradient id="mtnBack" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#7a9fc4" />
-            <stop offset="100%" stopColor="#a6c0db" />
-          </linearGradient>
-          <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4a6b8f" />
-            <stop offset="100%" stopColor="#6b89aa" />
-          </linearGradient>
-          <linearGradient id="mtnFront" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2d4866" />
-            <stop offset="100%" stopColor="#4a6b8f" />
-          </linearGradient>
+          <linearGradient id="mtnBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7a9fc4" /><stop offset="100%" stopColor="#a6c0db" /></linearGradient>
+          <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4a6b8f" /><stop offset="100%" stopColor="#6b89aa" /></linearGradient>
+          <linearGradient id="mtnFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2d4866" /><stop offset="100%" stopColor="#4a6b8f" /></linearGradient>
         </defs>
         <path d="M0,120 L0,60 L80,20 L150,50 L220,15 L300,55 L380,25 L480,60 L560,20 L640,55 L720,30 L800,65 L800,120 Z" fill="url(#mtnBack)" />
         <path d="M0,120 L0,80 L70,50 L160,75 L240,40 L340,80 L440,50 L540,80 L620,55 L720,85 L800,65 L800,120 Z" fill="url(#mtnMid)" />

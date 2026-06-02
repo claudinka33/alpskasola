@@ -1,136 +1,206 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Link from "next/link";
-import { Waves, ArrowRight, MapPin, Clock, Users, Shield, Heart, Award } from "lucide-react";
+import PageHero from "@/components/PageHero";
+import ProgramCta from "@/components/ProgramCta";
+import { Check, Waves, MapPin, Calendar, Camera, Users } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Plavalni tečaj — Alpska šola",
-  description: "Tečaji plavanja v Termah Zreče. Za vse stopnje od začetnikov do izpopolnjevanja. Varno učenje z izkušenimi učitelji.",
+  title: "Tečaj plavanja | Alpska šola Rogla",
+  description:
+    "Plavalni tečaji v Termah Zreče in bazenu Slovenske Konjice. Za vse starosti — od začetnikov do plavalcev. 5 dni × 2 uri, izkušeni učitelji, karta vključena. 130€.",
 };
+
+const lokacije = [
+  { ime: "Terme Zreče", opis: "Topla in prijetna voda" },
+  { ime: "Bazen Slovenske Konjice", opis: "Domači bazen" },
+];
+
+const meseci = ["Maj", "Junij", "Julij", "Avgust"];
+
+const faq = [
+  {
+    v: "Kaj potrebujejo otroci za na bazen?",
+    o: "Kopalke in brisačo, lahko tudi kopalni plašč (priporočamo, da podpišete etikete). Potrebujejo še milo za tuširanje, stekleničko z vodo in vrečko za mokro brisačo. Dekleta naj imajo spete lase (čopi ali kita).",
+  },
+  {
+    v: "Koliko otrok plava v skupini?",
+    o: "Skupine se oblikujejo glede na znanje in starost otrok. Začetniške skupine so manjše — do 5 otrok na učitelja. Pri predšolskih otrocih tudi manj.",
+  },
+  {
+    v: "Zakaj se otroci igrajo v 'čofotalniku'?",
+    o: "Pri otrocih je pomembno sprejemanje športa na njim zanimiv način. Veliko dela poteka v nizkem bazenu, kjer se preko iger navajamo na novo okolje, potapljanje glave in škropljenje.",
+  },
+  {
+    v: "Kaj pa hoja na stranišče?",
+    o: "Pred plavanjem gre vedno cela skupina na stranišče. Med odmorom prav tako. Po potrebi otroka odpelje učitelj — sam ali z dogovorom z ostalimi učitelji.",
+  },
+  {
+    v: "Kako je s preoblačenjem?",
+    o: "Na začetku tečaja pomagamo otroke preobleči v kopalke. Po končanem tečaju jim pomagamo pri tuširanju in sušenju.",
+  },
+  {
+    v: "Ali otrok v enem tednu splava?",
+    o: "Otrokov napredek je individualen, odvisen od motorične dojemljivosti in starosti. Vsak otrok napreduje glede na svoje začetno stanje.",
+  },
+];
 
 export default function PlavalniTecajPage() {
   return (
     <main>
       <Navbar />
+      <PageHero
+        badge="Tečaj plavanja"
+        title="Plavanje za vse starosti"
+        subtitle="Dobrodošli v čarobnem svetu plavanja, kjer se otroci lahko potopijo v veselje vode in se naučijo plavati s pravim užitkom!"
+        bgGradient="from-cyan-50 via-blue-50 to-white"
+      />
 
-      {/* Hero banner s sliko */}
-      <section className="relative h-[400px] lg:h-[500px] overflow-hidden">
-        <img
-          src="/plavalni-tecaj.png"
-          alt="Plavalni tečaj"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 via-blue-900/40 to-transparent" />
-        <div className="relative h-full max-w-7xl mx-auto px-4 lg:px-8 flex items-center">
-          <div className="max-w-2xl text-white">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-xs font-bold mb-5">
-              <span>★ POLETNI HIT 2026</span>
-            </div>
-            <h1 className="text-5xl lg:text-6xl font-extrabold leading-[1.05] mb-4">
-              Plavalni tečaj
-            </h1>
-            <p className="text-lg lg:text-xl text-white/90 max-w-xl">
-              Učimo. Rastemo. Uživamo v vodi.
-            </p>
+      {/* Uvod */}
+      <section className="bg-white py-14 lg:py-20">
+        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video order-2 lg:order-1">
+            <img src="/plavalni-tecaj.png" alt="Plavalni tečaj" className="w-full h-full object-cover" />
           </div>
-        </div>
-      </section>
-
-      {/* Info bar */}
-      <section className="bg-blue-50/60 py-8 border-b border-blue-100">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <InfoCard icon={MapPin} label="Lokacija" value="Terme Zreče" />
-            <InfoCard icon={Users} label="Za otroke" value="3+ let" />
-            <InfoCard icon={Clock} label="Trajanje" value="10 srečanj" />
-            <InfoCard icon={Award} label="Učitelji" value="Strokovni" />
-          </div>
-        </div>
-      </section>
-
-      {/* Vsebina */}
-      <section className="bg-white py-16 lg:py-20">
-        <div className="max-w-3xl mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
-              <span className="w-6 h-px bg-brand-orange" />
-              O programu
-              <span className="w-6 h-px bg-brand-orange" />
+          <div className="order-1 lg:order-2">
+            <div className="inline-flex items-center gap-2 bg-cyan-100 text-cyan-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
+              <Waves size={14} /> POLETNI PROGRAM
             </div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4">
-              Plavanje za vse stopnje
+            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
+              Veščina za celo življenje
             </h2>
-            <p className="text-base text-slate-600 leading-relaxed">
-              Naši plavalni tečaji omogočajo otrokom varno in zabavno učenje plavanja v idealnih
-              pogojih Term Zreče. Od prvih korakov v vodi do izpopolnjevanja tehnike.
+            <p className="text-slate-600 leading-relaxed mb-3">
+              Verjamemo, da je plavanje ključna veščina, ki krepi otrokovo
+              samozavest in spodbuja zdrav način življenja. Z veseljem vabimo
+              vse male radovedneže, ki si želijo osvojiti vodne globine.
             </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4 mb-12">
-            <Feature
-              icon={Shield}
-              title="Varno učenje"
-              text="Otrokova varnost je naša prioriteta. Vedno z izkušenimi učitelji."
-            />
-            <Feature
-              icon={Heart}
-              title="Zabavni pristop"
-              text="Otroci se učijo skozi igro. Brez strahu, s pozitivno energijo."
-            />
-            <Feature
-              icon={Users}
-              title="Majhne skupine"
-              text="Omejeno število otrok pomeni več individualne pozornosti."
-            />
-            <Feature
-              icon={Award}
-              title="Strokovne učitelji"
-              text="Naši trenerji so izkušeni in pedagoško usposobljeni."
-            />
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-6 lg:p-8 text-center">
-            <Waves size={36} className="text-blue-600 mx-auto mb-3" />
-            <h3 className="text-2xl font-extrabold text-brand-navy mb-2">
-              Pripravljen na vodne dogodivščine?
-            </h3>
-            <p className="text-sm text-slate-600 mb-6 max-w-md mx-auto">
-              Prijavi se na plavalni tečaj — termini se hitro polnijo!
+            <p className="text-slate-600 leading-relaxed">
+              S strokovno usposobljenimi in ljubečimi inštruktorji ustvarimo
+              prijetno okolje, kjer se otroci sprostijo, zabavajo in pridobijo
+              ključne veščine plavanja.
             </p>
-            <Link
-              href="/prijava?program=plavalni-tecaj"
-              className="inline-flex items-center gap-2 bg-brand-orange text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-brand-orange/30 hover:bg-brand-orange-dark transition-colors"
-            >
-              Prijavi se na ta program <ArrowRight size={16} />
-            </Link>
           </div>
         </div>
       </section>
 
+      {/* Kje in kdaj */}
+      <section className="bg-blue-50/40 py-14 border-y border-blue-100">
+        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200/70">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-brand-navy mb-4">
+              <MapPin className="text-brand-orange" size={20} /> Kje plavamo
+            </h3>
+            <div className="space-y-3">
+              {lokacije.map((l, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center shrink-0">
+                    <Waves size={14} />
+                  </div>
+                  <div>
+                    <strong className="block text-sm font-bold text-brand-navy">
+                      {l.ime}
+                    </strong>
+                    <span className="text-xs text-slate-600">{l.opis}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 border border-slate-200/70">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-brand-navy mb-4">
+              <Calendar className="text-brand-orange" size={20} /> Kdaj
+            </h3>
+            <p className="text-sm text-slate-600 mb-3">
+              Plavalni tečaji potekajo v poletnih mesecih:
+            </p>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {meseci.map((m) => (
+                <span
+                  key={m}
+                  className="bg-cyan-50 text-cyan-800 text-xs font-bold px-3 py-1.5 rounded-full"
+                >
+                  {m}
+                </span>
+              ))}
+            </div>
+            <p className="text-sm text-slate-600">
+              <strong>Ponedeljek – Petek</strong>, 2 uri na dan.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Paket */}
+      <section className="bg-white py-16 lg:py-20">
+        <div className="max-w-2xl mx-auto px-4 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-extrabold text-brand-navy mb-2">
+              Šola plavanja
+            </h2>
+            <p className="text-sm text-slate-600">10 šolskih ur — vse vključeno</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-cyan-50 to-blue-100 border-2 border-cyan-200 rounded-3xl p-8 lg:p-10 text-center">
+            <div className="inline-block bg-white text-cyan-800 text-xs font-bold px-3 py-1 rounded-full mb-4">
+              💧 POLETNI HIT
+            </div>
+            <h3 className="text-2xl font-extrabold text-brand-navy mb-1">
+              ŠOLA PLAVANJA
+            </h3>
+            <p className="text-sm text-slate-600 mb-6">10 šolskih ur (5×2)</p>
+            <div className="text-5xl font-extrabold text-brand-navy mb-6">
+              130€
+            </div>
+            <ul className="space-y-2.5 text-left max-w-sm mx-auto mb-6">
+              {[
+                "5× 2 uri tečaja (Pon – Pet)",
+                "Izkušen učitelj plavanja / animator",
+                "Spominska majica",
+                "Diploma",
+                "Karta za plavanje vključena v tečaj",
+              ].map((f, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <Check size={16} className="text-brand-orange shrink-0 mt-0.5" />
+                  <span className="text-slate-700">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-blue-50/40 py-16 lg:py-20 border-t border-blue-100">
+        <div className="max-w-3xl mx-auto px-4 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-extrabold text-brand-navy mb-2">
+              Pogosta vprašanja
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {faq.map((q, i) => (
+              <details key={i} className="bg-white rounded-xl border border-slate-200/70 group">
+                <summary className="px-5 py-4 cursor-pointer font-semibold text-brand-navy flex items-center justify-between hover:bg-slate-50 transition-colors">
+                  {q.v}
+                  <span className="text-brand-orange group-open:rotate-45 transition-transform text-xl">
+                    +
+                  </span>
+                </summary>
+                <div className="px-5 pb-4 text-sm text-slate-600 leading-relaxed">
+                  {q.o}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <ProgramCta
+        programSlug="plavalni-tecaj"
+        title="Prijava na plavalni tečaj"
+        subtitle="Termini se hitro polnijo. Rezervirajte mesto."
+      />
       <Footer />
     </main>
-  );
-}
-
-function InfoCard({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <div className="bg-white rounded-xl p-4 border border-slate-200/70 text-center">
-      <Icon size={20} className="text-brand-orange mx-auto mb-2" />
-      <div className="text-xs text-slate-500 mb-0.5">{label}</div>
-      <strong className="text-sm text-brand-navy">{value}</strong>
-    </div>
-  );
-}
-
-function Feature({ icon: Icon, title, text }: { icon: any; title: string; text: string }) {
-  return (
-    <div className="bg-slate-50 rounded-2xl p-5">
-      <div className="w-10 h-10 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center mb-3">
-        <Icon size={20} />
-      </div>
-      <h3 className="text-base font-bold text-brand-navy mb-1">{title}</h3>
-      <p className="text-sm text-slate-600 leading-relaxed">{text}</p>
-    </div>
   );
 }

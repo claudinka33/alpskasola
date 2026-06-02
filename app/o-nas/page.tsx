@@ -102,13 +102,9 @@ export default function ONasPage() {
             </div>
           </div>
 
-          {/* Slika placeholder */}
-          <div className="mt-12 h-72 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy">
-            <Camera size={42} className="text-brand-orange" />
-            <strong className="text-sm">Prostor za skupinsko fotografijo ekipe</strong>
-            <span className="text-xs text-slate-500">
-              Priporočamo: učitelji na Rogli (~1200×600px)
-            </span>
+          {/* Skupinska slika */}
+          <div className="mt-12 rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10">
+            <img src="/skupinska.jpg" alt="Ekipa Alpske šole" className="w-full h-auto object-cover" />
           </div>
         </div>
       </section>

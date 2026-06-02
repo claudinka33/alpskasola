@@ -141,10 +141,8 @@ export default function SolaSmucanjaPage() {
               <strong>panogo</strong> (smučanje ali bordanje).
             </p>
           </div>
-          <div className="h-72 lg:h-96 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy">
-            <Camera size={42} className="text-brand-orange" />
-            <strong className="text-sm">Prostor za fotografijo</strong>
-            <span className="text-xs text-slate-500">otroci na Rogli</span>
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video">
+            <img src="/smucanje.jpg" alt="Tečaj smučanja" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>

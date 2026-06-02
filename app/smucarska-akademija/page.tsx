@@ -101,10 +101,8 @@ export default function SmucarskaAkademijaPage() {
       {/* Uvod */}
       <section className="bg-white py-14 lg:py-20">
         <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
-          <div className="h-72 lg:h-96 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy order-2 lg:order-1">
-            <Camera size={42} className="text-brand-orange" />
-            <strong className="text-sm">Prostor za fotografijo</strong>
-            <span className="text-xs text-slate-500">akademija na Rogli</span>
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video order-2 lg:order-1">
+            <img src="/akademija.jpeg" alt="Smučarska akademija" className="w-full h-full object-cover" />
           </div>
           <div className="order-1 lg:order-2">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
@@ -218,10 +216,8 @@ export default function SmucarskaAkademijaPage() {
               </div>
             </div>
           </div>
-          <div className="h-72 lg:h-auto rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy">
-            <Camera size={42} className="text-brand-orange" />
-            <strong className="text-sm">Prostor za fotografijo</strong>
-            <span className="text-xs text-slate-500">zimsko smučanje</span>
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video lg:aspect-auto">
+            <img src="/zimskeaktivnosti.jpeg" alt="Zimske aktivnosti" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
