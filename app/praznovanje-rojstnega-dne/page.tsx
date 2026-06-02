@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHero from "@/components/PageHero";
 import Link from "next/link";
 import {
   Waves,
@@ -18,8 +19,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Rojstni dan z Alpsko šolo | 3 paketi praznovanja",
-  description:
-    "Praznujte rojstni dan z Alpsko šolo. 3 paketi: Vodna zabava v Termah Zreče, Športna norišnica na prostem, Nogometna zabava. Za otroke 4-12 let.",
+  description: "Praznujte rojstni dan z Alpsko šolo. 3 paketi: Vodna zabava, Športna norišnica, Nogometna zabava. Za otroke 4-12 let.",
 };
 
 const paketi = [
@@ -89,39 +89,21 @@ export default function RojstniDanPage() {
   return (
     <main>
       <Navbar />
+      <PageHero
+        badge="🎉 Praznujmo skupaj"
+        title="Rojstni dan z Alpsko šolo"
+        subtitle="3 različni paketi praznovanj — izberite tistega, ki bo slavljencu najbolj všeč. Mi poskrbimo za vse, vi pa samo prinesete nasmeh."
+        bgGradient="from-purple-50 via-pink-50 to-white"
+      />
 
-      {/* Hero banner s sliko */}
-      <section className="relative h-[400px] lg:h-[500px] overflow-hidden">
-        <img
-          src="/rojsnidan.png"
-          alt="Rojstni dan z Alpsko šolo"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/70 via-pink-900/40 to-transparent" />
-        <div className="relative h-full max-w-7xl mx-auto px-4 lg:px-8 flex items-center">
-          <div className="max-w-2xl text-white">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-xs font-bold mb-5">
-              🎉 PRAZNUJMO SKUPAJ
-            </div>
-            <h1 className="text-5xl lg:text-6xl font-extrabold leading-[1.05] mb-4">
-              Rojstni dan z Alpsko šolo
-            </h1>
-            <p className="text-lg lg:text-xl text-white/90 max-w-xl">
-              3 različni paketi praznovanj — izberite tistega, ki bo slavljencu najbolj všeč.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Info */}
-      <section className="bg-white py-12">
-        <div className="max-w-3xl mx-auto px-4 lg:px-8">
+      <section className="bg-white py-12 lg:py-16">
+        <div className="max-w-3xl mx-auto px-4 lg:px-8 text-center">
           <div className="grid grid-cols-3 gap-4 mb-8">
             <Info icon={Users} label="Starost" value="4–12 let" />
             <Info icon={Clock} label="Trajanje" value="2–3 ure" />
             <Info icon={Cake} label="3 paketi" value="Izbor je tvoj" />
           </div>
-          <p className="text-center text-slate-600 leading-relaxed">
+          <p className="text-slate-600 leading-relaxed">
             Naredite rojstni dan posebnega — naša ekipa poskrbi za vse organizacijske
             podrobnosti, da se vi lahko sprostite in uživate.
           </p>
@@ -189,8 +171,21 @@ export default function RojstniDanPage() {
         </div>
       </section>
 
+      {/* SLIKA POD PAKETI (16:9) */}
+      <section className="bg-white py-12 lg:py-16">
+        <div className="max-w-6xl mx-auto px-4 lg:px-8">
+          <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10">
+            <img
+              src="/rojsnidan.png"
+              alt="Rojstni dan z Alpsko šolo"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Športna aktivnosti */}
-      <section className="bg-white py-16 lg:py-20">
+      <section className="bg-blue-50/40 py-16 lg:py-20 border-y border-blue-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
@@ -209,7 +204,7 @@ export default function RojstniDanPage() {
             {aktivnostiSportna.map((a) => (
               <div
                 key={a}
-                className="bg-orange-50/50 border border-orange-200 rounded-xl p-3 text-center text-sm font-medium text-brand-navy"
+                className="bg-white border border-orange-200 rounded-xl p-3 text-center text-sm font-medium text-brand-navy"
               >
                 {a}
               </div>
@@ -219,7 +214,7 @@ export default function RojstniDanPage() {
       </section>
 
       {/* Kontakt Zoja */}
-      <section className="bg-blue-50/40 py-16 lg:py-20 border-t border-blue-100">
+      <section className="bg-white py-16 lg:py-20">
         <div className="max-w-2xl mx-auto px-4 lg:px-8 text-center">
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-3xl p-8">
             <div className="w-16 h-16 bg-purple-200 text-purple-800 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">
@@ -261,7 +256,7 @@ export default function RojstniDanPage() {
 
 function Info({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (
-    <div className="bg-white rounded-xl p-4 border border-slate-200/70 text-center">
+    <div className="bg-white rounded-xl p-4 border border-slate-200/70">
       <Icon size={20} className="text-brand-orange mx-auto mb-2" />
       <div className="text-xs text-slate-500 mb-0.5">{label}</div>
       <strong className="text-sm text-brand-navy">{value}</strong>

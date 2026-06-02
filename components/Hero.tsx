@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Play, Shield, Medal, Heart, Snowflake, Star } from "lucide-react";
+import { ArrowRight, Play, Shield, Medal, Heart, Waves, Star } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -22,7 +22,6 @@ export default function Hero() {
         ))}
       </div>
 
-      {/* Clouds */}
       <svg
         className="absolute top-8 left-0 right-0 w-full opacity-50 pointer-events-none"
         viewBox="0 0 800 80"
@@ -35,7 +34,6 @@ export default function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-4 lg:px-8 pt-12">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Left content */}
           <div className="relative z-10 max-w-xl">
             <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full text-xs font-semibold text-brand-navy mb-6 border border-slate-200/60 shadow-sm">
               <span className="w-2 h-2 bg-brand-orange rounded-full animate-pulse-orange" />
@@ -52,7 +50,9 @@ export default function Hero() {
             </h1>
 
             <p className="text-base lg:text-lg text-slate-600 mb-7 max-w-lg leading-relaxed">
-              Največja šola smučanja v Sloveniji. 15+ let izkušenj, 35+ usposobljenih učiteljev in 15.000+ otrok. Poleti pa plavanje za vse stopnje.
+              Največja šola smučanja v Sloveniji. 15+ let izkušenj, 35+
+              usposobljenih učiteljev in 15.000+ otrok. Poleti pa plavanje za
+              vse stopnje.
             </p>
 
             <div className="flex flex-wrap gap-3 mb-8">
@@ -86,9 +86,9 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right - slika plavanje */}
-          <div className="relative h-[280px] sm:h-[360px] lg:h-[460px]">
-            <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/20">
+          {/* Slika 16:9 */}
+          <div className="relative">
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/20">
               <img
                 src="/plavalni-tecaj.png"
                 alt="Plavalni tečaj"
@@ -96,22 +96,22 @@ export default function Hero() {
               />
             </div>
 
-            <div className="absolute -left-4 top-12 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float">
+            <div className="absolute -left-4 top-6 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float">
               <div className="bg-blue-50 text-blue-700 p-2 rounded-lg">
-                <Snowflake size={22} />
+                <Waves size={22} />
               </div>
               <div>
                 <strong className="block text-sm font-semibold text-brand-navy">
-                  Rogla
+                  Plavalni tečaj
                 </strong>
                 <span className="text-xs text-slate-500">
-                  Naša domača piha
+                  Poletna ponudba
                 </span>
               </div>
             </div>
 
             <div
-              className="absolute -right-2 bottom-16 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float"
+              className="absolute -right-2 -bottom-4 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 flex items-center gap-3 animate-float"
               style={{ animationDelay: "1.5s" }}
             >
               <div className="bg-amber-50 text-amber-700 p-2 rounded-lg">
@@ -121,16 +121,13 @@ export default function Hero() {
                 <strong className="block text-sm font-semibold text-brand-navy">
                   4.9 / 5.0
                 </strong>
-                <span className="text-xs text-slate-500">
-                  Ocena staršev
-                </span>
+                <span className="text-xs text-slate-500">Ocena staršev</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mountains - manjše */}
       <svg
         className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
         viewBox="0 0 800 120"
@@ -151,18 +148,9 @@ export default function Hero() {
             <stop offset="100%" stopColor="#4a6b8f" />
           </linearGradient>
         </defs>
-        <path
-          d="M0,120 L0,60 L80,20 L150,50 L220,15 L300,55 L380,25 L480,60 L560,20 L640,55 L720,30 L800,65 L800,120 Z"
-          fill="url(#mtnBack)"
-        />
-        <path
-          d="M0,120 L0,80 L70,50 L160,75 L240,40 L340,80 L440,50 L540,80 L620,55 L720,85 L800,65 L800,120 Z"
-          fill="url(#mtnMid)"
-        />
-        <path
-          d="M0,120 L0,100 L100,75 L200,95 L300,70 L400,100 L500,75 L600,100 L700,80 L800,105 L800,120 Z"
-          fill="url(#mtnFront)"
-        />
+        <path d="M0,120 L0,60 L80,20 L150,50 L220,15 L300,55 L380,25 L480,60 L560,20 L640,55 L720,30 L800,65 L800,120 Z" fill="url(#mtnBack)" />
+        <path d="M0,120 L0,80 L70,50 L160,75 L240,40 L340,80 L440,50 L540,80 L620,55 L720,85 L800,65 L800,120 Z" fill="url(#mtnMid)" />
+        <path d="M0,120 L0,100 L100,75 L200,95 L300,70 L400,100 L500,75 L600,100 L700,80 L800,105 L800,120 Z" fill="url(#mtnFront)" />
         <polygon points="80,20 67,33 76,33 71,46 89,46 84,33 93,33" fill="white" opacity="0.9" />
         <polygon points="220,15 207,30 217,30 212,44 232,44 227,30 237,30" fill="white" opacity="0.9" />
         <polygon points="380,25 367,40 377,40 372,53 392,53 387,40 397,40" fill="white" opacity="0.9" />

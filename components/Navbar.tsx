@@ -19,12 +19,12 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/60">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-20 lg:h-24">
+        <div className="flex items-center justify-between h-24 lg:h-28">
           <Link href="/" className="flex items-center shrink-0">
             <img
               src="/alpska-logo.png"
               alt="Alpska šola"
-              className="h-14 lg:h-16 w-auto"
+              className="h-20 lg:h-24 w-auto"
             />
           </Link>
 
