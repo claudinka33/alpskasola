@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
-import { Wrench, Clock, MapPin, Camera, Check } from "lucide-react";
+import { Wrench, Clock, MapPin, Check } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Servis smuči | Alpska šola Rogla",
@@ -59,10 +59,12 @@ export default function ServisPage() {
               občutek in dlje trajajoče smuči</strong>.
             </p>
           </div>
-          <div className="h-72 lg:h-96 rounded-2xl bg-gradient-to-br from-slate-100 to-gray-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy">
-            <Camera size={42} className="text-brand-orange" />
-            <strong className="text-sm">Prostor za fotografijo</strong>
-            <span className="text-xs text-slate-500">servis prostor</span>
+          <div className="h-72 lg:h-96 rounded-2xl overflow-hidden border border-slate-200/70">
+            <img
+              src="/servis.JPG"
+              alt="Servis smuči – Alpska šola"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </section>
