@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
-import { Trophy, Target, Users, Camera, Zap } from "lucide-react";
+import { Trophy, Target, Users, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Tekmovalne ekipe | Alpska šola Rogla",
@@ -66,7 +66,7 @@ export default function SkiRacingTeamPage() {
             </p>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video">
-            <img src="/tekmovalnaslika.jpg" alt="Tekmovalne ekipe" className="w-full h-full object-cover" />
+            <img src="/tekmovalna_1.jpg" alt="Tekmovalne ekipe" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
