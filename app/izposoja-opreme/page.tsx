@@ -36,7 +36,7 @@ export default function IzposojaPage() {
         <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
           <div className="h-72 lg:h-96 rounded-2xl overflow-hidden border border-slate-200/70 order-2 lg:order-1">
             <img
-              src="/izposoja.JPG"
+              src="/Izposoja.JPG"
               alt="Izposoja smučarske opreme – Alpska šola"
               className="w-full h-full object-cover"
             />
