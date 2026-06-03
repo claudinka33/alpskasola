@@ -2,7 +2,15 @@ import { redirect } from "next/navigation";
 import { pridobiTrenutniAdmin } from "@/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
-import { LayoutDashboard, FileText, Users, Settings, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Settings,
+  LogOut,
+  CalendarDays,
+  Cake,
+} from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -11,7 +19,6 @@ export default async function AdminLayout({
 }) {
   const admin = await pridobiTrenutniAdmin();
 
-  // Login stran je dostopna brez avtentikacije
   return (
     <div className="min-h-screen bg-slate-50">
       {admin ? (
@@ -36,6 +43,8 @@ export default async function AdminLayout({
               <NavItem href="/admin" icon={LayoutDashboard} label="Pregled" />
               <NavItem href="/admin/prijave" icon={FileText} label="Prijavnice" />
               <NavItem href="/admin/programi" icon={Settings} label="Programi" />
+              <NavItem href="/admin/termini" icon={CalendarDays} label="Termini" />
+              <NavItem href="/admin/rojstni-dan" icon={Cake} label="Rojstni dan" />
               <NavItem href="/admin/admini" icon={Users} label="Uporabniki" />
             </nav>
 
