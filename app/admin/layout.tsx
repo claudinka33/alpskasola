@@ -1,15 +1,15 @@
-import { redirect } from "next/navigation";
 import { pridobiTrenutniAdmin } from "@/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
 import {
   LayoutDashboard,
-  FileText,
-  Users,
-  Settings,
-  LogOut,
+  ClipboardList,
   CalendarDays,
   Cake,
+  FileText,
+  Settings,
+  Users,
+  LogOut,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -41,10 +41,15 @@ export default async function AdminLayout({
 
             <nav className="flex flex-col gap-1">
               <NavItem href="/admin" icon={LayoutDashboard} label="Pregled" />
-              <NavItem href="/admin/prijave" icon={FileText} label="Prijavnice" />
-              <NavItem href="/admin/programi" icon={Settings} label="Programi" />
+
+              <Skupina label="Prijavnica" />
+              <NavItem href="/admin/prijavnica" icon={ClipboardList} label="Nastavitve prijavnice" />
               <NavItem href="/admin/termini" icon={CalendarDays} label="Termini" />
               <NavItem href="/admin/rojstni-dan" icon={Cake} label="Rojstni dan" />
+              <NavItem href="/admin/prijave" icon={FileText} label="Oddane prijave" />
+
+              <Skupina label="Nastavitve" />
+              <NavItem href="/admin/programi" icon={Settings} label="Programi" />
               <NavItem href="/admin/admini" icon={Users} label="Uporabniki" />
             </nav>
 
@@ -68,6 +73,14 @@ export default async function AdminLayout({
       ) : (
         children
       )}
+    </div>
+  );
+}
+
+function Skupina({ label }: { label: string }) {
+  return (
+    <div className="text-[10px] font-bold uppercase tracking-wider text-white/40 px-3 mt-5 mb-1">
+      {label}
     </div>
   );
 }
