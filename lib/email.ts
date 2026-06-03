@@ -1,4 +1,6 @@
-// lib/email.ts — pošiljanje emailov prek Resend (brez npm paketa, direktno prek API)
+// lib/email.ts — pošiljanje emailov prek Resend (besedilo se ureja v CRM)
+
+import { sql } from "@vercel/postgres";
 
 type PrijavaEmail = {
   program: string;
@@ -20,9 +22,22 @@ type PrijavaEmail = {
 // Nastavljivo prek Vercel okoljskih spremenljivk:
 const FROM = process.env.EMAIL_FROM || "Alpska šola <onboarding@resend.dev>";
 const SOLA = process.env.EMAIL_SOLA || "info@alpskasola.com";
+const LOGO = process.env.EMAIL_LOGO || "https://alpskasola.vercel.app/alpska-logo.png";
 
 const NAVY = "#13294B";
 const ORANGE = "#F26B1E";
+
+// Fiksni podatki (vedno enaki — Zoja jih ne spreminja)
+const NASLOV_FIRME = "Alpska šola · Tepanje 60";
+const TELEFON = "064 230 888";
+const SPLETNA = "www.alpskasola.com";
+
+const PRIVZETA_PREDLOGA = {
+  zadeva: "Prejeli smo vašo prijavo",
+  naslov: "Hvala za prijavo!",
+  vsebina:
+    "Vašo prijavo smo uspešno prejeli in vas bomo v kratkem kontaktirali z vsemi podrobnostmi.",
+};
 
 const znanjeLabel: Record<string, string> = {
   zacetnik: "Začetnik",
@@ -32,6 +47,15 @@ const znanjeLabel: Record<string, string> = {
   tekmovalno: "Tekmovalna raven",
 };
 
+async function pridobiPredlogo() {
+  try {
+    const r = await sql`SELECT zadeva, naslov, vsebina FROM email_predloga WHERE id = 1;`;
+    return (r.rows[0] as typeof PRIVZETA_PREDLOGA) || PRIVZETA_PREDLOGA;
+  } catch {
+    return PRIVZETA_PREDLOGA;
+  }
+}
+
 function datum(d?: string | null) {
   if (!d) return "";
   const dt = new Date(d);
@@ -40,10 +64,7 @@ function datum(d?: string | null) {
 }
 
 function escapeHtml(s: string) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 async function posljiEmail(opts: {
@@ -85,24 +106,24 @@ function vrstica(oznaka: string, vrednost?: string | number | null) {
   </tr>`;
 }
 
+// Fiksna ovojnica: logotip zgoraj + noga z naslovom in spletno stranjo
 function ovojnica(vsebina: string) {
   return `<div style="background:#f1f5f9;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
     <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
-      <div style="background:${NAVY};padding:22px 28px;">
-        <div style="color:#ffffff;font-size:18px;font-weight:800;">Alpska šola</div>
+      <div style="padding:22px 28px;border-bottom:1px solid #eef2f7;text-align:center;">
+        <img src="${LOGO}" alt="Alpska šola" style="height:46px;width:auto;display:inline-block;" />
       </div>
       <div style="padding:28px;">${vsebina}</div>
-      <div style="padding:18px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:12px;">
-        Alpska šola · 064 230 888 · info@alpskasola.com
+      <div style="padding:18px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:12px;text-align:center;line-height:1.7;">
+        ${NASLOV_FIRME} · ${TELEFON}<br>
+        <a href="https://${SPLETNA}" style="color:${ORANGE};text-decoration:none;font-weight:600;">${SPLETNA}</a>
       </div>
     </div>
   </div>`;
 }
 
 function podatkiTabela(p: PrijavaEmail, programNaziv: string) {
-  const opombaHtml = p.opomba
-    ? escapeHtml(p.opomba).replace(/\n/g, "<br>")
-    : "";
+  const opombaHtml = p.opomba ? escapeHtml(p.opomba).replace(/\n/g, "<br>") : "";
   return `<table style="width:100%;border-collapse:collapse;">
     ${vrstica("Program", escapeHtml(programNaziv))}
     ${vrstica("Termin", p.termin ? escapeHtml(p.termin) : "")}
@@ -118,32 +139,31 @@ function podatkiTabela(p: PrijavaEmail, programNaziv: string) {
   </table>`;
 }
 
-// === Email STARŠU (potrditev) ===
+// === Email STARŠU (besedilo iz CRM) ===
 export async function posljiPotrditevStarsu(p: PrijavaEmail, programNaziv: string) {
-  const vsebina = `
-    <p style="margin:0 0 8px;color:${NAVY};font-size:20px;font-weight:800;">Hvala za prijavo! 🎉</p>
-    <p style="margin:0 0 18px;color:#475569;font-size:14px;line-height:1.6;">
-      Pozdravljeni, ${escapeHtml(p.starsi_ime)}. Vašo prijavo smo uspešno prejeli in vas bomo
-      v kratkem kontaktirali z vsemi podrobnostmi.
-    </p>
-    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;margin-bottom:18px;">
+  const t = await pridobiPredlogo();
+  const vsebinaHtml = escapeHtml(t.vsebina).replace(/\n/g, "<br>");
+  const body = `
+    <p style="margin:0 0 12px;color:${NAVY};font-size:21px;font-weight:800;">${escapeHtml(t.naslov)}</p>
+    <p style="margin:0 0 18px;color:#475569;font-size:14px;line-height:1.6;">${vsebinaHtml}</p>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;">
       ${podatkiTabela(p, programNaziv)}
     </div>
-    <p style="margin:0;color:#475569;font-size:13px;line-height:1.6;">
-      Za morebitna vprašanja nas pokličite na <strong style="color:${NAVY};">064 230 888</strong>
+    <p style="margin:18px 0 0;color:#475569;font-size:13px;line-height:1.6;">
+      Za morebitna vprašanja nas pokličite na <strong style="color:${NAVY};">${TELEFON}</strong>
       ali preprosto odgovorite na ta email.
     </p>`;
   await posljiEmail({
     to: p.email,
-    subject: `Prejeli smo vašo prijavo – ${programNaziv}`,
-    html: ovojnica(vsebina),
+    subject: t.zadeva,
+    html: ovojnica(body),
     replyTo: SOLA,
   });
 }
 
-// === Email ŠOLI (obvestilo) ===
+// === Email ŠOLI (interno obvestilo) ===
 export async function posljiObvestiloSoli(p: PrijavaEmail, programNaziv: string) {
-  const vsebina = `
+  const body = `
     <p style="margin:0 0 8px;color:${ORANGE};font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Nova prijava</p>
     <p style="margin:0 0 18px;color:${NAVY};font-size:20px;font-weight:800;">
       ${escapeHtml(`${p.otrok_ime} ${p.otrok_priimek}`)} — ${escapeHtml(programNaziv)}
@@ -151,13 +171,11 @@ export async function posljiObvestiloSoli(p: PrijavaEmail, programNaziv: string)
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;">
       ${podatkiTabela(p, programNaziv)}
     </div>
-    <p style="margin:16px 0 0;color:#94a3b8;font-size:12px;">
-      Na ta email lahko odgovoriš neposredno staršu (Reply).
-    </p>`;
+    <p style="margin:16px 0 0;color:#94a3b8;font-size:12px;">Na ta email lahko odgovoriš neposredno staršu (Reply).</p>`;
   await posljiEmail({
     to: SOLA,
     subject: `Nova prijava: ${programNaziv} – ${p.otrok_ime} ${p.otrok_priimek}`,
-    html: ovojnica(vsebina),
+    html: ovojnica(body),
     replyTo: p.email,
   });
 }
