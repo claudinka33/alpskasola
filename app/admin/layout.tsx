@@ -6,6 +6,7 @@ import {
   ClipboardList,
   CalendarDays,
   Cake,
+  Mail,
   FileText,
   Settings,
   Users,
@@ -46,6 +47,7 @@ export default async function AdminLayout({
               <NavItem href="/admin/prijavnica" icon={ClipboardList} label="Nastavitve prijavnice" />
               <NavItem href="/admin/termini" icon={CalendarDays} label="Termini" />
               <NavItem href="/admin/rojstni-dan" icon={Cake} label="Rojstni dan" />
+              <NavItem href="/admin/email" icon={Mail} label="Sporočilo staršem" />
               <NavItem href="/admin/prijave" icon={FileText} label="Oddane prijave" />
 
               <Skupina label="Nastavitve" />
