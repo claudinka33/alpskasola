@@ -1,81 +1,19 @@
 import Link from "next/link";
 import {
-  ArrowRight,
-  Mountain,
-  Trophy,
-  Award,
-  Waves,
-  Activity,
-  Bike,
-  Cake,
-  Wrench,
-  Package,
+  ArrowRight, Mountain, Trophy, Award, Waves,
+  Activity, Bike, Cake, Wrench, Package,
 } from "lucide-react";
 
 const programs = [
-  {
-    icon: Waves,
-    title: "Tečaj plavanja",
-    description: "Varno in zabavno učenje plavanja v Termah Zreče.",
-    href: "/plavalni-tecaj",
-    tag: "★ POLETNI HIT",
-  },
-  {
-    icon: Cake,
-    title: "Rojstni dan z Alpsko šolo",
-    description: "3 paketi: vodna, športna in nogometna zabava.",
-    href: "/praznovanje-rojstnega-dne",
-    tag: "★ NOVO",
-  },
-  {
-    icon: Activity,
-    title: "Športna abeceda",
-    description: "Gibalna vzgoja za vrtce in osnovne šole.",
-    href: "/sportna-abeceda",
-    tag: null,
-  },
-  {
-    icon: Mountain,
-    title: "Tečaji smučanja in bordanja",
-    description: "Za vse stopnje znanja — od začetnikov do izkušenih.",
-    href: "/sola-smucanja",
-    tag: null,
-  },
-  {
-    icon: Trophy,
-    title: "Tekmovalne ekipe",
-    description: "Resni treningi, slovenski pokal, mednarodne tekme.",
-    href: "/ski-racing-team",
-    tag: null,
-  },
-  {
-    icon: Award,
-    title: "Smučarska akademija",
-    description: "Poglobljen program za nadarjene mlade smučarje.",
-    href: "/smucarska-akademija",
-    tag: null,
-  },
-  {
-    icon: Bike,
-    title: "Tečaj rolanja",
-    description: "Spomladi in poleti — gibanje na kolesih.",
-    href: "/sola-rolanja",
-    tag: null,
-  },
-  {
-    icon: Wrench,
-    title: "Servis smuči",
-    description: "Profesionalna priprava smuči in deske.",
-    href: "/servis",
-    tag: null,
-  },
-  {
-    icon: Package,
-    title: "Izposoja opreme",
-    description: "Kakovostna smučarska oprema za vse starosti.",
-    href: "/izposoja-opreme",
-    tag: null,
-  },
+  { icon: Waves, title: "Tečaj plavanja", description: "Varno in zabavno učenje plavanja v Termah Zreče.", href: "/plavalni-tecaj", tag: "★ POLETNI HIT", accent: "bg-cyan-100 text-cyan-600" },
+  { icon: Cake, title: "Rojstni dan z Alpsko šolo", description: "3 paketi: vodna, športna in nogometna zabava.", href: "/praznovanje-rojstnega-dne", tag: "★ NOVO", accent: "bg-pink-100 text-pink-600" },
+  { icon: Activity, title: "Športna abeceda", description: "Gibalna vzgoja za vrtce in osnovne šole.", href: "/sportna-abeceda", tag: null, accent: "bg-emerald-100 text-emerald-600" },
+  { icon: Mountain, title: "Tečaji smučanja in bordanja", description: "Za vse stopnje znanja — od začetnikov do izkušenih.", href: "/sola-smucanja", tag: null, accent: "bg-blue-100 text-blue-600" },
+  { icon: Trophy, title: "Tekmovalne ekipe", description: "Resni treningi, slovenski pokal, mednarodne tekme.", href: "/ski-racing-team", tag: null, accent: "bg-amber-100 text-amber-600" },
+  { icon: Award, title: "Smučarska akademija", description: "Poglobljen program za nadarjene mlade smučarje.", href: "/smucarska-akademija", tag: null, accent: "bg-violet-100 text-violet-600" },
+  { icon: Bike, title: "Tečaj rolanja", description: "Spomladi in poleti — gibanje na kolesih.", href: "/sola-rolanja", tag: null, accent: "bg-teal-100 text-teal-600" },
+  { icon: Wrench, title: "Servis smuči", description: "Profesionalna priprava smuči in deske.", href: "/servis", tag: null, accent: "bg-slate-100 text-slate-600" },
+  { icon: Package, title: "Izposoja opreme", description: "Kakovostna smučarska oprema za vse starosti.", href: "/izposoja-opreme", tag: null, accent: "bg-orange-100 text-orange-600" },
 ];
 
 export default function Programs() {
@@ -97,34 +35,27 @@ export default function Programs() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
           {programs.map((program, i) => {
             const Icon = program.icon;
             return (
               <Link
                 key={i}
                 href={program.href}
-                className="group bg-white rounded-2xl overflow-hidden border border-slate-200/60 hover:border-brand-orange/40 hover:shadow-xl hover:shadow-brand-navy/5 hover:-translate-y-1 transition-all duration-300"
+                className="group relative bg-white rounded-2xl border border-slate-200/70 p-6 hover:border-brand-orange/40 hover:shadow-xl hover:shadow-brand-navy/5 hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="relative h-32 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-brand-navy overflow-hidden">
-                  <Icon size={44} className="relative z-10" />
-                  <div className="absolute bottom-[-20px] left-[-20%] right-[-20%] h-16 bg-white/40 rounded-t-full" />
-                  {program.tag && (
-                    <span className="absolute top-3 right-3 bg-white text-brand-orange px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider z-20">
-                      {program.tag}
-                    </span>
-                  )}
+                {program.tag && (
+                  <span className="absolute top-5 right-5 bg-brand-orange/10 text-brand-orange px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider">
+                    {program.tag}
+                  </span>
+                )}
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${program.accent} group-hover:scale-105 transition-transform duration-300`}>
+                  <Icon size={28} />
                 </div>
-                <div className="p-5">
-                  <h3 className="text-base font-bold text-brand-navy mb-1.5">
-                    {program.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-                    {program.description}
-                  </p>
-                  <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs font-semibold text-brand-orange group-hover:gap-2.5 transition-all">
-                    Več o programu <ArrowRight size={14} />
-                  </div>
+                <h3 className="text-lg font-bold text-brand-navy mb-1.5">{program.title}</h3>
+                <p className="text-sm text-slate-600 mb-5 leading-relaxed">{program.description}</p>
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-brand-orange group-hover:gap-2.5 transition-all">
+                  Več o programu <ArrowRight size={15} />
                 </div>
               </Link>
             );
