@@ -88,7 +88,7 @@ export default function SportnaAbecedaPage() {
             </p>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video">
-            <img src="/abeceda.jpg" alt="Športna abeceda" className="w-full h-full object-cover" />
+            <img src="/abeceda.JPG" alt="Športna abeceda" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
