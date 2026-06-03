@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
-import { Package, Check, Camera, Mountain } from "lucide-react";
+import { Package, Check, Mountain } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Izposoja smučarske opreme | Alpska šola Rogla",
@@ -34,10 +34,12 @@ export default function IzposojaPage() {
       {/* Uvod */}
       <section className="bg-white py-14 lg:py-20">
         <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
-          <div className="h-72 lg:h-96 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy order-2 lg:order-1">
-            <Camera size={42} className="text-brand-orange" />
-            <strong className="text-sm">Prostor za fotografijo</strong>
-            <span className="text-xs text-slate-500">izposojevalnica</span>
+          <div className="h-72 lg:h-96 rounded-2xl overflow-hidden border border-slate-200/70 order-2 lg:order-1">
+            <img
+              src="/izposoja.JPG"
+              alt="Izposoja smučarske opreme – Alpska šola"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="order-1 lg:order-2">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
