@@ -3,12 +3,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
-import { Trophy, Target, Users, Zap } from "lucide-react";
+import { Trophy, Target, Users, Award } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Tekmovalne ekipe | Alpska šola Rogla",
   description:
-    "Tekmovalne ekipe Alpske šole — resni treningi, slovenski pokal, mednarodne tekme. Za najbolj predane mlade smučarje.",
+    "Tekmovalne ekipe Alpske šole (U6–U12) — resni treningi, državna in regijska tekmovanja. Za najbolj predane mlade smučarje.",
 };
 
 const lastnosti = [
@@ -20,18 +20,26 @@ const lastnosti = [
   {
     icon: Trophy,
     title: "Slovenski pokal",
-    text: "Sodelovanje na vseh slovenskih tekmovanjih.",
+    text: "Državna tekmovanja in Regijski pokal Vzhodne regije.",
   },
   {
-    icon: Zap,
-    title: "Mednarodne tekme",
-    text: "Priložnost za izkušnje na evropskem nivoju.",
+    icon: Award,
+    title: "Koroški pokal",
+    text: "Regijska tekmovanja za mlajše kategorije.",
   },
   {
     icon: Users,
-    title: "Strokovni trener",
-    text: "Nejc Cilenšek — vodja tekmovalne smučarije.",
+    title: "Strokovna trenerja",
+    text: "Nejc Cilenšek in Claudio Seidl.",
   },
+];
+
+const tekmovanja = [
+  { naziv: "Slovenski pokal", opis: "U12" },
+  { naziv: "Pokal VZH regije", opis: "U10 in U12" },
+  { naziv: "Koroški pokal", opis: "U6, U8 in U10" },
+  { naziv: "Mini pokal Vitranc", opis: "U6, U8, U10 in U12" },
+  { naziv: "Pokal Roka Petroviča", opis: "U10 in U12" },
 ];
 
 export default function SkiRacingTeamPage() {
@@ -55,14 +63,14 @@ export default function SkiRacingTeamPage() {
               Pot do tekmovalnega smučanja
             </h2>
             <p className="text-slate-600 leading-relaxed mb-4">
-              Tekmovalne ekipe Alpske šole so namenjene mladim smučarjem in
-              smučarkam, ki si želijo svoje znanje nadgraditi in tekmovati na
-              regijskem, slovenskem in mednarodnem nivoju.
+              Tekmovalne ekipe <strong>U6, U8, U10 in U12</strong> Alpske šole so
+              namenjene mladim smučarjem in smučarkam, ki si želijo svoje znanje
+              nadgraditi in tekmovati na regijskem in državnem nivoju.
             </p>
             <p className="text-slate-600 leading-relaxed">
-              Pod vodstvom izkušenega trenerja <strong>Nejca Cilenška</strong>{" "}
-              razvijamo tehniko, kondicijo in tekmovalno mentaliteto naših mladih
-              tekmovalcev.
+              Pod vodstvom izkušenih trenerjev <strong>Nejca Cilenška in Claudia
+              Seidl</strong> razvijamo tehniko, kondicijo in tekmovalno
+              mentaliteto naših mladih tekmovalcev.
             </p>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video">
@@ -103,26 +111,19 @@ export default function SkiRacingTeamPage() {
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-extrabold text-brand-navy mb-3">
-              Kjer tekmujemo
+              Kje tekmujemo
             </h2>
             <p className="text-sm text-slate-600 max-w-xl mx-auto">
               Naši tekmovalci dosegajo odlične rezultate na različnih ravneh.
             </p>
           </div>
           <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              { naziv: "Mini pokal Vitranc", opis: "Mladinske kategorije" },
-              { naziv: "Koroški pokal", opis: "Regijska serija" },
-              { naziv: "Little Fox", opis: "Mednarodno tekmovanje" },
-            ].map((t, i) => (
+            {tekmovanja.map((t, i) => (
               <div
                 key={i}
                 className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-2xl p-6 text-center"
               >
-                <Trophy
-                  size={28}
-                  className="text-brand-orange mx-auto mb-3"
-                />
+                <Trophy size={28} className="text-brand-orange mx-auto mb-3" />
                 <strong className="block text-base font-bold text-brand-navy mb-1">
                   {t.naziv}
                 </strong>
