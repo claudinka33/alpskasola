@@ -19,18 +19,18 @@ const lastnosti = [
   },
   {
     icon: Trophy,
-    title: "Slovenski pokal",
+    title: "Tekmovanja",
     text: "Državna tekmovanja in Regijski pokal Vzhodne regije.",
   },
   {
     icon: Award,
-    title: "Koroški pokal",
-    text: "Regijska tekmovanja za mlajše kategorije.",
+    title: "Tekmovanja za mlajše člane",
+    text: "Koroški pokal",
   },
   {
     icon: Users,
     title: "Strokovna trenerja",
-    text: "Nejc Cilenšek in Claudio Seidl.",
+    text: "Nejc Cilenšek in Claudia Seidl.",
   },
 ];
 
@@ -68,7 +68,7 @@ export default function SkiRacingTeamPage() {
               nadgraditi in tekmovati na regijskem in državnem nivoju.
             </p>
             <p className="text-slate-600 leading-relaxed">
-              Pod vodstvom izkušenih trenerjev <strong>Nejca Cilenška in Claudia
+              Pod vodstvom izkušenih trenerjev <strong>Nejca Cilenška in Claudio
               Seidl</strong> razvijamo tehniko, kondicijo in tekmovalno
               mentaliteto naših mladih tekmovalcev.
             </p>
