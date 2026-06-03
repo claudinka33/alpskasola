@@ -93,7 +93,15 @@ function PrijavnaStranContent() {
   useEffect(() => {
     fetch("/api/programi")
       .then((r) => r.json())
-      .then((d) => setProgrami((d.programi || []).filter((p: any) => p.aktiven !== false)))
+      .then((d) => {
+        const vsi = d.programi || [];
+        // Če baza pozna stolpec "na_prijavnici", upoštevaj njega; sicer fallback na "aktiven".
+        const imaZnacko = vsi.some((p: any) => p.na_prijavnici === true || p.na_prijavnici === false);
+        const izbrani = imaZnacko
+          ? vsi.filter((p: any) => p.na_prijavnici === true)
+          : vsi.filter((p: any) => p.aktiven !== false);
+        setProgrami(izbrani);
+      })
       .catch(() => {});
 
     fetch("/api/rd-config")
