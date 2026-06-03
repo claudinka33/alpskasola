@@ -7,13 +7,23 @@ import Footer from "@/components/Footer";
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-const znanja = [
+// Privzete stopnje predznanja (smučanje ipd.)
+const znanjaPrivzeto = [
   { value: "zacetnik", label: "Začetnik" },
   { value: "osnovno", label: "Osnovno znanje" },
   { value: "srednje", label: "Srednje znanje" },
   { value: "napredno", label: "Napredno" },
   { value: "tekmovalno", label: "Tekmovalna raven" },
 ];
+
+// Stopnje predznanja glede na program (npr. plavanje ima svoje)
+const znanjaPoProgramu: Record<string, { value: string; label: string }[]> = {
+  "plavalni-tecaj": [
+    { value: "zacetnik", label: "Začetnik" },
+    { value: "osnovno", label: "Osnovno znanje" },
+    { value: "napredno", label: "Napredno znanje" },
+  ],
+};
 
 // Varnostni "fallback" — uporabi se SAMO, če baza (CRM) ne vrne paketov/aktivnosti.
 const FALLBACK_PAKETI = [
@@ -67,6 +77,9 @@ function PrijavnaStranContent() {
 
   const jeRojstniDan = form.program === "praznovanje-rojstnega-dne";
 
+  // Stopnje predznanja glede na izbrani program
+  const znanjaSeznam = znanjaPoProgramu[form.program] || znanjaPrivzeto;
+
   // Paketi/aktivnosti: iz CRM-ja, sicer fallback
   const paketi = rdPaketi.length ? rdPaketi : FALLBACK_PAKETI;
   const aktivnostiList = rdAktivnosti.length ? rdAktivnosti : FALLBACK_AKTIVNOSTI;
@@ -94,9 +107,9 @@ function PrijavnaStranContent() {
       .catch(() => {});
   }, []);
 
-  // Ob menjavi programa naloži termine za ta program in ponastavi izbrani termin
+  // Ob menjavi programa naloži termine in ponastavi izbiro termina + predznanje
   useEffect(() => {
-    setForm((f) => ({ ...f, termin_id: "" }));
+    setForm((f) => ({ ...f, termin_id: "", otrok_znanje: "" }));
     if (!form.program || form.program === "praznovanje-rojstnega-dne") {
       setTermini([]);
       return;
@@ -142,7 +155,6 @@ function PrijavnaStranContent() {
       return;
     }
 
-    // Izbrani termin (za zapis imena + cene)
     const izbraniTermin = termini.find((t) => String(t.id) === String(form.termin_id));
     const terminLabel = izbraniTermin
       ? `${izbraniTermin.naziv}${
@@ -155,7 +167,6 @@ function PrijavnaStranContent() {
       : null;
     const terminCena = izbraniTermin?.cena ?? null;
 
-    // Opomba za rojstni dan
     let opombaFull = form.opomba;
     if (jeRojstniDan) {
       const paketLabel = paketi.find((p) => p.value === form.rd_paket)?.label;
@@ -310,7 +321,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     <label className="block text-sm font-semibold text-brand-navy mb-1.5">Predznanje</label>
                     <select value={form.otrok_znanje} onChange={(e) => update("otrok_znanje", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
                       <option value="">— izberi —</option>
-                      {znanja.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
+                      {znanjaSeznam.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
                     </select>
                   </div>
                 )}
