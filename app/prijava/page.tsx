@@ -15,28 +15,22 @@ const znanja = [
   { value: "tekmovalno", label: "Tekmovalna raven" },
 ];
 
-const paketiRojstniDan = [
-  { value: "vodna", label: "Vodna zabava (Terme Zreče)" },
-  { value: "sportna", label: "Športna norišnica na prostem" },
-  { value: "nogomet", label: "Nogometna zabava pravih prvakov" },
+// Varnostni "fallback" — uporabi se SAMO, če baza (CRM) ne vrne paketov/aktivnosti.
+const FALLBACK_PAKETI = [
+  { value: "vodna", label: "Vodna zabava (Terme Zreče)", ima_aktivnosti: false },
+  { value: "sportna", label: "Športna norišnica na prostem", ima_aktivnosti: true },
+  { value: "nogomet", label: "Nogometna zabava pravih prvakov", ima_aktivnosti: false },
 ];
-
-const aktivnostiSportna = [
-  "Med dvema ognjema",
-  "Mini rokomet",
-  "Poligon z ovirami",
-  "Štafetne igre",
-  "Metanje na tarčo",
-  "Spretnostni izzivi",
-  "Ravnotežne igre",
-  "Igre z frizbijem",
-  "Iskanje zaklada",
-  "Ekipne misije",
-  "Vleka vrvi",
-  "Igra z vodnimi baloni",
+const FALLBACK_AKTIVNOSTI = [
+  "Med dvema ognjema", "Mini rokomet", "Poligon z ovirami", "Štafetne igre",
+  "Metanje na tarčo", "Spretnostni izzivi", "Ravnotežne igre", "Igre z frizbijem",
+  "Iskanje zaklada", "Ekipne misije", "Vleka vrvi", "Igra z vodnimi baloni",
 ];
 
 type Program = { slug: string; naziv: string };
+
+const fmtDatum = (d: string) =>
+  new Date(d).toLocaleDateString("sl-SI", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 function PrijavnaStranContent() {
   const searchParams = useSearchParams();
@@ -44,11 +38,15 @@ function PrijavnaStranContent() {
   const initialPaket = searchParams.get("paket") || "";
 
   const [programi, setProgrami] = useState<Program[]>([]);
+  const [termini, setTermini] = useState<any[]>([]);
+  const [rdPaketi, setRdPaketi] = useState<any[]>([]);
+  const [rdAktivnosti, setRdAktivnosti] = useState<string[]>([]);
   const [stanje, setStanje] = useState<"obrazec" | "poslano">("obrazec");
   const [napaka, setNapaka] = useState("");
   const [posiljam, setPosiljam] = useState(false);
   const [form, setForm] = useState({
     program: initialProgram,
+    termin_id: "",
     otrok_ime: "",
     otrok_priimek: "",
     otrok_rojstvo: "",
@@ -61,7 +59,6 @@ function PrijavnaStranContent() {
     posta: "",
     opomba: "",
     soglasje: false,
-    // Rojstnodnevna polja
     rd_paket: initialPaket,
     rd_datum: "",
     rd_stevilo_otrok: "",
@@ -69,17 +66,46 @@ function PrijavnaStranContent() {
   });
 
   const jeRojstniDan = form.program === "praznovanje-rojstnega-dne";
-  const jeSportna = form.rd_paket === "sportna";
 
+  // Paketi/aktivnosti: iz CRM-ja, sicer fallback
+  const paketi = rdPaketi.length ? rdPaketi : FALLBACK_PAKETI;
+  const aktivnostiList = rdAktivnosti.length ? rdAktivnosti : FALLBACK_AKTIVNOSTI;
+  const izbranPaket = paketi.find((p) => p.value === form.rd_paket);
+  const prikaziAktivnosti = izbranPaket?.ima_aktivnosti ?? form.rd_paket === "sportna";
+
+  // Termini: prikaži samo, če izbrani program (ne rojstni dan) ima aktivne termine
+  const prikaziTermine = !jeRojstniDan && termini.length > 0;
+
+  // Naloži programe + rojstnodnevno konfiguracijo
   useEffect(() => {
     fetch("/api/programi")
       .then((r) => r.json())
+      .then((d) => setProgrami((d.programi || []).filter((p: any) => p.aktiven !== false)))
+      .catch(() => {});
+
+    fetch("/api/rd-config")
+      .then((r) => r.json())
       .then((d) => {
-        const aktivni = (d.programi || []).filter((p: any) => p.aktiven !== false);
-        setProgrami(aktivni);
+        setRdPaketi((d.paketi || []).filter((p: any) => p.aktiven !== false));
+        setRdAktivnosti(
+          (d.aktivnosti || []).filter((a: any) => a.aktiven !== false).map((a: any) => a.label)
+        );
       })
       .catch(() => {});
   }, []);
+
+  // Ob menjavi programa naloži termine za ta program in ponastavi izbrani termin
+  useEffect(() => {
+    setForm((f) => ({ ...f, termin_id: "" }));
+    if (!form.program || form.program === "praznovanje-rojstnega-dne") {
+      setTermini([]);
+      return;
+    }
+    fetch(`/api/termini?program=${form.program}&aktivni=1`)
+      .then((r) => r.json())
+      .then((d) => setTermini(d.termini || []))
+      .catch(() => setTermini([]));
+  }, [form.program]);
 
   useEffect(() => {
     if (initialProgram && initialProgram !== form.program) {
@@ -110,10 +136,29 @@ function PrijavnaStranContent() {
       return;
     }
 
-    // Sestavi opombo z rojstnodnevnimi podatki
+    if (prikaziTermine && !form.termin_id) {
+      setNapaka("Prosimo, izberite termin.");
+      setPosiljam(false);
+      return;
+    }
+
+    // Izbrani termin (za zapis imena + cene)
+    const izbraniTermin = termini.find((t) => String(t.id) === String(form.termin_id));
+    const terminLabel = izbraniTermin
+      ? `${izbraniTermin.naziv}${
+          izbraniTermin.datum_od
+            ? ` (${fmtDatum(izbraniTermin.datum_od)}${
+                izbraniTermin.datum_do ? "–" + fmtDatum(izbraniTermin.datum_do) : ""
+              })`
+            : ""
+        }`
+      : null;
+    const terminCena = izbraniTermin?.cena ?? null;
+
+    // Opomba za rojstni dan
     let opombaFull = form.opomba;
     if (jeRojstniDan) {
-      const paketLabel = paketiRojstniDan.find((p) => p.value === form.rd_paket)?.label;
+      const paketLabel = paketi.find((p) => p.value === form.rd_paket)?.label;
       opombaFull = `🎂 ROJSTNI DAN
 Paket: ${paketLabel || "—"}
 Želen datum: ${form.rd_datum || "—"}
@@ -127,7 +172,13 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
       const res = await fetch("/api/prijave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, opomba: opombaFull }),
+        body: JSON.stringify({
+          ...form,
+          opomba: opombaFull,
+          termin: terminLabel,
+          termin_id: form.termin_id ? Number(form.termin_id) : null,
+          cena: terminCena,
+        }),
       });
       const data = await res.json();
       if (!res.ok) setNapaka(data.error || "Napaka.");
@@ -182,6 +233,25 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
               </select>
             </div>
 
+            {/* Termin (samo če program ima aktivne termine) */}
+            {prikaziTermine && (
+              <div className="mb-6">
+                <h2 className="text-lg font-bold text-brand-navy mb-3">Izberi termin</h2>
+                <select required value={form.termin_id} onChange={(e) => update("termin_id", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
+                  <option value="">— izberi termin —</option>
+                  {termini.map((t) => (
+                    <option key={t.id} value={t.id} disabled={t.status === "zaprt"}>
+                      {t.naziv}
+                      {t.datum_od ? ` (${fmtDatum(t.datum_od)}${t.datum_do ? "–" + fmtDatum(t.datum_do) : ""})` : ""}
+                      {t.lokacija ? ` · ${t.lokacija}` : ""}
+                      {t.cena ? ` · ${t.cena}€` : ""}
+                      {t.status === "poln" ? " — ZASEDENO" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* ROJSTNI DAN polja */}
             {jeRojstniDan && (
               <div className="mb-6 bg-purple-50 border-2 border-purple-200 rounded-xl p-5">
@@ -193,7 +263,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     <label className="block text-sm font-semibold text-brand-navy mb-1.5">Paket *</label>
                     <select required value={form.rd_paket} onChange={(e) => update("rd_paket", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
                       <option value="">— izberi paket —</option>
-                      {paketiRojstniDan.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+                      {paketi.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
                     </select>
                   </div>
 
@@ -202,13 +272,13 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     <F label="Pričakovano število otrok *" type="number" value={form.rd_stevilo_otrok} onChange={(v) => update("rd_stevilo_otrok", v)} required />
                   </div>
 
-                  {jeSportna && (
+                  {prikaziAktivnosti && (
                     <div>
                       <label className="block text-sm font-semibold text-brand-navy mb-2">
                         Katere aktivnosti želi slavljenec? (izberite več)
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {aktivnostiSportna.map((a) => (
+                        {aktivnostiList.map((a) => (
                           <label key={a} className="flex items-start gap-2 cursor-pointer bg-white rounded-lg p-2.5 border border-slate-200 hover:border-brand-orange">
                             <input
                               type="checkbox"
