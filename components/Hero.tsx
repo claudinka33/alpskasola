@@ -87,7 +87,7 @@ export default function Hero() {
               />
             </div>
 
-            <div className="hidden lg:flex absolute -left-6 -top-4 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 items-center gap-3 animate-float">
+            <div className="hidden lg:flex absolute -left-6 -top-14 bg-white p-3 rounded-2xl shadow-xl shadow-brand-navy/10 items-center gap-3 animate-float">
               <div className="bg-blue-50 text-blue-700 p-2 rounded-lg">
                 <Waves size={22} />
               </div>
