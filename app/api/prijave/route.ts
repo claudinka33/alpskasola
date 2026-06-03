@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ustvariPrijavo, pridobiPrijave } from "@/lib/db";
+import { ustvariPrijavo, pridobiPrijave, pridobiProgrami } from "@/lib/db";
+import { posljiPotrditevStarsu, posljiObvestiloSoli } from "@/lib/email";
 
 export async function GET(req: NextRequest) {
   try {
@@ -51,6 +52,20 @@ export async function POST(req: NextRequest) {
       termin: data.termin || null,
       cena: data.cena || null,
     });
+
+    // Pošlji emaila (potrditev staršu + obvestilo šoli).
+    // Če email spodleti, prijava vseeno ostane shranjena.
+    try {
+      const programi = await pridobiProgrami();
+      const programNaziv =
+        programi.find((p) => p.slug === data.program)?.naziv || data.program;
+      await Promise.all([
+        posljiPotrditevStarsu(prijava, programNaziv),
+        posljiObvestiloSoli(prijava, programNaziv),
+      ]);
+    } catch (e) {
+      console.error("Napaka pri pošiljanju emaila:", e);
+    }
 
     return NextResponse.json({ uspeh: true, prijava }, { status: 201 });
   } catch (error: any) {
