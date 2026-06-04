@@ -121,8 +121,9 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <Mail size={14} /> info@alpskasola.com
               </li>
-              <li className="flex items-center gap-2">
-                <MapPin size={14} /> Rogla, Slovenija
+              <li className="flex items-start gap-2">
+                <MapPin size={14} className="mt-0.5 shrink-0" /> Tepanje 60, 3210
+                Slovenske Konjice
               </li>
             </ul>
           </div>
@@ -153,14 +154,6 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/galerija"
-                  className="hover:text-brand-orange transition-colors"
-                >
-                  Galerija
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/o-nas"
                   className="hover:text-brand-orange transition-colors"
                 >
@@ -175,6 +168,14 @@ export default function Footer() {
                   Splošni pogoji
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/admin/login"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  CRM (za zaposlene)
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -184,7 +185,12 @@ export default function Footer() {
             © {new Date().getFullYear()} Športno društvo Alpska šola. Vse pravice
             pridržane.
           </span>
-          <span>Splošni pogoji · Zasebnost · Piškotki</span>
+          <Link
+            href="/splosni-pogoji"
+            className="hover:text-brand-orange transition-colors"
+          >
+            Splošni pogoji · Zasebnost · Piškotki
+          </Link>
         </div>
       </div>
     </footer>
