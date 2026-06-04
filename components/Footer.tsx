@@ -24,7 +24,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-2">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/alpskasola/?locale=sl_SI"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -33,7 +33,7 @@ export default function Footer() {
                 <Facebook size={16} />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/alpskasola/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -42,13 +42,24 @@ export default function Footer() {
                 <Instagram size={16} />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@alpskasola4739"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
                 className="w-9 h-9 rounded-xl bg-white/5 hover:bg-brand-orange flex items-center justify-center text-white transition-colors"
               >
                 <Youtube size={16} />
+              </a>
+              <a
+                href="https://www.tiktok.com/@alpskasola.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="w-9 h-9 rounded-xl bg-white/5 hover:bg-brand-orange flex items-center justify-center text-white transition-colors"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                  <path d="M16.5 3c.36 2.27 1.86 3.9 4.05 4.18v2.79c-1.27.12-2.46-.27-3.86-1.02v6.2c0 3.6-2.6 6.05-5.97 6.05-3.19 0-5.62-2.43-5.62-5.62 0-3.32 2.74-5.71 6.18-5.32v2.92c-.42-.13-.89-.2-1.32-.2-1.5 0-2.62 1.13-2.62 2.6 0 1.56 1.13 2.66 2.71 2.66 1.66 0 2.81-1.2 2.81-2.99V3h3.64z" />
+                </svg>
               </a>
             </div>
           </div>
@@ -173,7 +184,7 @@ export default function Footer() {
                   href="/admin/login"
                   className="hover:text-brand-orange transition-colors"
                 >
-                  CRM (za zaposlene)
+                  CMS (za zaposlene)
                 </Link>
               </li>
             </ul>
