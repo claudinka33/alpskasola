@@ -4,8 +4,6 @@ import Link from "next/link";
 import {
   LayoutDashboard,
   ClipboardList,
-  CalendarDays,
-  Cake,
   Mail,
   FileText,
   Settings,
@@ -35,7 +33,7 @@ export default async function AdminLayout({
                 className="h-10 w-auto"
               />
               <div>
-                <div className="text-sm font-bold">CRM</div>
+                <div className="text-sm font-bold">CMS</div>
                 <div className="text-[10px] text-white/60">Alpska šola</div>
               </div>
             </Link>
@@ -45,8 +43,6 @@ export default async function AdminLayout({
 
               <Skupina label="Prijavnica" />
               <NavItem href="/admin/prijavnica" icon={ClipboardList} label="Nastavitve prijavnice" />
-              <NavItem href="/admin/termini" icon={CalendarDays} label="Termini" />
-              <NavItem href="/admin/rojstni-dan" icon={Cake} label="Rojstni dan" />
               <NavItem href="/admin/email" icon={Mail} label="Sporočilo staršem" />
               <NavItem href="/admin/prijave" icon={FileText} label="Oddane prijave" />
 
