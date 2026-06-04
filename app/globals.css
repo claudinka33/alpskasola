@@ -18,3 +18,53 @@ button:focus-visible, a:focus-visible {
   outline: 2px solid #FF6B1A;
   outline-offset: 2px;
 }
+/* ============================================
+   Mehke interakcije (hover dvig + klik "pritisk")
+   ============================================ */
+
+/* Gladki prehodi za vse gumbe in povezave */
+button,
+a {
+  transition: transform 0.18s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+/* Nežen "pritisk" ob kliku — velja povsod */
+button:active,
+a:active {
+  transform: scale(0.96);
+}
+
+/* Polni obarvani gumbi (npr. Rezerviraj / Prijavi) se ob približanju miške rahlo dvignejo in povečajo */
+a[class*="bg-brand-orange"]:hover,
+button[class*="bg-brand-orange"]:hover,
+a[class*="bg-brand-navy"]:hover,
+button[class*="bg-brand-navy"]:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 28px -10px rgba(19, 41, 75, 0.45);
+}
+
+/* Ob kliku naj tudi pri obarvanih gumbih prevlada "pritisk" */
+a[class*="bg-brand-orange"]:active,
+button[class*="bg-brand-orange"]:active,
+a[class*="bg-brand-navy"]:active,
+button[class*="bg-brand-navy"]:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Spoštuj nastavitev "manj animacij" (dostopnost) */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a {
+    transition: none;
+  }
+  button:active,
+  a:active,
+  a[class*="bg-brand-orange"]:hover,
+  button[class*="bg-brand-orange"]:hover,
+  a[class*="bg-brand-navy"]:hover,
+  button[class*="bg-brand-navy"]:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
