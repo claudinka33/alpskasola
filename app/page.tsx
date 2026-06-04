@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import StatsBand from "@/components/StatsBand";
 import Programs from "@/components/Programs";
+import FacebookFeed from "@/components/FacebookFeed";
 import About from "@/components/About";
 import CtaBand from "@/components/CtaBand";
 import Footer from "@/components/Footer";
@@ -13,6 +14,7 @@ export default function HomePage() {
       <Hero />
       <StatsBand />
       <Programs />
+      <FacebookFeed />
       <About />
       <CtaBand />
       <Footer />
