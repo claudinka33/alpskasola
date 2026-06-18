@@ -7,6 +7,10 @@ import StatusGumbi from "./StatusGumbi";
 
 export const dynamic = "force-dynamic";
 
+type Props = {
+  params: { id: string };
+};
+
 const programLabels: Record<string, string> = {
   "sola-smucanja": "Smučanje",
   "ski-racing-team": "Tekmovalne ekipe",
@@ -19,7 +23,7 @@ const programLabels: Record<string, string> = {
   "izposoja-opreme": "Izposoja",
 };
 
-export default async function PrijavaPage({ params }: { params: { id: string } }) {
+export default async function PrijavaPage({ params }: Props) {
   const admin = await pridobiTrenutniAdmin();
   if (!admin) redirect("/admin/login");
 
@@ -39,7 +43,6 @@ export default async function PrijavaPage({ params }: { params: { id: string } }
         <ArrowLeft size={14} /> Nazaj na prijave
       </Link>
 
-      {/* Header */}
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-orange-100 text-brand-orange flex items-center justify-center font-bold text-lg shrink-0">
@@ -57,7 +60,6 @@ export default async function PrijavaPage({ params }: { params: { id: string } }
         </div>
       </div>
 
-      {/* Status */}
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 block">
           Status
@@ -65,7 +67,6 @@ export default async function PrijavaPage({ params }: { params: { id: string } }
         <StatusGumbi id={p.id} zacetni={p.status} />
       </div>
 
-      {/* Otrok */}
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
         <h2 className="text-sm font-bold text-brand-navy mb-3">Otrok</h2>
         <div className="bg-slate-50 rounded-xl p-4 grid grid-cols-2 gap-3 text-sm">
@@ -104,7 +105,6 @@ export default async function PrijavaPage({ params }: { params: { id: string } }
         </div>
       </div>
 
-      {/* Starš */}
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
         <h2 className="text-sm font-bold text-brand-navy mb-3">Starš</h2>
         <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
@@ -135,7 +135,6 @@ export default async function PrijavaPage({ params }: { params: { id: string } }
         </div>
       </div>
 
-      {/* Opomba */}
       {p.opomba && (
         <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
           <h2 className="text-sm font-bold text-brand-navy mb-3">Opomba</h2>
@@ -147,9 +146,7 @@ export default async function PrijavaPage({ params }: { params: { id: string } }
 
       <p className="text-xs text-slate-400 px-1">
         Prijava ustvarjena:{" "}
-        {p.ustvarjeno
-          ? new Date(p.ustvarjeno).toLocaleString("sl-SI")
-          : "—"}
+        {p.ustvarjeno ? new Date(p.ustvarjeno).toLocaleString("sl-SI") : "—"}
       </p>
     </div>
   );
