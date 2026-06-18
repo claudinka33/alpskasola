@@ -2,8 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { sql } from "@vercel/postgres";
 import { pridobiTrenutniAdmin } from "@/lib/auth";
-import { ArrowLeft, Phone, Mail, MapPin } from "lucide-react";
-import StatusGumbi from "./StatusGumbi";
+import { ArrowLeft, Phone, Mail, MapPin, Pencil } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -12,15 +11,23 @@ type Props = {
 };
 
 const programLabels: Record<string, string> = {
-  "sola-smucanja": "Smucanje",
+  "sola-smucanja": "Smučanje",
   "ski-racing-team": "Tekmovalne ekipe",
   "smucarska-akademija": "Akademija",
   "plavalni-tecaj": "Plavanje",
-  "sportna-abeceda": "Sportna abeceda",
+  "sportna-abeceda": "Športna abeceda",
   "sola-rolanja": "Rolanje",
   "praznovanje-rojstnega-dne": "Rojstni dan",
   servis: "Servis",
   "izposoja-opreme": "Izposoja",
+};
+
+const statusLabels: Record<string, { label: string; bg: string; text: string }> = {
+  nova: { label: "Nova", bg: "bg-amber-100", text: "text-amber-800" },
+  potrjeno: { label: "Potrjeno", bg: "bg-blue-100", text: "text-blue-800" },
+  placano: { label: "Plačano", bg: "bg-green-100", text: "text-green-800" },
+  koncano: { label: "Končano", bg: "bg-slate-100", text: "text-slate-700" },
+  preklicano: { label: "Preklicano", bg: "bg-red-100", text: "text-red-800" },
 };
 
 export default async function PrijavaPage({ params }: Props) {
@@ -34,14 +41,24 @@ export default async function PrijavaPage({ params }: Props) {
   const p = result.rows[0];
   if (!p) notFound();
 
+  const st = statusLabels[p.status] || statusLabels.nova;
+
   return (
     <div className="max-w-3xl">
-      <Link
-        href="/admin/prijave"
-        className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-orange mb-4"
-      >
-        <ArrowLeft size={14} /> Nazaj na prijave
-      </Link>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <Link
+          href="/admin/prijave"
+          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-orange"
+        >
+          <ArrowLeft size={14} /> Nazaj na prijave
+        </Link>
+        <Link
+          href={`/admin/prijave/${p.id}/uredi`}
+          className="inline-flex items-center gap-2 bg-brand-orange text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-brand-orange-dark transition-colors"
+        >
+          <Pencil size={14} /> Uredi prijavnico
+        </Link>
+      </div>
 
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
         <div className="flex items-center gap-4">
@@ -49,7 +66,7 @@ export default async function PrijavaPage({ params }: Props) {
             {p.otrok_ime?.[0]}
             {p.otrok_priimek?.[0]}
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl font-extrabold text-brand-navy">
               {p.otrok_ime} {p.otrok_priimek}
             </h1>
@@ -57,14 +74,10 @@ export default async function PrijavaPage({ params }: Props) {
               {programLabels[p.program] || p.program} &middot; #{p.id}
             </p>
           </div>
+          <span className={`ml-auto text-xs font-bold px-3 py-1.5 rounded-full ${st.bg} ${st.text}`}>
+            {st.label.toUpperCase()}
+          </span>
         </div>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
-        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 block">
-          Status
-        </label>
-        <StatusGumbi id={p.id} zacetni={p.status} />
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
@@ -106,7 +119,7 @@ export default async function PrijavaPage({ params }: Props) {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
-        <h2 className="text-sm font-bold text-brand-navy mb-3">Stars</h2>
+        <h2 className="text-sm font-bold text-brand-navy mb-3">Starš</h2>
         <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
           <strong className="text-brand-navy block">
             {p.starsi_ime} {p.starsi_priimek}
