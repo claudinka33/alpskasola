@@ -7,8 +7,7 @@ import Footer from "@/components/Footer";
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-// Privzete stopnje predznanja (smučanje ipd.)
-const znanjaPrivzeto = [
+const znanja = [
   { value: "zacetnik", label: "Začetnik" },
   { value: "osnovno", label: "Osnovno znanje" },
   { value: "srednje", label: "Srednje znanje" },
@@ -16,31 +15,28 @@ const znanjaPrivzeto = [
   { value: "tekmovalno", label: "Tekmovalna raven" },
 ];
 
-// Stopnje predznanja glede na program (npr. plavanje ima svoje)
-const znanjaPoProgramu: Record<string, { value: string; label: string }[]> = {
-  "plavalni-tecaj": [
-    { value: "zacetnik", label: "Začetnik" },
-    { value: "osnovno", label: "Osnovno znanje" },
-    { value: "napredno", label: "Napredno znanje" },
-  ],
-};
-
-// Varnostni "fallback" — uporabi se SAMO, če baza (CRM) ne vrne paketov/aktivnosti.
-const FALLBACK_PAKETI = [
-  { value: "vodna", label: "Vodna zabava (Terme Zreče)", ima_aktivnosti: false },
-  { value: "sportna", label: "Športna norišnica na prostem", ima_aktivnosti: true },
-  { value: "nogomet", label: "Nogometna zabava pravih prvakov", ima_aktivnosti: false },
+const paketiRojstniDan = [
+  { value: "vodna", label: "Vodna zabava (Terme Zreče)" },
+  { value: "sportna", label: "Športna norišnica na prostem" },
+  { value: "nogomet", label: "Nogometna zabava pravih prvakov" },
 ];
-const FALLBACK_AKTIVNOSTI = [
-  "Med dvema ognjema", "Mini rokomet", "Poligon z ovirami", "Štafetne igre",
-  "Metanje na tarčo", "Spretnostni izzivi", "Ravnotežne igre", "Igre z frizbijem",
-  "Iskanje zaklada", "Ekipne misije", "Vleka vrvi", "Igra z vodnimi baloni",
+
+const aktivnostiSportna = [
+  "Med dvema ognjema",
+  "Mini rokomet",
+  "Poligon z ovirami",
+  "Štafetne igre",
+  "Metanje na tarčo",
+  "Spretnostni izzivi",
+  "Ravnotežne igre",
+  "Igre z frizbijem",
+  "Iskanje zaklada",
+  "Ekipne misije",
+  "Vleka vrvi",
+  "Igra z vodnimi baloni",
 ];
 
 type Program = { slug: string; naziv: string };
-
-const fmtDatum = (d: string) =>
-  new Date(d).toLocaleDateString("sl-SI", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 function PrijavnaStranContent() {
   const searchParams = useSearchParams();
@@ -48,15 +44,11 @@ function PrijavnaStranContent() {
   const initialPaket = searchParams.get("paket") || "";
 
   const [programi, setProgrami] = useState<Program[]>([]);
-  const [termini, setTermini] = useState<any[]>([]);
-  const [rdPaketi, setRdPaketi] = useState<any[]>([]);
-  const [rdAktivnosti, setRdAktivnosti] = useState<string[]>([]);
   const [stanje, setStanje] = useState<"obrazec" | "poslano">("obrazec");
   const [napaka, setNapaka] = useState("");
   const [posiljam, setPosiljam] = useState(false);
   const [form, setForm] = useState({
     program: initialProgram,
-    termin_id: "",
     otrok_ime: "",
     otrok_priimek: "",
     otrok_rojstvo: "",
@@ -68,7 +60,9 @@ function PrijavnaStranContent() {
     naslov: "",
     posta: "",
     opomba: "",
+    alergije: "",
     soglasje: false,
+    // Rojstnodnevna polja
     rd_paket: initialPaket,
     rd_datum: "",
     rd_stevilo_otrok: "",
@@ -76,57 +70,17 @@ function PrijavnaStranContent() {
   });
 
   const jeRojstniDan = form.program === "praznovanje-rojstnega-dne";
+  const jeSportna = form.rd_paket === "sportna";
 
-  // Stopnje predznanja glede na izbrani program
-  const znanjaSeznam = znanjaPoProgramu[form.program] || znanjaPrivzeto;
-
-  // Paketi/aktivnosti: iz CRM-ja, sicer fallback
-  const paketi = rdPaketi.length ? rdPaketi : FALLBACK_PAKETI;
-  const aktivnostiList = rdAktivnosti.length ? rdAktivnosti : FALLBACK_AKTIVNOSTI;
-  const izbranPaket = paketi.find((p) => p.value === form.rd_paket);
-  const prikaziAktivnosti = izbranPaket?.ima_aktivnosti ?? form.rd_paket === "sportna";
-
-  // Termini: prikaži samo, če izbrani program (ne rojstni dan) ima aktivne termine
-  const prikaziTermine = !jeRojstniDan && termini.length > 0;
-
-  // Naloži programe + rojstnodnevno konfiguracijo
   useEffect(() => {
     fetch("/api/programi")
       .then((r) => r.json())
       .then((d) => {
-        const vsi = d.programi || [];
-        // Če baza pozna stolpec "na_prijavnici", upoštevaj njega; sicer fallback na "aktiven".
-        const imaZnacko = vsi.some((p: any) => p.na_prijavnici === true || p.na_prijavnici === false);
-        const izbrani = imaZnacko
-          ? vsi.filter((p: any) => p.na_prijavnici === true)
-          : vsi.filter((p: any) => p.aktiven !== false);
-        setProgrami(izbrani);
-      })
-      .catch(() => {});
-
-    fetch("/api/rd-config")
-      .then((r) => r.json())
-      .then((d) => {
-        setRdPaketi((d.paketi || []).filter((p: any) => p.aktiven !== false));
-        setRdAktivnosti(
-          (d.aktivnosti || []).filter((a: any) => a.aktiven !== false).map((a: any) => a.label)
-        );
+        const aktivni = (d.programi || []).filter((p: any) => p.aktiven !== false);
+        setProgrami(aktivni);
       })
       .catch(() => {});
   }, []);
-
-  // Ob menjavi programa naloži termine in ponastavi izbiro termina + predznanje
-  useEffect(() => {
-    setForm((f) => ({ ...f, termin_id: "", otrok_znanje: "" }));
-    if (!form.program || form.program === "praznovanje-rojstnega-dne") {
-      setTermini([]);
-      return;
-    }
-    fetch(`/api/termini?program=${form.program}&aktivni=1`)
-      .then((r) => r.json())
-      .then((d) => setTermini(d.termini || []))
-      .catch(() => setTermini([]));
-  }, [form.program]);
 
   useEffect(() => {
     if (initialProgram && initialProgram !== form.program) {
@@ -157,27 +111,10 @@ function PrijavnaStranContent() {
       return;
     }
 
-    if (prikaziTermine && !form.termin_id) {
-      setNapaka("Prosimo, izberite termin.");
-      setPosiljam(false);
-      return;
-    }
-
-    const izbraniTermin = termini.find((t) => String(t.id) === String(form.termin_id));
-    const terminLabel = izbraniTermin
-      ? `${izbraniTermin.naziv}${
-          izbraniTermin.datum_od
-            ? ` (${fmtDatum(izbraniTermin.datum_od)}${
-                izbraniTermin.datum_do ? "–" + fmtDatum(izbraniTermin.datum_do) : ""
-              })`
-            : ""
-        }`
-      : null;
-    const terminCena = izbraniTermin?.cena ?? null;
-
+    // Sestavi opombo z rojstnodnevnimi podatki
     let opombaFull = form.opomba;
     if (jeRojstniDan) {
-      const paketLabel = paketi.find((p) => p.value === form.rd_paket)?.label;
+      const paketLabel = paketiRojstniDan.find((p) => p.value === form.rd_paket)?.label;
       opombaFull = `🎂 ROJSTNI DAN
 Paket: ${paketLabel || "—"}
 Želen datum: ${form.rd_datum || "—"}
@@ -187,17 +124,16 @@ ${form.rd_aktivnosti.length > 0 ? "Izbrane aktivnosti: " + form.rd_aktivnosti.jo
 ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
     }
 
+    // Dodaj alergije na začetek opombe
+    if (form.alergije) {
+      opombaFull = `Alergije: ${form.alergije}` + (opombaFull ? `\n\n${opombaFull}` : "");
+    }
+
     try {
       const res = await fetch("/api/prijave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          opomba: opombaFull,
-          termin: terminLabel,
-          termin_id: form.termin_id ? Number(form.termin_id) : null,
-          cena: terminCena,
-        }),
+        body: JSON.stringify({ ...form, opomba: opombaFull }),
       });
       const data = await res.json();
       if (!res.ok) setNapaka(data.error || "Napaka.");
@@ -252,25 +188,6 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
               </select>
             </div>
 
-            {/* Termin (samo če program ima aktivne termine) */}
-            {prikaziTermine && (
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-brand-navy mb-3">Izberi termin</h2>
-                <select required value={form.termin_id} onChange={(e) => update("termin_id", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
-                  <option value="">— izberi termin —</option>
-                  {termini.map((t) => (
-                    <option key={t.id} value={t.id} disabled={t.status === "zaprt"}>
-                      {t.naziv}
-                      {t.datum_od ? ` (${fmtDatum(t.datum_od)}${t.datum_do ? "–" + fmtDatum(t.datum_do) : ""})` : ""}
-                      {t.lokacija ? ` · ${t.lokacija}` : ""}
-                      {t.cena ? ` · ${t.cena}€` : ""}
-                      {t.status === "poln" ? " — ZASEDENO" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
             {/* ROJSTNI DAN polja */}
             {jeRojstniDan && (
               <div className="mb-6 bg-purple-50 border-2 border-purple-200 rounded-xl p-5">
@@ -282,7 +199,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     <label className="block text-sm font-semibold text-brand-navy mb-1.5">Paket *</label>
                     <select required value={form.rd_paket} onChange={(e) => update("rd_paket", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
                       <option value="">— izberi paket —</option>
-                      {paketi.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+                      {paketiRojstniDan.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
                     </select>
                   </div>
 
@@ -291,13 +208,13 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     <F label="Pričakovano število otrok *" type="number" value={form.rd_stevilo_otrok} onChange={(v) => update("rd_stevilo_otrok", v)} required />
                   </div>
 
-                  {prikaziAktivnosti && (
+                  {jeSportna && (
                     <div>
                       <label className="block text-sm font-semibold text-brand-navy mb-2">
                         Katere aktivnosti želi slavljenec? (izberite več)
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {aktivnostiList.map((a) => (
+                        {aktivnostiSportna.map((a) => (
                           <label key={a} className="flex items-start gap-2 cursor-pointer bg-white rounded-lg p-2.5 border border-slate-200 hover:border-brand-orange">
                             <input
                               type="checkbox"
@@ -329,7 +246,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     <label className="block text-sm font-semibold text-brand-navy mb-1.5">Predznanje</label>
                     <select value={form.otrok_znanje} onChange={(e) => update("otrok_znanje", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
                       <option value="">— izberi —</option>
-                      {znanjaSeznam.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
+                      {znanja.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
                     </select>
                   </div>
                 )}
@@ -349,10 +266,16 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
               </div>
             </div>
 
+            {/* Alergije */}
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-brand-navy mb-3">4. Alergije</h2>
+              <textarea value={form.alergije} onChange={(e) => update("alergije", e.target.value)} rows={2} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y" placeholder="Ali ima otrok alergije? Napišite katere (ali pustite prazno)." />
+            </div>
+
             {/* Opomba */}
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-brand-navy mb-3">4. Opomba</h2>
-              <textarea value={form.opomba} onChange={(e) => update("opomba", e.target.value)} rows={4} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y" placeholder="Alergije, posebnosti, želje..." />
+              <h2 className="text-lg font-bold text-brand-navy mb-3">5. Opomba</h2>
+              <textarea value={form.opomba} onChange={(e) => update("opomba", e.target.value)} rows={4} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y" placeholder="Posebnosti, želje..." />
             </div>
 
             <label className="flex items-start gap-3 mb-6 cursor-pointer">
@@ -388,11 +311,29 @@ export default function PrijavnaStranPage() {
   );
 }
 
-function F({ label, value, onChange, type = "text", required = false }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
+function F({
+  label,
+  value,
+  onChange,
+  type = "text",
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  required?: boolean;
+}) {
   return (
     <div>
       <label className="block text-sm font-semibold text-brand-navy mb-1.5">{label}</label>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={required} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm" />
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm"
+      />
     </div>
   );
 }
