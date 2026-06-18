@@ -12,11 +12,11 @@ type Props = {
 };
 
 const programLabels: Record<string, string> = {
-  "sola-smucanja": "Smučanje",
+  "sola-smucanja": "Smucanje",
   "ski-racing-team": "Tekmovalne ekipe",
   "smucarska-akademija": "Akademija",
   "plavalni-tecaj": "Plavanje",
-  "sportna-abeceda": "Športna abeceda",
+  "sportna-abeceda": "Sportna abeceda",
   "sola-rolanja": "Rolanje",
   "praznovanje-rojstnega-dne": "Rojstni dan",
   servis: "Servis",
@@ -54,7 +54,7 @@ export default async function PrijavaPage({ params }: Props) {
               {p.otrok_ime} {p.otrok_priimek}
             </h1>
             <p className="text-sm text-slate-500">
-              {programLabels[p.program] || p.program} · #{p.id}
+              {programLabels[p.program] || p.program} &middot; #{p.id}
             </p>
           </div>
         </div>
@@ -81,7 +81,7 @@ export default async function PrijavaPage({ params }: Props) {
             <strong className="text-brand-navy">
               {p.otrok_rojstvo
                 ? new Date(p.otrok_rojstvo).toLocaleDateString("sl-SI")
-                : "—"}
+                : "-"}
             </strong>
           </div>
           {p.otrok_znanje && (
@@ -99,20 +99,20 @@ export default async function PrijavaPage({ params }: Props) {
           {p.cena != null && (
             <div>
               <span className="text-xs text-slate-500 block">Cena</span>
-              <strong className="text-brand-navy">{p.cena} €</strong>
+              <strong className="text-brand-navy">{p.cena} EUR</strong>
             </div>
           )}
         </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-4">
-        <h2 className="text-sm font-bold text-brand-navy mb-3">Starš</h2>
+        <h2 className="text-sm font-bold text-brand-navy mb-3">Stars</h2>
         <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
           <strong className="text-brand-navy block">
             {p.starsi_ime} {p.starsi_priimek}
           </strong>
           {p.telefon && (
-            
+            <a
               href={`tel:${p.telefon}`}
               className="flex items-center gap-2 text-brand-orange hover:underline"
             >
@@ -120,7 +120,7 @@ export default async function PrijavaPage({ params }: Props) {
             </a>
           )}
           {p.email && (
-            
+            <a
               href={`mailto:${p.email}`}
               className="flex items-center gap-2 text-brand-orange hover:underline"
             >
@@ -146,7 +146,7 @@ export default async function PrijavaPage({ params }: Props) {
 
       <p className="text-xs text-slate-400 px-1">
         Prijava ustvarjena:{" "}
-        {p.ustvarjeno ? new Date(p.ustvarjeno).toLocaleString("sl-SI") : "—"}
+        {p.ustvarjeno ? new Date(p.ustvarjeno).toLocaleString("sl-SI") : "-"}
       </p>
     </div>
   );
