@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   Waves,
   Activity,
-  Trophy,
   Cake,
   Users,
   Phone,
@@ -16,6 +15,31 @@ import {
   MapPin,
   Clock,
 } from "lucide-react";
+
+// Ikona nogometne žoge (v naši verziji lucide-react je ni, zato lastna SVG)
+function SoccerBall({ size = 24 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 7l4.76 3.45-1.82 5.6H9.06l-1.82-5.6z" />
+      <path d="M12 7V2" />
+      <path d="M7.24 10.45 2.49 8.91" />
+      <path d="M9.06 16.05 6.12 20.1" />
+      <path d="M14.94 16.05l2.94 4.05" />
+      <path d="M16.76 10.45l4.75-1.54" />
+    </svg>
+  );
+}
 
 export const metadata: Metadata = {
   title: "Rojstni dan z Alpsko šolo | 3 paketi praznovanja",
@@ -51,11 +75,10 @@ const paketi = [
     accent: "bg-brand-orange text-white",
     textAccent: "text-orange-700",
     bullets: [
-      "Igre po izbiri otrok (med dvema ognjema, mini rokomet, poligon...)",
+      "Slavljenec izbere 3 aktivnosti (med dvema ognjema, mini rokomet, poligon...)",
       "Animatorji vodijo zabavo od začetka do konca",
       "Darilce za slavljenca",
       "Pogostitev (hrana in pijača)",
-      "Slavljenec sam izbere katere igre želi igrati",
     ],
     lokacija: "Zunanji prostori (po dogovoru)",
   },
@@ -63,7 +86,7 @@ const paketi = [
     id: "nogomet",
     naslov: "Nogometna zabava",
     podnaslov: "pravih prvakov",
-    icon: Trophy,
+    icon: SoccerBall,
     barva: "from-green-50 to-emerald-100",
     border: "border-green-300",
     accent: "bg-green-600 text-white",
@@ -192,11 +215,11 @@ export default function RojstniDanPage() {
               <Activity size={14} /> Športna norišnica
             </div>
             <h2 className="text-3xl font-extrabold text-brand-navy mb-3">
-              Slavljenec izbira igre 🎯
+              Slavljenec izbere 3 aktivnosti 🎯
             </h2>
             <p className="text-sm text-slate-600 max-w-xl mx-auto">
-              Pri športni norišnici slavljenec sam izbere katere aktivnosti
-              želi imeti na svojem rojstnem dnevu:
+              Pri športni norišnici slavljenec sam izbere <strong>tri
+              aktivnosti</strong>, ki jih želi imeti na svojem rojstnem dnevu:
             </p>
           </div>
 
