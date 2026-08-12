@@ -2,8 +2,10 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import StatsBand from "@/components/StatsBand";
 import Programs from "@/components/Programs";
-import Utrinki from "@/components/Utrinki";
+import VpisKoraki from "@/components/VpisKoraki";
 import About from "@/components/About";
+import FotoPas from "@/components/FotoPas";
+import Utrinki from "@/components/Utrinki";
 import CtaBand from "@/components/CtaBand";
 import Footer from "@/components/Footer";
 
@@ -14,8 +16,10 @@ export default function HomePage() {
       <Hero />
       <StatsBand />
       <Programs />
-      <Utrinki />
+      <VpisKoraki />
       <About />
+      <FotoPas />
+      <Utrinki />
       <CtaBand />
       <Footer />
     </main>
