@@ -85,7 +85,6 @@ const zimskeAktivnosti = [
 const tekme = [
   "Mini pokal Vitranc",
   "Koroški pokal",
-  "Little Fox",
 ];
 
 export default function SmucarskaAkademijaPage() {
@@ -101,6 +100,7 @@ export default function SmucarskaAkademijaPage() {
       {/* Uvod */}
       <section className="bg-white py-14 lg:py-20">
         <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
+          {/* TODO: zamenjaj z novo fotografijo akademije, ko jo dobimo */}
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video order-2 lg:order-1">
             <img src="/akademija.jpeg" alt="Smučarska akademija" className="w-full h-full object-cover" />
           </div>
