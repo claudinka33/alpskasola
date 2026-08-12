@@ -9,6 +9,8 @@ import {
   Settings,
   Users,
   LogOut,
+  Send,
+  Contact,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -45,6 +47,10 @@ export default async function AdminLayout({
               <NavItem href="/admin/prijavnica" icon={ClipboardList} label="Nastavitve prijavnice" />
               <NavItem href="/admin/email" icon={Mail} label="Sporočilo staršem" />
               <NavItem href="/admin/prijave" icon={FileText} label="Oddane prijave" />
+
+              <Skupina label="Obveščanje" />
+              <NavItem href="/admin/kontakti" icon={Contact} label="Kontakti (baza)" />
+              <NavItem href="/admin/kampanje" icon={Send} label="Emailing" />
 
               <Skupina label="Nastavitve" />
               <NavItem href="/admin/programi" icon={Settings} label="Programi" />
