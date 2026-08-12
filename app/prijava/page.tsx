@@ -90,8 +90,11 @@ function PrijavnaStranContent() {
 
   const update = (k: string, v: any) => setForm({ ...form, [k]: v });
 
+  const MAX_AKTIVNOSTI = 3;
+
   const toggleAktivnost = (a: string) => {
     const exists = form.rd_aktivnosti.includes(a);
+    if (!exists && form.rd_aktivnosti.length >= MAX_AKTIVNOSTI) return;
     setForm({
       ...form,
       rd_aktivnosti: exists
@@ -211,21 +214,36 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                   {jeSportna && (
                     <div>
                       <label className="block text-sm font-semibold text-brand-navy mb-2">
-                        Katere aktivnosti želi slavljenec? (izberite več)
+                        Katere aktivnosti želi slavljenec? (izberite 3)
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {aktivnostiSportna.map((a) => (
-                          <label key={a} className="flex items-start gap-2 cursor-pointer bg-white rounded-lg p-2.5 border border-slate-200 hover:border-brand-orange">
-                            <input
-                              type="checkbox"
-                              checked={form.rd_aktivnosti.includes(a)}
-                              onChange={() => toggleAktivnost(a)}
-                              className="mt-0.5 w-4 h-4 accent-brand-orange shrink-0"
-                            />
-                            <span className="text-xs text-slate-700">{a}</span>
-                          </label>
-                        ))}
+                        {aktivnostiSportna.map((a) => {
+                          const izbrana = form.rd_aktivnosti.includes(a);
+                          const poln = !izbrana && form.rd_aktivnosti.length >= MAX_AKTIVNOSTI;
+                          return (
+                            <label
+                              key={a}
+                              className={`flex items-start gap-2 bg-white rounded-lg p-2.5 border border-slate-200 ${
+                                poln
+                                  ? "opacity-40 cursor-not-allowed"
+                                  : "cursor-pointer hover:border-brand-orange"
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={izbrana}
+                                disabled={poln}
+                                onChange={() => toggleAktivnost(a)}
+                                className="mt-0.5 w-4 h-4 accent-brand-orange shrink-0"
+                              />
+                              <span className="text-xs text-slate-700">{a}</span>
+                            </label>
+                          );
+                        })}
                       </div>
+                      <p className="text-xs text-slate-500 mt-2">
+                        Izbrane: {form.rd_aktivnosti.length}/{MAX_AKTIVNOSTI}
+                      </p>
                     </div>
                   )}
                 </div>
