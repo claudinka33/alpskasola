@@ -8,6 +8,10 @@ import {
   izbrisiTermin,
 } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 // GET /api/termini?program=plavalni-tecaj          -> vsi termini programa
 // GET /api/termini?program=plavalni-tecaj&aktivni=1 -> samo aktivni (za prijavnico)
 // GET /api/termini                                  -> vsi termini
