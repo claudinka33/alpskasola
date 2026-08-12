@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
+import SmucanjeTabs from "@/components/SmucanjeTabs";
 import { Check, Mountain, Snowflake, Bus, Utensils, Camera, AlertCircle } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -119,33 +120,8 @@ export default function SolaSmucanjaPage() {
         subtitle="Otroci z izkušenimi učitelji spoznavajo osnove smučanja in bordanja na varen in igriv način. Po starosti in znanju razdeljeni v manjše skupine."
       />
 
-      {/* Uvod + slika */}
-      <section className="bg-white py-14 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <div className="inline-block bg-orange-100 text-brand-orange text-xs font-bold px-3 py-1 rounded-full mb-3">
-              🎿 PRIČNEMO 10.1.2026
-            </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
-              Začnemo s spoznavanjem opreme, igrami na snegu in žičnico
-            </h2>
-            <p className="text-slate-600 leading-relaxed mb-4">
-              Začeli bomo s spoznavanjem in prilagajanjem na opremo, igrami na
-              snegu, drsenjem po hribu, zavijanjem in uporabo žičnice. Tisti, ki
-              so z osnovami že seznanjeni, se bodo učili pravilne smučarske
-              tehnike — osnovno vijuganje, ritem smučanja, uporaba palic,
-              smučanje v celcu in v snežnem parku.
-            </p>
-            <p className="text-slate-600 leading-relaxed">
-              Tečaji so narejeni glede na <strong>starost otroka</strong> in{" "}
-              <strong>panogo</strong> (smučanje ali bordanje).
-            </p>
-          </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video">
-            <img src="/smucanje.jpg" alt="Tečaj smučanja" className="w-full h-full object-cover" />
-          </div>
-        </div>
-      </section>
+      {/* Trije zavihki: Alpska šola tečaj / Tečaj bordanja / Mini alpska šola */}
+      <SmucanjeTabs />
 
       {/* Fakti */}
       <section className="bg-blue-50/40 py-14 border-y border-blue-100">
