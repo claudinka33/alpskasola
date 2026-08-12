@@ -30,15 +30,19 @@ export type Program = {
   ustvarjeno: string;
 };
 
-export async function ustvariPrijavo(data: Omit<Prijava, "id" | "status" | "ustvarjeno">) {
+export async function ustvariPrijavo(
+  data: Omit<Prijava, "id" | "status" | "ustvarjeno">,
+  dodatno?: Record<string, string> | null
+) {
   const result = await sql<Prijava>`
     INSERT INTO prijave (
       program, otrok_ime, otrok_priimek, otrok_rojstvo, otrok_znanje,
-      starsi_ime, starsi_priimek, email, telefon, naslov, posta, opomba, termin, cena
+      starsi_ime, starsi_priimek, email, telefon, naslov, posta, opomba, termin, cena, dodatno
     ) VALUES (
       ${data.program}, ${data.otrok_ime}, ${data.otrok_priimek}, ${data.otrok_rojstvo}, ${data.otrok_znanje},
       ${data.starsi_ime}, ${data.starsi_priimek}, ${data.email}, ${data.telefon},
-      ${data.naslov}, ${data.posta}, ${data.opomba}, ${data.termin}, ${data.cena}
+      ${data.naslov}, ${data.posta}, ${data.opomba}, ${data.termin}, ${data.cena},
+      ${dodatno ? JSON.stringify(dodatno) : null}
     ) RETURNING *;
   `;
   return result.rows[0];
@@ -238,4 +242,133 @@ export async function posodobiRdAktivnost(id: number, d: Partial<RdAktivnost>) {
 
 export async function izbrisiRdAktivnost(id: number) {
   await sql`DELETE FROM rd_aktivnosti WHERE id = ${id};`;
+}
+
+// ---------- POLJA PRIJAVNICE ----------
+export type FormPolje = {
+  id: number;
+  program_slug: string;
+  kljuc: string;
+  label: string;
+  tip: string;
+  moznosti: string | null;
+  obvezno: boolean;
+  viden: boolean;
+  vrstni_red: number;
+  sistemsko: boolean;
+};
+
+export async function pridobiFormPolja(program_slug: string) {
+  const r = await sql<FormPolje>`SELECT * FROM form_polja WHERE program_slug = ${program_slug} ORDER BY vrstni_red, id;`;
+  return r.rows;
+}
+
+export async function ustvariFormPolje(d: Partial<FormPolje>) {
+  const r = await sql<FormPolje>`
+    INSERT INTO form_polja (program_slug, kljuc, label, tip, moznosti, obvezno, viden, vrstni_red, sistemsko)
+    VALUES (${d.program_slug!}, ${d.kljuc!}, ${d.label!}, ${d.tip || "text"}, ${d.moznosti || null},
+            ${d.obvezno ?? false}, ${d.viden ?? true}, ${d.vrstni_red ?? 99}, false)
+    RETURNING *;`;
+  return r.rows[0];
+}
+
+export async function posodobiFormPolje(id: number, d: Partial<FormPolje>) {
+  await sql`UPDATE form_polja SET
+    label = COALESCE(${d.label ?? null}, label),
+    tip = COALESCE(${d.tip ?? null}, tip),
+    moznosti = ${d.moznosti !== undefined ? d.moznosti : null},
+    obvezno = COALESCE(${d.obvezno ?? null}, obvezno),
+    viden = COALESCE(${d.viden ?? null}, viden),
+    vrstni_red = COALESCE(${d.vrstni_red ?? null}, vrstni_red)
+    WHERE id = ${id};`;
+}
+
+export async function izbrisiFormPolje(id: number) {
+  await sql`DELETE FROM form_polja WHERE id = ${id} AND sistemsko = false;`;
+}
+
+// ---------- KONTAKTI ----------
+export type Kontakt = {
+  id: number;
+  ime: string | null;
+  priimek: string | null;
+  email: string;
+  telefon: string | null;
+  otrok: string | null;
+  oznake: string;
+  narocen: boolean;
+  vir: string | null;
+  ustvarjeno: string;
+};
+
+export async function pridobiKontakte(filter?: { iskanje?: string; oznaka?: string; narocen?: boolean }) {
+  const q = filter?.iskanje ? `%${filter.iskanje}%` : null;
+  const oz = filter?.oznaka ? `%${filter.oznaka}%` : null;
+  const r = await sql<Kontakt>`
+    SELECT * FROM kontakti
+    WHERE (${q}::text IS NULL OR ime ILIKE ${q} OR priimek ILIKE ${q} OR email ILIKE ${q} OR otrok ILIKE ${q} OR telefon ILIKE ${q})
+      AND (${oz}::text IS NULL OR oznake ILIKE ${oz})
+      AND (${filter?.narocen ?? null}::boolean IS NULL OR narocen = ${filter?.narocen ?? null})
+    ORDER BY ustvarjeno DESC;`;
+  return r.rows;
+}
+
+export async function upsertKontakt(d: Partial<Kontakt>) {
+  const email = (d.email || "").trim().toLowerCase();
+  if (!email) return null;
+  const r = await sql<Kontakt>`
+    INSERT INTO kontakti (ime, priimek, email, telefon, otrok, oznake, narocen, vir)
+    VALUES (${d.ime || null}, ${d.priimek || null}, ${email}, ${d.telefon || null},
+            ${d.otrok || null}, ${d.oznake || ""}, ${d.narocen ?? true}, ${d.vir || null})
+    ON CONFLICT (email) DO UPDATE SET
+      ime = COALESCE(NULLIF(EXCLUDED.ime, ''), kontakti.ime),
+      priimek = COALESCE(NULLIF(EXCLUDED.priimek, ''), kontakti.priimek),
+      telefon = COALESCE(NULLIF(EXCLUDED.telefon, ''), kontakti.telefon),
+      otrok = COALESCE(NULLIF(EXCLUDED.otrok, ''), kontakti.otrok),
+      oznake = CASE
+        WHEN kontakti.oznake = '' THEN EXCLUDED.oznake
+        WHEN EXCLUDED.oznake = '' THEN kontakti.oznake
+        WHEN position(EXCLUDED.oznake in kontakti.oznake) > 0 THEN kontakti.oznake
+        ELSE kontakti.oznake || ';' || EXCLUDED.oznake
+      END
+    RETURNING *;`;
+  return r.rows[0];
+}
+
+export async function izbrisiKontakt(id: number) {
+  await sql`DELETE FROM kontakti WHERE id = ${id};`;
+}
+
+export async function odjaviKontakt(email: string) {
+  await sql`UPDATE kontakti SET narocen = false WHERE email = ${email.trim().toLowerCase()};`;
+}
+
+// ---------- KAMPANJE ----------
+export type Kampanja = {
+  id: number;
+  zadeva: string;
+  naslov: string | null;
+  vsebina: string;
+  filter_opis: string | null;
+  prejemniki_st: number;
+  poslano_st: number;
+  status: string;
+  ustvarjeno: string;
+};
+
+export async function pridobiKampanje() {
+  const r = await sql<Kampanja>`SELECT * FROM kampanje ORDER BY ustvarjeno DESC LIMIT 50;`;
+  return r.rows;
+}
+
+export async function ustvariKampanjo(d: Partial<Kampanja>) {
+  const r = await sql<Kampanja>`
+    INSERT INTO kampanje (zadeva, naslov, vsebina, filter_opis, prejemniki_st, status)
+    VALUES (${d.zadeva!}, ${d.naslov || null}, ${d.vsebina!}, ${d.filter_opis || null}, ${d.prejemniki_st ?? 0}, 'posilja')
+    RETURNING *;`;
+  return r.rows[0];
+}
+
+export async function posodobiKampanjo(id: number, poslano_st: number, status: string) {
+  await sql`UPDATE kampanje SET poslano_st = ${poslano_st}, status = ${status} WHERE id = ${id};`;
 }

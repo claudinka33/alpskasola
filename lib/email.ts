@@ -179,3 +179,62 @@ export async function posljiObvestiloSoli(p: PrijavaEmail, programNaziv: string)
     replyTo: p.email,
   });
 }
+
+// === MNOŽIČNE KAMPANJE ===
+
+import crypto from "crypto";
+
+const BAZNI_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://alpskasola.vercel.app";
+
+export function odjavaHash(email: string) {
+  const secret = process.env.JWT_SECRET || "change-me";
+  return crypto.createHmac("sha256", secret).update(email.trim().toLowerCase()).digest("hex").slice(0, 32);
+}
+
+function kampanjaHtml(naslov: string, vsebina: string, email: string) {
+  const vsebinaHtml = escapeHtml(vsebina).replace(/\n/g, "<br>");
+  const odjavaUrl = `${BAZNI_URL}/api/odjava?e=${encodeURIComponent(email)}&t=${odjavaHash(email)}`;
+  const body = `
+    ${naslov ? `<p style="margin:0 0 12px;color:${NAVY};font-size:21px;font-weight:800;">${escapeHtml(naslov)}</p>` : ""}
+    <p style="margin:0;color:#475569;font-size:14px;line-height:1.7;">${vsebinaHtml}</p>
+    <p style="margin:24px 0 0;color:#94a3b8;font-size:11px;">
+      Ta email ste prejeli, ker ste del Alpske šole.
+      <a href="${odjavaUrl}" style="color:#94a3b8;text-decoration:underline;">Odjava od obvestil</a>
+    </p>`;
+  return ovojnica(body);
+}
+
+// Pošlje paket kampanje (do 100 prejemnikov) prek Resend batch API-ja.
+// Vrne število uspešno poslanih.
+export async function posljiKampanjoPaket(
+  prejemniki: string[],
+  zadeva: string,
+  naslov: string,
+  vsebina: string
+): Promise<number> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY ni nastavljen v Vercel nastavitvah.");
+  if (prejemniki.length === 0) return 0;
+
+  const emails = prejemniki.slice(0, 100).map((email) => ({
+    from: FROM,
+    to: [email],
+    subject: zadeva,
+    html: kampanjaHtml(naslov, vsebina, email),
+    reply_to: SOLA,
+  }));
+
+  const res = await fetch("https://api.resend.com/emails/batch", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(emails),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`Resend napaka ${res.status}: ${t.slice(0, 200)}`);
+  }
+  return emails.length;
+}
