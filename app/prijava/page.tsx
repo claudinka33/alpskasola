@@ -108,11 +108,14 @@ function PrijavnaStranContent() {
   );
 
   useEffect(() => {
-    fetch("/api/programi")
+    // Samo programi, ki so v CRM označeni kot "Na prijavnici"
+    fetch("/api/prijavnica-programi")
       .then((r) => r.json())
       .then((d) => {
-        const aktivni = (d.programi || []).filter((p: any) => p.aktiven !== false);
-        setProgrami(aktivni);
+        const vidni = (d.programi || []).filter(
+          (p: any) => p.na_prijavnici === true && p.aktiven !== false
+        );
+        setProgrami(vidni);
       })
       .catch(() => {});
   }, []);
