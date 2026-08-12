@@ -7,9 +7,9 @@ import {
   Waves,
   Activity,
   Bike,
-  Cake,
   Wrench,
   Package,
+  Cake,
 } from "lucide-react";
 
 const programs = [
@@ -20,6 +20,7 @@ const programs = [
     href: "/plavalni-tecaj",
     tag: "★ POLETNI HIT",
     accent: "bg-cyan-100 text-cyan-600",
+    image: "/plavalni-tecaj.png",
   },
   {
     icon: Cake,
@@ -28,6 +29,7 @@ const programs = [
     href: "/praznovanje-rojstnega-dne",
     tag: "★ NOVO",
     accent: "bg-pink-100 text-pink-600",
+    image: "/rojsnidan.png",
   },
   {
     icon: Activity,
@@ -36,6 +38,7 @@ const programs = [
     href: "/sportna-abeceda",
     tag: null,
     accent: "bg-emerald-100 text-emerald-600",
+    image: "/abeceda.JPG",
   },
   {
     icon: Mountain,
@@ -44,6 +47,7 @@ const programs = [
     href: "/sola-smucanja",
     tag: null,
     accent: "bg-blue-100 text-blue-600",
+    image: "/smucanje.jpg",
   },
   {
     icon: Trophy,
@@ -52,6 +56,7 @@ const programs = [
     href: "/ski-racing-team",
     tag: null,
     accent: "bg-amber-100 text-amber-600",
+    image: "/tekmovalnaslika.jpg",
   },
   {
     icon: Award,
@@ -60,6 +65,7 @@ const programs = [
     href: "/smucarska-akademija",
     tag: null,
     accent: "bg-violet-100 text-violet-600",
+    image: "/zimskeaktivnosti.jpeg",
   },
   {
     icon: Bike,
@@ -68,6 +74,7 @@ const programs = [
     href: "/sola-rolanja",
     tag: null,
     accent: "bg-teal-100 text-teal-600",
+    image: null, // TODO: dodaj fotografijo rolanja, ko jo dobimo
   },
   {
     icon: Wrench,
@@ -76,6 +83,7 @@ const programs = [
     href: "/servis",
     tag: null,
     accent: "bg-slate-100 text-slate-600",
+    image: "/servis.JPG",
   },
   {
     icon: Package,
@@ -84,6 +92,7 @@ const programs = [
     href: "/izposoja-opreme",
     tag: null,
     accent: "bg-orange-100 text-orange-600",
+    image: "/Izposoja.JPG",
   },
 ];
 
@@ -113,29 +122,48 @@ export default function Programs() {
               <Link
                 key={i}
                 href={program.href}
-                className="group relative bg-white rounded-2xl border border-slate-200/70 p-6 hover:border-brand-orange/40 hover:shadow-xl hover:shadow-brand-navy/5 hover:-translate-y-1 transition-all duration-300"
+                className="group relative bg-white rounded-2xl border border-slate-200/70 overflow-hidden hover:border-brand-orange/40 hover:shadow-xl hover:shadow-brand-navy/5 hover:-translate-y-1 transition-all duration-300 flex flex-col"
               >
-                {program.tag && (
-                  <span className="absolute top-5 right-5 bg-brand-orange/10 text-brand-orange px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider">
-                    {program.tag}
-                  </span>
-                )}
-
-                <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${program.accent} group-hover:scale-105 transition-transform duration-300`}
-                >
-                  <Icon size={28} />
+                {/* Fotografija */}
+                <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-blue-50 to-slate-100">
+                  {program.image ? (
+                    <img
+                      src={program.image}
+                      alt={program.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className={`w-20 h-20 rounded-3xl flex items-center justify-center ${program.accent}`}>
+                        <Icon size={40} />
+                      </div>
+                    </div>
+                  )}
+                  {program.tag && (
+                    <span className="absolute top-3 right-3 bg-brand-orange text-white px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider shadow-lg">
+                      {program.tag}
+                    </span>
+                  )}
                 </div>
 
-                <h3 className="text-lg font-bold text-brand-navy mb-1.5">
-                  {program.title}
-                </h3>
-                <p className="text-sm text-slate-600 mb-5 leading-relaxed">
-                  {program.description}
-                </p>
-
-                <div className="flex items-center gap-1.5 text-sm font-semibold text-brand-orange group-hover:gap-2.5 transition-all">
-                  Več o programu <ArrowRight size={15} />
+                <div className="p-5 lg:p-6 flex flex-col flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${program.accent}`}
+                    >
+                      <Icon size={18} />
+                    </div>
+                    <h3 className="text-lg font-bold text-brand-navy leading-snug">
+                      {program.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-slate-600 mb-4 leading-relaxed flex-1">
+                    {program.description}
+                  </p>
+                  <div className="flex items-center gap-1.5 text-sm font-semibold text-brand-orange group-hover:gap-2.5 transition-all">
+                    Več o programu <ArrowRight size={15} />
+                  </div>
                 </div>
               </Link>
             );
