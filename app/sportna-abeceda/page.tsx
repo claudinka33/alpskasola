@@ -12,16 +12,16 @@ export const metadata: Metadata = {
 };
 
 const sporti = [
-  "Tekalne igre",
-  "Lovljenja",
-  "Poligoni",
-  "Igre z žogo",
-  "Igre z loparji",
-  "Gimnastika",
-  "Ples",
-  "Plezanje",
-  "Atletika",
-  "Borilni športi",
+  { ime: "Tekalne igre", ikona: "🏃", barva: "bg-red-50 border-red-200" },
+  { ime: "Lovljenja", ikona: "🤾", barva: "bg-amber-50 border-amber-200" },
+  { ime: "Poligoni", ikona: "🚧", barva: "bg-yellow-50 border-yellow-200" },
+  { ime: "Igre z žogo", ikona: "⚽", barva: "bg-green-50 border-green-200" },
+  { ime: "Igre z loparji", ikona: "🏸", barva: "bg-emerald-50 border-emerald-200" },
+  { ime: "Gimnastika", ikona: "🤸", barva: "bg-cyan-50 border-cyan-200" },
+  { ime: "Ples", ikona: "💃", barva: "bg-pink-50 border-pink-200" },
+  { ime: "Plezanje", ikona: "🧗", barva: "bg-blue-50 border-blue-200" },
+  { ime: "Atletika", ikona: "🏅", barva: "bg-orange-50 border-orange-200" },
+  { ime: "Borilni športi", ikona: "🥋", barva: "bg-purple-50 border-purple-200" },
 ];
 
 const termini = [
@@ -110,9 +110,12 @@ export default function SportnaAbecedaPage() {
             {sporti.map((s, i) => (
               <div
                 key={i}
-                className="bg-white rounded-xl p-3 border border-orange-100 text-center"
+                className={`rounded-xl p-3 border text-center ${s.barva}`}
               >
-                <span className="text-sm font-semibold text-brand-navy">{s}</span>
+                <span className="block text-2xl mb-1" aria-hidden="true">
+                  {s.ikona}
+                </span>
+                <span className="text-sm font-semibold text-brand-navy">{s.ime}</span>
               </div>
             ))}
           </div>
