@@ -3,6 +3,8 @@ import { pridobiFormPolja } from "@/lib/db";
 import { zagotoviTabele, zagotoviPoljaZaProgram } from "@/lib/migracije";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 // GET /api/form-config?program=slug → vidna polja prijavnice za program (javno)
 export async function GET(req: NextRequest) {
