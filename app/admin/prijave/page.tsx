@@ -41,6 +41,7 @@ type Prijava = {
   status: string;
   termin: string | null;
   cena: number | null;
+  dodatno: Record<string, string> | null;
   ustvarjeno: string;
 };
 
@@ -116,6 +117,12 @@ export default function PrijavePage() {
   };
 
   const getStatusConfig = (s: string) => statusi.find((x) => x.value === s) || statusi[0];
+
+  // Dodatni stolpci: ko je izbran program, pokaži polja po meri (npr. alergije),
+  // ki se pojavijo v prijavah tega programa
+  const dodatniStolpci = filterProgram
+    ? Array.from(new Set(prijave.flatMap((p) => Object.keys(p.dodatno || {})))).slice(0, 4)
+    : [];
 
   return (
     <div>
@@ -207,6 +214,9 @@ export default function PrijavePage() {
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Program</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Starš</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Kontakt</th>
+                  {dodatniStolpci.map((s) => (
+                    <th key={s} className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">{s}</th>
+                  ))}
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Datum</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Status</th>
                 </tr>
@@ -241,6 +251,11 @@ export default function PrijavePage() {
                       <td className="px-4 py-3 text-slate-500 text-xs">
                         {p.telefon}
                       </td>
+                      {dodatniStolpci.map((s) => (
+                        <td key={s} className="px-4 py-3 text-slate-600 text-xs max-w-[160px] truncate">
+                          {(p.dodatno || {})[s] || ""}
+                        </td>
+                      ))}
                       <td className="px-4 py-3 text-slate-500 text-xs">
                         {new Date(p.ustvarjeno).toLocaleDateString("sl-SI")}
                       </td>
@@ -351,6 +366,21 @@ export default function PrijavePage() {
                   )}
                 </div>
               </div>
+
+              {/* Dodatna polja */}
+              {izbrana.dodatno && Object.keys(izbrana.dodatno).length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-brand-navy mb-2">Dodatna polja</h3>
+                  <div className="bg-slate-50 rounded-xl p-4 grid grid-cols-2 gap-3 text-sm">
+                    {Object.entries(izbrana.dodatno).map(([k, v]) => (
+                      <div key={k}>
+                        <span className="text-xs text-slate-500 block">{k}</span>
+                        <strong className="text-brand-navy">{v}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Opomba */}
               {izbrana.opomba && (
