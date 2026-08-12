@@ -38,6 +38,22 @@ const aktivnostiSportna = [
 
 type Program = { slug: string; naziv: string };
 
+type FormPolje = {
+  kljuc: string;
+  label: string;
+  tip: string;
+  moznosti: string | null;
+  obvezno: boolean;
+};
+
+// Privzeta polja, če nastavitev za program (še) ni
+const PRIVZETA_POLJA: FormPolje[] = [
+  { kljuc: "otrok_znanje", label: "Predznanje", tip: "select", moznosti: null, obvezno: false },
+  { kljuc: "naslov", label: "Naslov", tip: "text", moznosti: null, obvezno: false },
+  { kljuc: "posta", label: "Pošta in kraj", tip: "text", moznosti: null, obvezno: false },
+  { kljuc: "opomba", label: "Opomba", tip: "textarea", moznosti: null, obvezno: false },
+];
+
 function PrijavnaStranContent() {
   const searchParams = useSearchParams();
   const initialProgram = searchParams.get("program") || "";
@@ -60,7 +76,6 @@ function PrijavnaStranContent() {
     naslov: "",
     posta: "",
     opomba: "",
-    alergije: "",
     soglasje: false,
     // Rojstnodnevna polja
     rd_paket: initialPaket,
@@ -71,6 +86,26 @@ function PrijavnaStranContent() {
 
   const jeRojstniDan = form.program === "praznovanje-rojstnega-dne";
   const jeSportna = form.rd_paket === "sportna";
+
+  // Nastavljiva polja za izbrani program
+  const [polja, setPolja] = useState<FormPolje[]>(PRIVZETA_POLJA);
+  const [dodatnoVal, setDodatnoVal] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!form.program) {
+      setPolja(PRIVZETA_POLJA);
+      return;
+    }
+    fetch(`/api/form-config?program=${encodeURIComponent(form.program)}`)
+      .then((r) => r.json())
+      .then((d) => setPolja(d.polja && d.polja.length > 0 ? d.polja : PRIVZETA_POLJA))
+      .catch(() => setPolja(PRIVZETA_POLJA));
+  }, [form.program]);
+
+  const polje = (kljuc: string) => polja.find((p) => p.kljuc === kljuc);
+  const ostalaPolja = polja.filter(
+    (p) => !["otrok_znanje", "naslov", "posta"].includes(p.kljuc)
+  );
 
   useEffect(() => {
     fetch("/api/programi")
@@ -127,16 +162,11 @@ ${form.rd_aktivnosti.length > 0 ? "Izbrane aktivnosti: " + form.rd_aktivnosti.jo
 ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
     }
 
-    // Dodaj alergije na začetek opombe
-    if (form.alergije) {
-      opombaFull = `Alergije: ${form.alergije}` + (opombaFull ? `\n\n${opombaFull}` : "");
-    }
-
     try {
       const res = await fetch("/api/prijave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, opomba: opombaFull }),
+        body: JSON.stringify({ ...form, opomba: opombaFull, dodatno: dodatnoVal }),
       });
       const data = await res.json();
       if (!res.ok) setNapaka(data.error || "Napaka.");
@@ -259,10 +289,17 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                 <F label="Ime *" value={form.otrok_ime} onChange={(v) => update("otrok_ime", v)} required />
                 <F label="Priimek *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
                 <F label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
-                {!jeRojstniDan && (
+                {!jeRojstniDan && polje("otrok_znanje") && (
                   <div>
-                    <label className="block text-sm font-semibold text-brand-navy mb-1.5">Predznanje</label>
-                    <select value={form.otrok_znanje} onChange={(e) => update("otrok_znanje", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
+                    <label className="block text-sm font-semibold text-brand-navy mb-1.5">
+                      Predznanje{polje("otrok_znanje")!.obvezno ? " *" : ""}
+                    </label>
+                    <select
+                      value={form.otrok_znanje}
+                      onChange={(e) => update("otrok_znanje", e.target.value)}
+                      required={polje("otrok_znanje")!.obvezno}
+                      className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white"
+                    >
                       <option value="">— izberi —</option>
                       {znanja.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
                     </select>
@@ -279,22 +316,92 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                 <F label="Priimek *" value={form.starsi_priimek} onChange={(v) => update("starsi_priimek", v)} required />
                 <F label="Email *" type="email" value={form.email} onChange={(v) => update("email", v)} required />
                 <F label="Telefon *" type="tel" value={form.telefon} onChange={(v) => update("telefon", v)} required />
-                <F label="Naslov" value={form.naslov} onChange={(v) => update("naslov", v)} />
-                <F label="Pošta" value={form.posta} onChange={(v) => update("posta", v)} />
+                {polje("naslov") && (
+                  <F
+                    label={`Naslov${polje("naslov")!.obvezno ? " *" : ""}`}
+                    value={form.naslov}
+                    onChange={(v) => update("naslov", v)}
+                    required={polje("naslov")!.obvezno}
+                  />
+                )}
+                {polje("posta") && (
+                  <F
+                    label={`Pošta${polje("posta")!.obvezno ? " *" : ""}`}
+                    value={form.posta}
+                    onChange={(v) => update("posta", v)}
+                    required={polje("posta")!.obvezno}
+                  />
+                )}
               </div>
             </div>
 
-            {/* Alergije */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-brand-navy mb-3">4. Alergije</h2>
-              <textarea value={form.alergije} onChange={(e) => update("alergije", e.target.value)} rows={2} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y" placeholder="Ali ima otrok alergije? Napišite katere (ali pustite prazno)." />
-            </div>
-
-            {/* Opomba */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-brand-navy mb-3">5. Opomba</h2>
-              <textarea value={form.opomba} onChange={(e) => update("opomba", e.target.value)} rows={4} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y" placeholder="Posebnosti, želje..." />
-            </div>
+            {/* Nastavljiva polja (alergije, opomba, polja po meri...) */}
+            {ostalaPolja.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-bold text-brand-navy mb-3">4. Dodatno</h2>
+                <div className="space-y-4">
+                  {ostalaPolja.map((p) => {
+                    const jeOpomba = p.kljuc === "opomba";
+                    const vrednost = jeOpomba ? form.opomba : dodatnoVal[p.kljuc] || "";
+                    const nastavi = (v: string) =>
+                      jeOpomba
+                        ? update("opomba", v)
+                        : setDodatnoVal((prev) => ({ ...prev, [p.kljuc]: v }));
+                    return (
+                      <div key={p.kljuc}>
+                        <label className="block text-sm font-semibold text-brand-navy mb-1.5">
+                          {p.label}{p.obvezno ? " *" : ""}
+                        </label>
+                        {p.tip === "textarea" ? (
+                          <textarea
+                            value={vrednost}
+                            onChange={(e) => nastavi(e.target.value)}
+                            required={p.obvezno}
+                            rows={3}
+                            className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y"
+                          />
+                        ) : p.tip === "select" ? (
+                          <select
+                            value={vrednost}
+                            onChange={(e) => nastavi(e.target.value)}
+                            required={p.obvezno}
+                            className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white"
+                          >
+                            <option value="">— izberi —</option>
+                            {(p.moznosti || "")
+                              .split(",")
+                              .map((m) => m.trim())
+                              .filter(Boolean)
+                              .map((m) => (
+                                <option key={m} value={m}>{m}</option>
+                              ))}
+                          </select>
+                        ) : p.tip === "checkbox" ? (
+                          <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={vrednost === "Da"}
+                              onChange={(e) => nastavi(e.target.checked ? "Da" : "")}
+                              required={p.obvezno}
+                              className="w-4 h-4 accent-brand-orange"
+                            />
+                            Da
+                          </label>
+                        ) : (
+                          <input
+                            type={p.tip === "date" ? "date" : "text"}
+                            value={vrednost}
+                            onChange={(e) => nastavi(e.target.value)}
+                            required={p.obvezno}
+                            className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <label className="flex items-start gap-3 mb-6 cursor-pointer">
               <input type="checkbox" checked={form.soglasje} onChange={(e) => update("soglasje", e.target.checked)} className="mt-1 w-4 h-4 accent-brand-orange" />
