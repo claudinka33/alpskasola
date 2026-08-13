@@ -238,3 +238,42 @@ export async function posljiKampanjoPaket(
   }
   return emails.length;
 }
+
+// === EMAIL OB POTRDITVI PRIJAVE (besedilo iz CRM, predloga id=2) ===
+
+const PRIVZETA_POTRDITEV = {
+  zadeva: "Vaša prijava je potrjena",
+  naslov: "Prijava je potrjena! 🎉",
+  vsebina:
+    "Z veseljem sporočamo, da je prijava vašega otroka potrjena. Vse podrobnosti najdete v povzetku spodaj. Se vidimo!",
+};
+
+async function pridobiPredlogoPotrditev() {
+  try {
+    const r = await sql`SELECT zadeva, naslov, vsebina FROM email_predloga WHERE id = 2;`;
+    return (r.rows[0] as typeof PRIVZETA_POTRDITEV) || PRIVZETA_POTRDITEV;
+  } catch {
+    return PRIVZETA_POTRDITEV;
+  }
+}
+
+export async function posljiPotrjenoStarsu(p: PrijavaEmail, programNaziv: string) {
+  const t = await pridobiPredlogoPotrditev();
+  const vsebinaHtml = escapeHtml(t.vsebina).replace(/\n/g, "<br>");
+  const body = `
+    <p style="margin:0 0 12px;color:${NAVY};font-size:21px;font-weight:800;">${escapeHtml(t.naslov)}</p>
+    <p style="margin:0 0 18px;color:#475569;font-size:14px;line-height:1.6;">${vsebinaHtml}</p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 18px;">
+      ${podatkiTabela(p, programNaziv)}
+    </div>
+    <p style="margin:18px 0 0;color:#475569;font-size:13px;line-height:1.6;">
+      Za morebitna vprašanja nas pokličite na <strong style="color:${NAVY};">${TELEFON}</strong>
+      ali preprosto odgovorite na ta email.
+    </p>`;
+  await posljiEmail({
+    to: p.email,
+    subject: t.zadeva,
+    html: ovojnica(body),
+    replyTo: SOLA,
+  });
+}
