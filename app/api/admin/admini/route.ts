@@ -50,6 +50,26 @@ export async function POST(req: Request) {
   }
 }
 
+// PUT → zamenjaj geslo { id, geslo }
+export async function PUT(req: Request) {
+  const me = await pridobiTrenutniAdmin();
+  if (!me) return NextResponse.json({ error: "Ni dovoljenja" }, { status: 401 });
+  try {
+    const { id, geslo } = await req.json();
+    if (!id || !geslo) {
+      return NextResponse.json({ error: "Manjka id ali geslo" }, { status: 400 });
+    }
+    if (String(geslo).length < 6) {
+      return NextResponse.json({ error: "Geslo naj ima vsaj 6 znakov." }, { status: 400 });
+    }
+    const hash = await bcrypt.hash(String(geslo), 10);
+    await sql`UPDATE admini SET geslo_hash = ${hash} WHERE id = ${id};`;
+    return NextResponse.json({ ok: true });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message || "Napaka" }, { status: 500 });
+  }
+}
+
 // DELETE ?id= → izbriši uporabnika
 export async function DELETE(req: Request) {
   const me = await pridobiTrenutniAdmin();
