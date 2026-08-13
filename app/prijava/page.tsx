@@ -91,6 +91,37 @@ function PrijavnaStranContent() {
   const [polja, setPolja] = useState<FormPolje[]>(PRIVZETA_POLJA);
   const [dodatnoVal, setDodatnoVal] = useState<Record<string, string>>({});
 
+  // Termini za izbrani program (razpisani v CRM)
+  type Termin = {
+    id: number;
+    naziv: string;
+    lokacija: string | null;
+    datum_od: string | null;
+    datum_do: string | null;
+    cena: number | null;
+    status: string;
+  };
+  const [termini, setTermini] = useState<Termin[]>([]);
+  const [izbranTermin, setIzbranTermin] = useState<Termin | null>(null);
+
+  useEffect(() => {
+    setTermini([]);
+    setIzbranTermin(null);
+    if (!form.program || jeRojstniDan) return;
+    fetch(`/api/termini?program=${encodeURIComponent(form.program)}&aktivni=1`)
+      .then((r) => r.json())
+      .then((d) => setTermini(d.termini || []))
+      .catch(() => setTermini([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.program]);
+
+  const datumObseg = (t: Termin) => {
+    const f = (s: string | null) =>
+      s ? new Date(s).toLocaleDateString("sl-SI", { day: "numeric", month: "numeric", year: "numeric" }) : "";
+    if (t.datum_od && t.datum_do) return `${f(t.datum_od)} – ${f(t.datum_do)}`;
+    return f(t.datum_od) || "";
+  };
+
   useEffect(() => {
     if (!form.program) {
       setPolja(PRIVZETA_POLJA);
@@ -152,6 +183,12 @@ function PrijavnaStranContent() {
       return;
     }
 
+    if (termini.length > 0 && !izbranTermin) {
+      setNapaka("Prosimo, izberite termin.");
+      setPosiljam(false);
+      return;
+    }
+
     // Sestavi opombo z rojstnodnevnimi podatki
     let opombaFull = form.opomba;
     if (jeRojstniDan) {
@@ -169,7 +206,15 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
       const res = await fetch("/api/prijave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, opomba: opombaFull, dodatno: dodatnoVal }),
+        body: JSON.stringify({
+          ...form,
+          opomba: opombaFull,
+          dodatno: dodatnoVal,
+          termin: izbranTermin
+            ? `${izbranTermin.naziv}${datumObseg(izbranTermin) ? " (" + datumObseg(izbranTermin) + ")" : ""}`
+            : null,
+          cena: izbranTermin?.cena ?? null,
+        }),
       });
       const data = await res.json();
       if (!res.ok) setNapaka(data.error || "Napaka.");
@@ -223,6 +268,52 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                 {programi.map((p) => <option key={p.slug} value={p.slug}>{p.naziv}</option>)}
               </select>
             </div>
+
+            {/* Termini (razpisani v CRM) */}
+            {termini.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-bold text-brand-navy mb-3">Izberite termin *</h2>
+                <div className="space-y-2">
+                  {termini.map((t) => {
+                    const izbran = izbranTermin?.id === t.id;
+                    const poln = t.status === "poln" || t.status === "zaseden";
+                    return (
+                      <label
+                        key={t.id}
+                        className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
+                          poln
+                            ? "opacity-50 cursor-not-allowed border-slate-200"
+                            : izbran
+                            ? "border-brand-orange bg-orange-50 cursor-pointer"
+                            : "border-slate-200 hover:border-brand-orange/50 cursor-pointer"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="termin"
+                          checked={izbran}
+                          disabled={poln}
+                          onChange={() => setIzbranTermin(t)}
+                          className="w-4 h-4 accent-brand-orange shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-brand-navy text-sm">
+                            {t.naziv}
+                            {poln && <span className="ml-2 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">ZASEDENO</span>}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {[datumObseg(t), t.lokacija].filter(Boolean).join(" · ")}
+                          </div>
+                        </div>
+                        {t.cena != null && (
+                          <div className="text-base font-extrabold text-brand-navy shrink-0">{t.cena}€</div>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* ROJSTNI DAN polja */}
             {jeRojstniDan && (
