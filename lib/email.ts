@@ -22,6 +22,8 @@ type PrijavaEmail = {
 // Nastavljivo prek Vercel okoljskih spremenljivk:
 const FROM = process.env.EMAIL_FROM || "Alpska šola <onboarding@resend.dev>";
 const SOLA = process.env.EMAIL_SOLA || "info@alpskasola.com";
+// Kam gredo obvestila o novih prijavah (če ni nastavljeno, na EMAIL_SOLA)
+const OBVESTILA = process.env.EMAIL_OBVESTILA || SOLA;
 const LOGO = process.env.EMAIL_LOGO || "https://alpskasola.vercel.app/alpska-logo.png";
 
 const NAVY = "#13294B";
@@ -173,7 +175,7 @@ export async function posljiObvestiloSoli(p: PrijavaEmail, programNaziv: string)
     </div>
     <p style="margin:16px 0 0;color:#94a3b8;font-size:12px;">Na ta email lahko odgovoriš neposredno staršu (Reply).</p>`;
   await posljiEmail({
-    to: SOLA,
+    to: OBVESTILA,
     subject: `Nova prijava: ${programNaziv} – ${p.otrok_ime} ${p.otrok_priimek}`,
     html: ovojnica(body),
     replyTo: p.email,
