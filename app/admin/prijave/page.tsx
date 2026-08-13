@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown } from "lucide-react";
+import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer } from "lucide-react";
 
 const programLabels: Record<string, string> = {
   "sola-smucanja": "Smučanje",
@@ -51,6 +51,8 @@ export default function PrijavePage() {
   const [iskanje, setIskanje] = useState("");
   const [filterProgram, setFilterProgram] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterTermin, setFilterTermin] = useState("");
+  const [seznamPogled, setSeznamPogled] = useState(false);
   const [izbrana, setIzbrana] = useState<Prijava | null>(null);
 
   const naloziPrijave = async () => {
@@ -94,12 +96,12 @@ export default function PrijavePage() {
 
   const izvoziCsv = () => {
     const headers = [
-      "ID", "Program", "Otrok ime", "Otrok priimek", "Rojstvo", "Znanje",
+      "ID", "Program", "Termin", "Otrok ime", "Otrok priimek", "Rojstvo", "Znanje",
       "Starš ime", "Starš priimek", "Email", "Telefon", "Naslov", "Pošta",
       "Opomba", "Status", "Ustvarjeno",
     ];
-    const rows = prijave.map((p) => [
-      p.id, programLabels[p.program] || p.program, p.otrok_ime, p.otrok_priimek,
+    const rows = prikazane.map((p) => [
+      p.id, programLabels[p.program] || p.program, p.termin || "", p.otrok_ime, p.otrok_priimek,
       p.otrok_rojstvo, p.otrok_znanje || "", p.starsi_ime, p.starsi_priimek,
       p.email, p.telefon, p.naslov || "", p.posta || "", p.opomba || "",
       p.status, new Date(p.ustvarjeno).toLocaleString("sl-SI"),
@@ -124,18 +126,85 @@ export default function PrijavePage() {
     ? Array.from(new Set(prijave.flatMap((p) => Object.keys(p.dodatno || {})))).slice(0, 4)
     : [];
 
+  // Termini, ki se pojavijo v naloženih prijavah (za filter)
+  const terminMoznosti = Array.from(
+    new Set(prijave.map((p) => p.termin).filter(Boolean))
+  ) as string[];
+
+  // Prikazane prijave = strežniški filtri + filter po terminu (lokalno)
+  const prikazane = filterTermin
+    ? prijave.filter((p) => p.termin === filterTermin)
+    : prijave;
+
+  const natisniSeznam = () => {
+    const naslov = [
+      filterProgram ? programLabels[filterProgram] || filterProgram : "Vsi programi",
+      filterTermin || null,
+    ]
+      .filter(Boolean)
+      .join(" — ");
+    const vrstice = prikazane
+      .map(
+        (p, i) =>
+          `<tr>
+            <td>${i + 1}.</td>
+            <td><strong>${p.otrok_ime} ${p.otrok_priimek}</strong></td>
+            <td>${p.otrok_rojstvo ? new Date(p.otrok_rojstvo).toLocaleDateString("sl-SI") : ""}</td>
+            <td>${p.starsi_ime} ${p.starsi_priimek}</td>
+            <td>${p.telefon}</td>
+            <td>${(statusi.find((s) => s.value === p.status)?.label || p.status).toUpperCase()}</td>
+          </tr>`
+      )
+      .join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Seznam prijav</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:24px;color:#0C2340}
+        h1{font-size:18px;margin:0 0 4px} p{margin:0 0 16px;color:#64748b;font-size:12px}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e2e8f0}
+        th{font-size:11px;text-transform:uppercase;color:#64748b}
+      </style></head><body>
+      <h1>Seznam prijavljenih otrok — ${naslov}</h1>
+      <p>${prikazane.length} prijav · natisnjeno ${new Date().toLocaleDateString("sl-SI")}</p>
+      <table><thead><tr><th></th><th>Otrok</th><th>Rojstvo</th><th>Starš</th><th>Telefon</th><th>Status</th></tr></thead>
+      <tbody>${vrstice}</tbody></table></body></html>`;
+    const w = window.open("", "_blank");
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+      w.print();
+    }
+  };
+
   return (
     <div>
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-brand-navy mb-1">Prijavnice</h1>
-          <p className="text-sm text-slate-600">{prijave.length} prijav prikazanih</p>
+          <p className="text-sm text-slate-600">{prikazane.length} prijav prikazanih</p>
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => setSeznamPogled((v) => !v)}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors ${
+              seznamPogled
+                ? "bg-brand-navy text-white border-brand-navy"
+                : "bg-white text-brand-navy border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            <ListChecks size={16} /> Seznam otrok
+          </button>
+          <button
+            onClick={natisniSeznam}
+            disabled={prikazane.length === 0}
+            className="inline-flex items-center gap-2 bg-white text-brand-navy px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 hover:border-slate-300 disabled:opacity-50"
+          >
+            <Printer size={16} /> Natisni
+          </button>
+          <button
             onClick={izvoziCsv}
-            disabled={prijave.length === 0}
+            disabled={prikazane.length === 0}
             className="inline-flex items-center gap-2 bg-white text-brand-navy px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 hover:border-slate-300 transition-colors disabled:opacity-50"
           >
             <Download size={16} /> Izvozi CSV
@@ -181,12 +250,23 @@ export default function PrijavePage() {
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
-        {(iskanje || filterProgram || filterStatus) && (
+        <select
+          value={filterTermin}
+          onChange={(e) => setFilterTermin(e.target.value)}
+          className="px-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:border-brand-orange outline-none max-w-[260px]"
+        >
+          <option value="">Vsi termini</option>
+          {terminMoznosti.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+        {(iskanje || filterProgram || filterStatus || filterTermin) && (
           <button
             onClick={() => {
               setIskanje("");
               setFilterProgram("");
               setFilterStatus("");
+              setFilterTermin("");
             }}
             className="px-3 py-2.5 text-sm text-slate-600 hover:text-brand-orange"
           >
@@ -201,9 +281,50 @@ export default function PrijavePage() {
           <div className="py-16 text-center">
             <Loader2 size={32} className="animate-spin text-brand-orange mx-auto" />
           </div>
-        ) : prijave.length === 0 ? (
+        ) : prikazane.length === 0 ? (
           <div className="py-16 text-center text-slate-400">
             <p className="text-sm">Ni prijav za prikaz.</p>
+          </div>
+        ) : seznamPogled ? (
+          <div className="p-6">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">
+              {[
+                filterProgram ? programLabels[filterProgram] || filterProgram : "Vsi programi",
+                filterTermin || null,
+              ].filter(Boolean).join(" — ")}{" "}
+              · {prikazane.length} otrok
+            </div>
+            <ol className="space-y-2">
+              {prikazane.map((p, i) => {
+                const c = getStatusConfig(p.status);
+                return (
+                  <li
+                    key={p.id}
+                    onClick={() => setIzbrana(p)}
+                    className="flex items-center gap-3 bg-slate-50 hover:bg-orange-50/50 rounded-xl px-4 py-3 cursor-pointer"
+                  >
+                    <span className="text-sm font-bold text-slate-400 w-7 shrink-0">{i + 1}.</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-brand-navy">
+                        {p.otrok_ime} {p.otrok_priimek}
+                      </span>
+                      <span className="text-xs text-slate-500 ml-2">
+                        {p.otrok_rojstvo ? new Date(p.otrok_rojstvo).toLocaleDateString("sl-SI") : ""}
+                      </span>
+                      {!filterTermin && p.termin && (
+                        <span className="text-xs text-slate-400 ml-2 truncate">· {p.termin}</span>
+                      )}
+                    </div>
+                    <span className="text-xs text-slate-500 hidden sm:block">
+                      {p.starsi_ime} {p.starsi_priimek} · {p.telefon}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${c.bg} ${c.text}`}>
+                      {c.label.toUpperCase()}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -222,7 +343,7 @@ export default function PrijavePage() {
                 </tr>
               </thead>
               <tbody>
-                {prijave.map((p) => {
+                {prikazane.map((p) => {
                   const c = getStatusConfig(p.status);
                   return (
                     <tr
