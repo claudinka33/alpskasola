@@ -1,33 +1,47 @@
 import { sql } from "@vercel/postgres";
 import { NextResponse } from "next/server";
 
-const PRIVZETO = {
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
+const PRIVZETO_PREJEM = {
   zadeva: "Prejeli smo vašo prijavo",
   naslov: "Hvala za prijavo!",
   vsebina:
     "Vašo prijavo smo uspešno prejeli in vas bomo v kratkem kontaktirali z vsemi podrobnostmi.",
 };
 
-// GET → trenutno besedilo maila
+const PRIVZETO_POTRDITEV = {
+  zadeva: "Vaša prijava je potrjena",
+  naslov: "Prijava je potrjena! 🎉",
+  vsebina:
+    "Z veseljem sporočamo, da je prijava vašega otroka potrjena. Vse podrobnosti najdete v povzetku spodaj. Se vidimo!",
+};
+
+// GET → obe predlogi (ob prejemu in ob potrditvi)
 export async function GET() {
   try {
-    const r = await sql`SELECT zadeva, naslov, vsebina FROM email_predloga WHERE id = 1;`;
-    return NextResponse.json({ predloga: r.rows[0] || PRIVZETO });
+    const r = await sql`SELECT id, zadeva, naslov, vsebina FROM email_predloga WHERE id IN (1, 2);`;
+    const prejem = r.rows.find((x) => x.id === 1) || PRIVZETO_PREJEM;
+    const potrditev = r.rows.find((x) => x.id === 2) || PRIVZETO_POTRDITEV;
+    return NextResponse.json({ predloga: prejem, potrditev });
   } catch (e: any) {
     return NextResponse.json({ error: e.message || "Napaka" }, { status: 500 });
   }
 }
 
-// PUT { zadeva, naslov, vsebina } → shrani
+// PUT { tip?: "prejem" | "potrditev", zadeva, naslov, vsebina } → shrani
 export async function PUT(req: Request) {
   try {
-    const { zadeva, naslov, vsebina } = await req.json();
+    const { tip, zadeva, naslov, vsebina } = await req.json();
     if (!zadeva || !naslov || !vsebina) {
       return NextResponse.json({ error: "Izpolni vsa polja." }, { status: 400 });
     }
+    const id = tip === "potrditev" ? 2 : 1;
     await sql`
       INSERT INTO email_predloga (id, zadeva, naslov, vsebina, posodobljeno)
-      VALUES (1, ${zadeva}, ${naslov}, ${vsebina}, now())
+      VALUES (${id}, ${zadeva}, ${naslov}, ${vsebina}, now())
       ON CONFLICT (id) DO UPDATE
         SET zadeva = EXCLUDED.zadeva,
             naslov = EXCLUDED.naslov,
