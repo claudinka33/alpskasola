@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Loader2, UserPlus, Trash2, Check, X } from "lucide-react";
+import { Users, Loader2, UserPlus, Trash2, Check, X, KeyRound } from "lucide-react";
 
 type Admin = {
   id: number;
@@ -60,6 +60,38 @@ export default function UporabnikiPage() {
       }
     } catch {
       setNapaka("Napaka pri povezavi.");
+    } finally {
+      setShranjujem(false);
+    }
+  };
+
+  const [gesloZa, setGesloZa] = useState<Admin | null>(null);
+  const [novoGeslo, setNovoGeslo] = useState("");
+  const [gesloNapaka, setGesloNapaka] = useState("");
+  const [gesloShranjeno, setGesloShranjeno] = useState(false);
+
+  const zamenjajGeslo = async () => {
+    if (!gesloZa) return;
+    setGesloNapaka("");
+    setShranjujem(true);
+    try {
+      const res = await fetch("/api/admin/admini", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: gesloZa.id, geslo: novoGeslo }),
+      });
+      const d = await res.json();
+      if (!res.ok) setGesloNapaka(d.error || "Napaka.");
+      else {
+        setGesloShranjeno(true);
+        setTimeout(() => {
+          setGesloZa(null);
+          setNovoGeslo("");
+          setGesloShranjeno(false);
+        }, 1500);
+      }
+    } catch {
+      setGesloNapaka("Napaka pri povezavi.");
     } finally {
       setShranjujem(false);
     }
@@ -177,7 +209,17 @@ export default function UporabnikiPage() {
                   <td className="px-6 py-3.5 text-slate-500">
                     {a.ustvarjeno ? new Date(a.ustvarjeno).toLocaleDateString("sl-SI") : ""}
                   </td>
-                  <td className="px-6 py-3.5 text-right">
+                  <td className="px-6 py-3.5 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => {
+                        setGesloZa(a);
+                        setNovoGeslo("");
+                        setGesloNapaka("");
+                      }}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-brand-orange transition-colors mr-4"
+                    >
+                      <KeyRound size={14} /> Zamenjaj geslo
+                    </button>
                     <button
                       onClick={() => izbrisi(a)}
                       className="text-slate-400 hover:text-red-600 transition-colors"
@@ -192,6 +234,53 @@ export default function UporabnikiPage() {
           </table>
         )}
       </div>
+
+      {/* Modal: zamenjaj geslo */}
+      {gesloZa && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setGesloZa(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl w-full max-w-md p-6"
+          >
+            <h2 className="text-lg font-extrabold text-brand-navy mb-1 flex items-center gap-2">
+              <KeyRound size={18} className="text-brand-orange" /> Zamenjaj geslo
+            </h2>
+            <p className="text-sm text-slate-500 mb-4">
+              {gesloZa.ime} · {gesloZa.email}
+            </p>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Novo geslo (vsaj 6 znakov)</label>
+            <input
+              type="text"
+              value={novoGeslo}
+              onChange={(e) => setNovoGeslo(e.target.value)}
+              className={I}
+              autoFocus
+            />
+            {gesloNapaka && (
+              <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm mt-3">{gesloNapaka}</div>
+            )}
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={zamenjajGeslo}
+                disabled={shranjujem || novoGeslo.length < 6}
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-brand-orange text-white px-5 py-2.5 rounded-xl font-bold disabled:opacity-50"
+              >
+                {shranjujem ? <Loader2 size={16} className="animate-spin" /> : gesloShranjeno ? <Check size={16} /> : <KeyRound size={16} />}
+                {gesloShranjeno ? "Shranjeno!" : "Shrani geslo"}
+              </button>
+              <button
+                onClick={() => setGesloZa(null)}
+                className="px-5 py-2.5 rounded-xl font-bold text-slate-600 border border-slate-200"
+              >
+                Prekliči
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
