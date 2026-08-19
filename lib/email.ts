@@ -24,6 +24,9 @@ const FROM = process.env.EMAIL_FROM || "Alpska šola <onboarding@resend.dev>";
 const SOLA = process.env.EMAIL_SOLA || "info@alpskasola.com";
 // Kam gredo obvestila o novih prijavah (če ni nastavljeno, na EMAIL_SOLA)
 const OBVESTILA = process.env.EMAIL_OBVESTILA || SOLA;
+// Dodatni prejemnik obvestil SAMO za prijave na rojstni dan (lahko več, ločeno z vejico)
+const OBVESTILA_ROJSTNI_DAN =
+  process.env.EMAIL_OBVESTILA_ROJSTNI_DAN || "zoja@alpskasola.com";
 const LOGO = process.env.EMAIL_LOGO || "https://alpskasola.vercel.app/alpska-logo.png";
 
 const NAVY = "#13294B";
@@ -163,6 +166,12 @@ export async function posljiPotrditevStarsu(p: PrijavaEmail, programNaziv: strin
   });
 }
 
+// Ali gre za prijavo na rojstni dan (slug ali naziv programa vsebuje "rojstn")
+function jeRojstniDan(programSlug?: string | null, programNaziv?: string | null) {
+  const s = `${programSlug || ""} ${programNaziv || ""}`.toLowerCase();
+  return s.includes("rojstn");
+}
+
 // === Email ŠOLI (interno obvestilo) ===
 export async function posljiObvestiloSoli(p: PrijavaEmail, programNaziv: string) {
   const body = `
@@ -174,8 +183,21 @@ export async function posljiObvestiloSoli(p: PrijavaEmail, programNaziv: string)
       ${podatkiTabela(p, programNaziv)}
     </div>
     <p style="margin:16px 0 0;color:#94a3b8;font-size:12px;">Na ta email lahko odgovoriš neposredno staršu (Reply).</p>`;
+
+  // Osnovni prejemnik + (samo pri rojstnih dnevih) Zoja
+  const prejemniki = [OBVESTILA];
+  if (jeRojstniDan(p.program, programNaziv)) {
+    for (const e of OBVESTILA_ROJSTNI_DAN.split(",")) {
+      const naslov = e.trim();
+      if (naslov) prejemniki.push(naslov);
+    }
+  }
+  const unikatni = Array.from(
+    new Set(prejemniki.filter(Boolean).map((e) => e.trim().toLowerCase()))
+  );
+
   await posljiEmail({
-    to: OBVESTILA,
+    to: unikatni,
     subject: `Nova prijava: ${programNaziv} – ${p.otrok_ime} ${p.otrok_priimek}`,
     html: ovojnica(body),
     replyTo: p.email,
