@@ -7,6 +7,7 @@ import {
   nastaviTerminAktiven,
   izbrisiTermin,
 } from "@/lib/db";
+import { zagotoviVsebino } from "@/lib/vsebina";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -20,6 +21,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const program = searchParams.get("program") || undefined;
     const aktivni = searchParams.get("aktivni");
+
+    await zagotoviVsebino();
 
     const termini =
       aktivni && program
@@ -46,11 +49,16 @@ function ocisti(data: any) {
     vrstni_red:
       data.vrstni_red !== "" && data.vrstni_red != null ? parseInt(data.vrstni_red) : 0,
     opomba: data.opomba || null,
+    dan: data.dan || null,
+    ura: data.ura || null,
+    skupina: data.skupina || null,
+    na_strani: data.na_strani ?? true,
   };
 }
 
 export async function POST(req: NextRequest) {
   try {
+    await zagotoviVsebino();
     const data = await req.json();
     if (!data.program_slug || !data.naziv) {
       return NextResponse.json({ error: "Manjka program ali naziv" }, { status: 400 });
@@ -64,6 +72,7 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    await zagotoviVsebino();
     const data = await req.json();
     if (!data.id) return NextResponse.json({ error: "Manjka id" }, { status: 400 });
     // Hiter preklop vidnosti (samo aktiven)
