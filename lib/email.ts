@@ -215,12 +215,127 @@ export function odjavaHash(email: string) {
   return crypto.createHmac("sha256", secret).update(email.trim().toLowerCase()).digest("hex").slice(0, 32);
 }
 
+// --- Razčlenjevanje vsebine kampanje ---------------------------------------
+//
+// V polje "Vsebina" se piše navadno besedilo. Na svojo vrstico lahko dodaš:
+//
+//   SLIKA: https://www.alpskasola.com/plavanje.jpg
+//
+//   GUMB: Prijavi se | https://www.alpskasola.com/prijava
+//
+//   PODATKI:
+//   Termin: 31. avgust – 4. september 2026
+//   Lokacija: Terme Zreče
+//   Cena: 130 €
+//
+// Blok PODATKI se konča ob prvi prazni vrstici.
+// Dovoljeni so samo naslovi, ki se začnejo s https:// (varnost).
+
+type KampanjaBlok =
+  | { tip: "besedilo"; besedilo: string }
+  | { tip: "slika"; url: string }
+  | { tip: "gumb"; napis: string; url: string }
+  | { tip: "podatki"; vrstice: { oznaka: string; vrednost: string }[] };
+
+function varenUrl(url: string) {
+  const u = url.trim();
+  if (!/^https:\/\/[^\s"'<>]+$/i.test(u)) return null;
+  return u;
+}
+
+function razcleniVsebino(vsebina: string): KampanjaBlok[] {
+  const vrstice = (vsebina || "").split(/\r?\n/);
+  const bloki: KampanjaBlok[] = [];
+  let zbrano: string[] = [];
+
+  const zakljuciBesedilo = () => {
+    const t = zbrano.join("\n").trim();
+    if (t) bloki.push({ tip: "besedilo", besedilo: t });
+    zbrano = [];
+  };
+
+  for (let i = 0; i < vrstice.length; i++) {
+    const surova = vrstice[i];
+    const t = surova.trim();
+
+    const slika = t.match(/^SLIKA:\s*(.+)$/i);
+    if (slika) {
+      const url = varenUrl(slika[1]);
+      if (url) {
+        zakljuciBesedilo();
+        bloki.push({ tip: "slika", url });
+        continue;
+      }
+    }
+
+    const gumb = t.match(/^GUMB:\s*(.+?)\s*\|\s*(.+)$/i);
+    if (gumb) {
+      const url = varenUrl(gumb[2]);
+      const napis = gumb[1].trim();
+      if (url && napis) {
+        zakljuciBesedilo();
+        bloki.push({ tip: "gumb", napis, url });
+        continue;
+      }
+    }
+
+    if (/^PODATKI:\s*$/i.test(t)) {
+      const zbrane: { oznaka: string; vrednost: string }[] = [];
+      let j = i + 1;
+      for (; j < vrstice.length; j++) {
+        const p = vrstice[j].trim();
+        if (!p) break;
+        const m = p.match(/^([^:]{1,40}):\s*(.+)$/);
+        if (!m) break;
+        zbrane.push({ oznaka: m[1].trim(), vrednost: m[2].trim() });
+      }
+      if (zbrane.length > 0) {
+        zakljuciBesedilo();
+        bloki.push({ tip: "podatki", vrstice: zbrane });
+        i = j - 1;
+        continue;
+      }
+    }
+
+    zbrano.push(surova);
+  }
+
+  zakljuciBesedilo();
+  return bloki;
+}
+
+function blokHtml(b: KampanjaBlok) {
+  if (b.tip === "slika") {
+    return `<img src="${b.url}" alt="" style="width:100%;max-width:504px;height:auto;border-radius:12px;display:block;margin:0 0 20px;" />`;
+  }
+
+  if (b.tip === "gumb") {
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px;">
+      <tr><td style="background:${ORANGE};border-radius:10px;">
+        <a href="${b.url}" style="display:inline-block;padding:13px 28px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${escapeHtml(b.napis)}</a>
+      </td></tr>
+    </table>`;
+  }
+
+  if (b.tip === "podatki") {
+    const vrsticeHtml = b.vrstice
+      .map((v) => vrstica(escapeHtml(v.oznaka), escapeHtml(v.vrednost)))
+      .join("");
+    return `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;margin:0 0 20px;">
+      <table style="width:100%;border-collapse:collapse;">${vrsticeHtml}</table>
+    </div>`;
+  }
+
+  const besediloHtml = escapeHtml(b.besedilo).replace(/\n/g, "<br>");
+  return `<p style="margin:0 0 18px;color:#475569;font-size:14px;line-height:1.7;">${besediloHtml}</p>`;
+}
+
 function kampanjaHtml(naslov: string, vsebina: string, email: string) {
-  const vsebinaHtml = escapeHtml(vsebina).replace(/\n/g, "<br>");
+  const bloki = razcleniVsebino(vsebina);
   const odjavaUrl = `${BAZNI_URL}/api/odjava?e=${encodeURIComponent(email)}&t=${odjavaHash(email)}`;
   const body = `
-    ${naslov ? `<p style="margin:0 0 12px;color:${NAVY};font-size:21px;font-weight:800;">${escapeHtml(naslov)}</p>` : ""}
-    <p style="margin:0;color:#475569;font-size:14px;line-height:1.7;">${vsebinaHtml}</p>
+    ${naslov ? `<p style="margin:0 0 14px;color:${NAVY};font-size:21px;font-weight:800;">${escapeHtml(naslov)}</p>` : ""}
+    ${bloki.map(blokHtml).join("")}
     <p style="margin:24px 0 0;color:#94a3b8;font-size:11px;">
       Ta email ste prejeli, ker ste del Alpske šole.
       <a href="${odjavaUrl}" style="color:#94a3b8;text-decoration:underline;">Odjava od obvestil</a>
