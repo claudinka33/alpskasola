@@ -136,6 +136,11 @@ export type Termin = {
   vrstni_red: number;
   opomba: string | null;
   ustvarjeno: string;
+  // Prikaz na javni strani programa (Kje in kdaj)
+  dan: string | null;
+  ura: string | null;
+  skupina: string | null;
+  na_strani: boolean;
 };
 
 export async function pridobiTermini(program_slug?: string) {
@@ -154,9 +159,10 @@ export async function pridobiTerminiAktivni(program_slug: string) {
 
 export async function ustvariTermin(d: Partial<Termin>) {
   const r = await sql<Termin>`
-    INSERT INTO termini (program_slug, naziv, lokacija, datum_od, datum_do, cena, status, aktiven, sezona, vrstni_red, opomba)
+    INSERT INTO termini (program_slug, naziv, lokacija, datum_od, datum_do, cena, status, aktiven, sezona, vrstni_red, opomba, dan, ura, skupina, na_strani)
     VALUES (${d.program_slug!}, ${d.naziv!}, ${d.lokacija || null}, ${d.datum_od || null}, ${d.datum_do || null},
-            ${d.cena ?? null}, ${d.status || "odprt"}, ${d.aktiven ?? true}, ${d.sezona || null}, ${d.vrstni_red ?? 0}, ${d.opomba || null})
+            ${d.cena ?? null}, ${d.status || "odprt"}, ${d.aktiven ?? true}, ${d.sezona || null}, ${d.vrstni_red ?? 0}, ${d.opomba || null},
+            ${d.dan || null}, ${d.ura || null}, ${d.skupina || null}, ${d.na_strani ?? true})
     RETURNING *;`;
   return r.rows[0];
 }
@@ -167,7 +173,9 @@ export async function posodobiTermin(id: number, d: Partial<Termin>) {
     datum_od = ${d.datum_od || null}, datum_do = ${d.datum_do || null},
     cena = ${d.cena ?? null}, status = ${d.status || "odprt"},
     aktiven = ${d.aktiven ?? true}, sezona = ${d.sezona || null},
-    vrstni_red = ${d.vrstni_red ?? 0}, opomba = ${d.opomba || null}
+    vrstni_red = ${d.vrstni_red ?? 0}, opomba = ${d.opomba || null},
+    dan = ${d.dan || null}, ura = ${d.ura || null},
+    skupina = ${d.skupina || null}, na_strani = ${d.na_strani ?? true}
     WHERE id = ${id};`;
 }
 

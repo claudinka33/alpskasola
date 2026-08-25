@@ -27,6 +27,10 @@ type Termin = {
   sezona: string | null;
   vrstni_red: number;
   opomba: string | null;
+  dan: string | null;
+  ura: string | null;
+  skupina: string | null;
+  na_strani: boolean;
 };
 type Program = { id: number; slug: string; naziv: string };
 
@@ -105,7 +109,8 @@ export default function TerminiPage() {
             <CalendarDays size={26} className="text-brand-orange" /> Termini
           </h1>
           <p className="text-sm text-slate-600 mt-1">
-            Razpiši in uredi termine. Samo <strong>aktivni</strong> termini se prikažejo na prijavnici.
+            Razpiši in uredi termine. <strong>Aktivni</strong> se prikažejo na prijavnici, označeni
+            <strong> Prikaži na strani</strong> pa tudi v sekciji “Kje in kdaj” na strani programa.
           </p>
         </div>
         <button
@@ -143,7 +148,7 @@ export default function TerminiPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>
-                  {["Program", "Termin", "Datum", "Cena", "Status", "Vidnost", "Akcije"].map((h, i) => (
+                  {["Program", "Termin", "Kdaj", "Cena", "Status", "Vidnost", "Akcije"].map((h, i) => (
                     <th
                       key={h}
                       className={`px-4 py-3 font-semibold text-brand-navy text-xs uppercase ${i >= 5 ? "text-right" : "text-left"}`}
@@ -164,8 +169,20 @@ export default function TerminiPage() {
                         {t.lokacija && <span className="block text-xs font-normal text-slate-400">{t.lokacija}</span>}
                       </td>
                       <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                        {t.datum_od ? datum(t.datum_od) : "—"}
-                        {t.datum_do ? ` – ${datum(t.datum_do)}` : ""}
+                        {t.dan || t.ura ? (
+                          <>
+                            {t.dan || ""}
+                            {t.ura ? <span className="block text-xs text-slate-400">{t.ura}</span> : null}
+                            {t.skupina ? <span className="block text-xs text-slate-400">{t.skupina}</span> : null}
+                          </>
+                        ) : t.datum_od ? (
+                          <>
+                            {datum(t.datum_od)}
+                            {t.datum_do ? ` – ${datum(t.datum_do)}` : ""}
+                          </>
+                        ) : (
+                          "—"
+                        )}
                       </td>
                       <td className="px-4 py-3 text-slate-600">{t.cena ? `${t.cena}€` : "—"}</td>
                       <td className="px-4 py-3">
@@ -175,8 +192,13 @@ export default function TerminiPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${t.aktiven ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-500"}`}>
-                          {t.aktiven ? "VIDEN" : "SKRIT"}
+                          {t.aktiven ? "PRIJAVNICA" : "SKRIT"}
                         </span>
+                        {t.na_strani && (
+                          <span className="ml-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-orange-100 text-orange-800">
+                            STRAN
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="inline-flex gap-1">
@@ -241,6 +263,10 @@ function TerminModal({
     aktiven: termin?.aktiven ?? true,
     vrstni_red: termin?.vrstni_red?.toString() || "0",
     opomba: termin?.opomba || "",
+    dan: termin?.dan || "",
+    ura: termin?.ura || "",
+    skupina: termin?.skupina || "",
+    na_strani: termin?.na_strani ?? true,
   });
   const [posiljam, setPosiljam] = useState(false);
   const [napaka, setNapaka] = useState("");
@@ -292,6 +318,30 @@ function TerminModal({
           <div>
             <label className={L}>Lokacija</label>
             <input value={form.lokacija} onChange={(e) => setForm({ ...form, lokacija: e.target.value })} className={I} placeholder="Terme Zreče" />
+          </div>
+
+          <div className="rounded-xl border border-orange-200 bg-orange-50/50 p-4 space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-orange-800">
+              Prikaz na spletni strani
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={L}>Dan v tednu</label>
+                <input value={form.dan} onChange={(e) => setForm({ ...form, dan: e.target.value })} className={I} placeholder="Ponedeljek" />
+              </div>
+              <div>
+                <label className={L}>Ura</label>
+                <input value={form.ura} onChange={(e) => setForm({ ...form, ura: e.target.value })} className={I} placeholder="14.15 – 15.00" />
+              </div>
+            </div>
+            <div>
+              <label className={L}>Starostna skupina</label>
+              <input value={form.skupina} onChange={(e) => setForm({ ...form, skupina: e.target.value })} className={I} placeholder="5/6 let" />
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={form.na_strani} onChange={(e) => setForm({ ...form, na_strani: e.target.checked })} className="w-4 h-4 accent-brand-orange" />
+              <span className="text-sm text-slate-700">Prikaži ta termin na strani programa</span>
+            </label>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

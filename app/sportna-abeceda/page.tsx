@@ -3,7 +3,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
-import { Check, Activity, Calendar, MapPin, Camera } from "lucide-react";
+import TerminiSekcija from "@/components/TerminiSekcija";
+import CenikSekcija from "@/components/CenikSekcija";
+import { Check, Activity } from "lucide-react";
+
+// Termini in cenik se berejo iz baze (CMS) — stran se ne sme predpomniti.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Športna abeceda | Alpska šola Rogla",
@@ -24,38 +31,6 @@ const sporti = [
   { ime: "Borilni športi", ikona: "🥋", barva: "bg-purple-50 border-purple-200" },
 ];
 
-const termini = [
-  {
-    vrtec: "Vrtec Vojnik",
-    dan: "Ponedeljek",
-    cas: "14.15 – 15.00 (5/6 let)",
-  },
-  {
-    vrtec: "Vrtec Vojnik",
-    dan: "Ponedeljek",
-    cas: "15.15 – 16.00 (3/4 let)",
-  },
-  {
-    vrtec: "Vrtec Zreče",
-    dan: "Torek",
-    cas: "15.00 – 15.45",
-  },
-  {
-    vrtec: "Vrtec Tepanje",
-    dan: "Sreda",
-    cas: "15.15 – 16.00",
-  },
-  {
-    vrtec: "Vrtec Prevrat",
-    dan: "Petek",
-    cas: "15.15 – 16.00",
-  },
-  {
-    vrtec: "Vrtec Loče",
-    dan: "Petek",
-    cas: "15.00 – 15.45",
-  },
-];
 
 export default function SportnaAbecedaPage() {
   return (
@@ -132,43 +107,12 @@ export default function SportnaAbecedaPage() {
         </div>
       </section>
 
-      {/* Termini */}
-      <section className="bg-white py-16 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
-              <span className="w-6 h-px bg-brand-orange" />
-              Kje in kdaj
-              <span className="w-6 h-px bg-brand-orange" />
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy">
-              Termini po vrtcih
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-3">
-            {termini.map((t, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl p-5 border border-slate-200/70 hover:border-brand-orange/40 transition-colors flex items-start gap-4"
-              >
-                <div className="w-11 h-11 rounded-xl bg-orange-100 text-brand-orange flex items-center justify-center shrink-0">
-                  <MapPin size={18} />
-                </div>
-                <div>
-                  <strong className="block text-sm font-bold text-brand-navy mb-0.5">
-                    {t.vrtec}
-                  </strong>
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <Calendar size={12} /> {t.dan}
-                  </div>
-                  <div className="text-sm text-slate-700 mt-1">{t.cas}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Termini — ureja se v CMS: /admin/termini */}
+      <TerminiSekcija
+        programSlug="sportna-abeceda"
+        badge="Kje in kdaj"
+        naslov="Termini po vrtcih"
+      />
 
       {/* Oprema */}
       <section className="bg-blue-50/40 py-14 border-t border-blue-100">
@@ -195,41 +139,8 @@ export default function SportnaAbecedaPage() {
         </div>
       </section>
 
-      {/* Cenik */}
-      <section className="bg-white py-16 lg:py-20">
-        <div className="max-w-md mx-auto px-4 lg:px-8">
-          <div className="bg-gradient-to-br from-orange-50 to-pink-50 border-2 border-orange-200 rounded-3xl p-8 text-center">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-orange-800 mb-1">
-              Cenik
-            </h3>
-            <h2 className="text-2xl font-extrabold text-brand-navy mb-2">
-              Športna abeceda
-            </h2>
-            <p className="text-sm text-slate-600 mb-6">
-              Za otroke od 3. leta naprej in prvo šolsko triado
-            </p>
-            <div className="mb-2">
-              <span className="text-5xl font-extrabold text-brand-navy">30€</span>
-              <span className="text-base text-slate-500">/mesec</span>
-            </div>
-            <p className="text-xs text-slate-500 mb-6">Cena z DDV</p>
-            <ul className="space-y-2 text-left text-sm">
-              {[
-                "Osnove gibanja, gimnastika, atletika",
-                "Igre z žogo, borilni športi, ples",
-                "Izkušen učitelj / animator",
-                "Vadbeni kartonček + štampiljke",
-                "Spominska majica + diploma",
-              ].map((f, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <Check size={16} className="text-brand-orange shrink-0 mt-0.5" />
-                  <span className="text-slate-700">{f}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
+      {/* Cenik — ureja se v CMS: /admin/cenik */}
+      <CenikSekcija programSlug="sportna-abeceda" />
 
       <ProgramCta
         programSlug="sportna-abeceda"

@@ -1,35 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  pridobiTermini,
-  pridobiTerminiAktivni,
-  ustvariTermin,
-  posodobiTermin,
-  nastaviTerminAktiven,
-  izbrisiTermin,
-} from "@/lib/db";
-import { zagotoviVsebino } from "@/lib/vsebina";
+  pridobiCenik,
+  ustvariCenik,
+  posodobiCenik,
+  nastaviCenikAktiven,
+  izbrisiCenik,
+} from "@/lib/vsebina";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
-// GET /api/termini?program=plavalni-tecaj          -> vsi termini programa
-// GET /api/termini?program=plavalni-tecaj&aktivni=1 -> samo aktivni (za prijavnico)
-// GET /api/termini                                  -> vsi termini
+// GET /api/cenik?program=sportna-abeceda
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const program = searchParams.get("program") || undefined;
-    const aktivni = searchParams.get("aktivni");
-
-    await zagotoviVsebino();
-
-    const termini =
-      aktivni && program
-        ? await pridobiTerminiAktivni(program)
-        : await pridobiTermini(program);
-
-    return NextResponse.json({ termini });
+    const cenik = await pridobiCenik(program);
+    return NextResponse.json({ cenik });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -39,32 +27,26 @@ function ocisti(data: any) {
   return {
     program_slug: data.program_slug,
     naziv: data.naziv,
-    lokacija: data.lokacija || null,
-    datum_od: data.datum_od || null,
-    datum_do: data.datum_do || null,
-    cena: data.cena !== "" && data.cena != null ? parseInt(data.cena) : null,
-    status: data.status || "odprt",
+    podnaslov: data.podnaslov || null,
+    cena: String(data.cena ?? "").trim(),
+    enota: data.enota || null,
+    opomba: data.opomba || null,
+    vkljuceno: data.vkljuceno || null,
+    poudarjen: data.poudarjen ?? false,
     aktiven: data.aktiven ?? true,
-    sezona: data.sezona || null,
     vrstni_red:
       data.vrstni_red !== "" && data.vrstni_red != null ? parseInt(data.vrstni_red) : 0,
-    opomba: data.opomba || null,
-    dan: data.dan || null,
-    ura: data.ura || null,
-    skupina: data.skupina || null,
-    na_strani: data.na_strani ?? true,
   };
 }
 
 export async function POST(req: NextRequest) {
   try {
-    await zagotoviVsebino();
     const data = await req.json();
-    if (!data.program_slug || !data.naziv) {
-      return NextResponse.json({ error: "Manjka program ali naziv" }, { status: 400 });
+    if (!data.program_slug || !data.naziv || !String(data.cena ?? "").trim()) {
+      return NextResponse.json({ error: "Manjka program, naziv ali cena" }, { status: 400 });
     }
-    const termin = await ustvariTermin(ocisti(data));
-    return NextResponse.json({ uspeh: true, termin }, { status: 201 });
+    const postavka = await ustvariCenik(ocisti(data));
+    return NextResponse.json({ uspeh: true, postavka }, { status: 201 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -72,15 +54,13 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    await zagotoviVsebino();
     const data = await req.json();
     if (!data.id) return NextResponse.json({ error: "Manjka id" }, { status: 400 });
-    // Hiter preklop vidnosti (samo aktiven)
     if (data.samoAktiven) {
-      await nastaviTerminAktiven(data.id, !!data.aktiven);
+      await nastaviCenikAktiven(data.id, !!data.aktiven);
       return NextResponse.json({ uspeh: true });
     }
-    await posodobiTermin(data.id, ocisti(data));
+    await posodobiCenik(data.id, ocisti(data));
     return NextResponse.json({ uspeh: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -91,7 +71,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const id = parseInt(req.nextUrl.searchParams.get("id") || "0");
     if (!id) return NextResponse.json({ error: "Manjka id" }, { status: 400 });
-    await izbrisiTermin(id);
+    await izbrisiCenik(id);
     return NextResponse.json({ uspeh: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
