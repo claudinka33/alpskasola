@@ -99,7 +99,10 @@ export default function TerminiPage() {
     nalozi();
   };
 
-  const prikazani = filter ? termini.filter((t) => t.program_slug === filter) : termini;
+  // Najnovejši termini na vrhu (največji id je najnovejši).
+  const prikazani = (filter ? termini.filter((t) => t.program_slug === filter) : termini)
+    .slice()
+    .sort((a, b) => b.id - a.id);
 
   return (
     <div>
