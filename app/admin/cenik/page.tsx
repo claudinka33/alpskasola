@@ -13,6 +13,8 @@ import {
   EyeOff,
   Tag,
   Star,
+  Heading,
+  Save,
 } from "lucide-react";
 
 type Postavka = {
@@ -24,11 +26,30 @@ type Postavka = {
   enota: string | null;
   opomba: string | null;
   vkljuceno: string | null;
+  barva: string | null;
+  znacka: string | null;
   poudarjen: boolean;
   aktiven: boolean;
   vrstni_red: number;
 };
 type Program = { id: number; slug: string; naziv: string };
+type Sekcija = {
+  program_slug: string;
+  badge: string | null;
+  naslov: string | null;
+  podnaslov: string | null;
+  opomba_spodaj: string | null;
+};
+
+const BARVE = [
+  { v: "", ime: "Privzeta (oranžno-roza)", pika: "bg-orange-200" },
+  { v: "vijolicna", ime: "Vijolična", pika: "bg-purple-200" },
+  { v: "oranzna", ime: "Oranžna", pika: "bg-orange-300" },
+  { v: "modra", ime: "Modra", pika: "bg-blue-200" },
+  { v: "cyan", ime: "Cyan", pika: "bg-cyan-200" },
+  { v: "zelena", ime: "Zelena", pika: "bg-green-200" },
+  { v: "roza", ime: "Roza", pika: "bg-pink-200" },
+];
 
 export default function CenikPage() {
   const [postavke, setPostavke] = useState<Postavka[]>([]);
@@ -117,6 +138,8 @@ export default function CenikPage() {
           ))}
         </select>
       </div>
+
+      {filter && <SekcijaUrejevalnik programSlug={filter} naziv={programNaziv(filter)} />}
 
       <div className="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
         {loading ? (
@@ -225,6 +248,8 @@ function CenikModal({
     enota: postavka?.enota || "",
     opomba: postavka?.opomba || "",
     vkljuceno: postavka?.vkljuceno || "",
+    barva: postavka?.barva || "",
+    znacka: postavka?.znacka || "",
     poudarjen: postavka?.poudarjen ?? false,
     aktiven: postavka?.aktiven ?? true,
     vrstni_red: postavka?.vrstni_red?.toString() || "0",
@@ -308,6 +333,19 @@ function CenikModal({
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={L}>Barva kartice</label>
+              <select value={form.barva} onChange={(e) => setForm({ ...form, barva: e.target.value })} className={`${I} bg-white`}>
+                {BARVE.map((b) => <option key={b.v} value={b.v}>{b.ime}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={L}>Besedilo značke</label>
+              <input value={form.znacka} onChange={(e) => setForm({ ...form, znacka: e.target.value })} className={I} placeholder="⭐ NAJBOLJ POPULAREN" />
+            </div>
+          </div>
+
           <div>
             <label className={L}>Vrstni red</label>
             <input type="number" value={form.vrstni_red} onChange={(e) => setForm({ ...form, vrstni_red: e.target.value })} className={I} />
@@ -315,7 +353,7 @@ function CenikModal({
 
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.poudarjen} onChange={(e) => setForm({ ...form, poudarjen: e.target.checked })} className="w-4 h-4 accent-brand-orange" />
-            <span className="text-sm text-slate-700">Poudarjena kartica (npr. “Najbolj priljubljeno”)</span>
+            <span className="text-sm text-slate-700">Poudarjena kartica — pokaže značko in oranžen okvir</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -337,6 +375,112 @@ function CenikModal({
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+function SekcijaUrejevalnik({ programSlug, naziv }: { programSlug: string; naziv: string }) {
+  const [form, setForm] = useState<Sekcija>({
+    program_slug: programSlug,
+    badge: "",
+    naslov: "",
+    podnaslov: "",
+    opomba_spodaj: "",
+  });
+  const [nalagam, setNalagam] = useState(true);
+  const [shranjujem, setShranjujem] = useState(false);
+  const [shranjeno, setShranjeno] = useState(false);
+
+  useEffect(() => {
+    let velja = true;
+    setNalagam(true);
+    setShranjeno(false);
+    fetch(`/api/cenik-sekcija?program=${programSlug}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!velja) return;
+        const s = d.sekcija;
+        setForm({
+          program_slug: programSlug,
+          badge: s?.badge || "",
+          naslov: s?.naslov || "",
+          podnaslov: s?.podnaslov || "",
+          opomba_spodaj: s?.opomba_spodaj || "",
+        });
+      })
+      .finally(() => velja && setNalagam(false));
+    return () => {
+      velja = false;
+    };
+  }, [programSlug]);
+
+  const shrani = async () => {
+    setShranjujem(true);
+    await fetch("/api/cenik-sekcija", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    setShranjujem(false);
+    setShranjeno(true);
+    setTimeout(() => setShranjeno(false), 2500);
+  };
+
+  const L = "block text-xs font-semibold text-slate-600 mb-1";
+  const I = "w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-brand-orange outline-none text-sm";
+
+  return (
+    <div className="bg-orange-50/60 border border-orange-200 rounded-2xl p-5 mb-4">
+      <div className="flex items-center gap-2 mb-1">
+        <Heading size={16} className="text-brand-orange" />
+        <h2 className="text-sm font-extrabold text-brand-navy">Naslov sekcije — {naziv}</h2>
+      </div>
+      <p className="text-xs text-slate-600 mb-4">
+        Besedilo nad karticami in rumena opomba pod njimi. Pustiš prazno, če ju ne želiš.
+      </p>
+
+      {nalagam ? (
+        <Loader2 size={20} className="animate-spin text-brand-orange" />
+      ) : (
+        <>
+          <div className="grid sm:grid-cols-3 gap-3 mb-3">
+            <div>
+              <label className={L}>Mala oznaka</label>
+              <input value={form.badge || ""} onChange={(e) => setForm({ ...form, badge: e.target.value })} className={I} placeholder="Cenik" />
+            </div>
+            <div>
+              <label className={L}>Naslov</label>
+              <input value={form.naslov || ""} onChange={(e) => setForm({ ...form, naslov: e.target.value })} className={I} placeholder="Izberite svoj paket" />
+            </div>
+            <div>
+              <label className={L}>Podnaslov</label>
+              <input value={form.podnaslov || ""} onChange={(e) => setForm({ ...form, podnaslov: e.target.value })} className={I} placeholder="Tri možnosti, prilagojene starosti in panogi." />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <label className={L}>Rumena opomba pod karticami (**besedilo** = krepko)</label>
+            <textarea
+              value={form.opomba_spodaj || ""}
+              onChange={(e) => setForm({ ...form, opomba_spodaj: e.target.value })}
+              rows={2}
+              className={`${I} resize-y`}
+              placeholder="**Dnevna smučarska karta** na voljo po akcijski ceni **27,50€** (ni všteto v paketu)."
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={shrani}
+              disabled={shranjujem}
+              className="inline-flex items-center gap-2 bg-brand-navy text-white px-4 py-2 rounded-lg text-sm font-bold disabled:opacity-50"
+            >
+              {shranjujem ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Shrani naslov
+            </button>
+            {shranjeno && <span className="text-sm text-green-700 font-semibold">Shranjeno ✓</span>}
+          </div>
+        </>
+      )}
     </div>
   );
 }
