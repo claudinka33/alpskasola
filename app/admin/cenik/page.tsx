@@ -28,6 +28,10 @@ type Postavka = {
   vkljuceno: string | null;
   barva: string | null;
   znacka: string | null;
+  ikona: string | null;
+  lokacija: string | null;
+  gumb: string | null;
+  gumb_povezava: string | null;
   poudarjen: boolean;
   aktiven: boolean;
   vrstni_red: number;
@@ -49,6 +53,23 @@ const BARVE = [
   { v: "cyan", ime: "Cyan", pika: "bg-cyan-200" },
   { v: "zelena", ime: "Zelena", pika: "bg-green-200" },
   { v: "roza", ime: "Roza", pika: "bg-pink-200" },
+];
+
+const IKONE = [
+  { v: "", ime: "Brez ikone" },
+  { v: "voda", ime: "Voda / plavanje" },
+  { v: "sport", ime: "Šport / gibanje" },
+  { v: "zoga", ime: "Nogometna žoga" },
+  { v: "torta", ime: "Torta / rojstni dan" },
+  { v: "gora", ime: "Gora / smučanje" },
+  { v: "sneg", ime: "Snežinka" },
+  { v: "kolo", ime: "Kolo / rolanje" },
+  { v: "servis", ime: "Servis / ključ" },
+  { v: "paket", ime: "Paket / oprema" },
+  { v: "pokal", ime: "Pokal" },
+  { v: "medalja", ime: "Medalja" },
+  { v: "skupina", ime: "Skupina" },
+  { v: "zvezda", ime: "Zvezda" },
 ];
 
 export default function CenikPage() {
@@ -179,7 +200,7 @@ export default function CenikPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-slate-700 whitespace-nowrap font-semibold">
-                      {t.cena}
+                      {t.cena || "—"}
                       <span className="text-xs font-normal text-slate-400">{t.enota || ""}</span>
                     </td>
                     <td className="px-4 py-3 text-slate-500 text-xs">
@@ -250,6 +271,10 @@ function CenikModal({
     vkljuceno: postavka?.vkljuceno || "",
     barva: postavka?.barva || "",
     znacka: postavka?.znacka || "",
+    ikona: postavka?.ikona || "",
+    lokacija: postavka?.lokacija || "",
+    gumb: postavka?.gumb || "",
+    gumb_povezava: postavka?.gumb_povezava || "",
     poudarjen: postavka?.poudarjen ?? false,
     aktiven: postavka?.aktiven ?? true,
     vrstni_red: postavka?.vrstni_red?.toString() || "0",
@@ -308,8 +333,8 @@ function CenikModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={L}>Cena *</label>
-              <input required value={form.cena} onChange={(e) => setForm({ ...form, cena: e.target.value })} className={I} placeholder="30€" />
+              <label className={L}>Cena</label>
+              <input value={form.cena} onChange={(e) => setForm({ ...form, cena: e.target.value })} className={I} placeholder="30€" />
             </div>
             <div>
               <label className={L}>Enota</label>
@@ -343,6 +368,30 @@ function CenikModal({
             <div>
               <label className={L}>Besedilo značke</label>
               <input value={form.znacka} onChange={(e) => setForm({ ...form, znacka: e.target.value })} className={I} placeholder="⭐ NAJBOLJ POPULAREN" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={L}>Ikona nad naslovom</label>
+              <select value={form.ikona} onChange={(e) => setForm({ ...form, ikona: e.target.value })} className={`${I} bg-white`}>
+                {IKONE.map((i) => <option key={i.v} value={i.v}>{i.ime}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={L}>Lokacija (pod seznamom)</label>
+              <input value={form.lokacija} onChange={(e) => setForm({ ...form, lokacija: e.target.value })} className={I} placeholder="Terme Zreče" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={L}>Besedilo gumba</label>
+              <input value={form.gumb} onChange={(e) => setForm({ ...form, gumb: e.target.value })} className={I} placeholder="Rezerviraj termin" />
+            </div>
+            <div>
+              <label className={L}>Povezava gumba</label>
+              <input value={form.gumb_povezava} onChange={(e) => setForm({ ...form, gumb_povezava: e.target.value })} className={I} placeholder="/prijava?program=..." />
             </div>
           </div>
 

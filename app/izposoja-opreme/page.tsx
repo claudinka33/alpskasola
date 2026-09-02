@@ -3,7 +3,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
+import TerminiSekcija from "@/components/TerminiSekcija";
+import CenikSekcija from "@/components/CenikSekcija";
 import { Package, Check, Mountain } from "lucide-react";
+
+// Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Izposoja smučarske opreme | Alpska šola Rogla",
@@ -127,6 +134,16 @@ export default function IzposojaPage() {
           </p>
         </div>
       </section>
+
+      {/* Termini — ureja se v CMS: /admin/termini */}
+      <TerminiSekcija
+        programSlug="izposoja-opreme"
+        badge="Kje in kdaj"
+        naslov="Termini"
+      />
+
+      {/* Cenik — ureja se v CMS: /admin/cenik */}
+      <CenikSekcija programSlug="izposoja-opreme" />
 
       <ProgramCta
         programSlug="izposoja-opreme"

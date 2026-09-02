@@ -34,6 +34,10 @@ function ocisti(data: any) {
     vkljuceno: data.vkljuceno || null,
     barva: data.barva || null,
     znacka: data.znacka || null,
+    ikona: data.ikona || null,
+    lokacija: data.lokacija || null,
+    gumb: data.gumb || null,
+    gumb_povezava: data.gumb_povezava || null,
     poudarjen: data.poudarjen ?? false,
     aktiven: data.aktiven ?? true,
     vrstni_red:
@@ -44,8 +48,8 @@ function ocisti(data: any) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    if (!data.program_slug || !data.naziv || !String(data.cena ?? "").trim()) {
-      return NextResponse.json({ error: "Manjka program, naziv ali cena" }, { status: 400 });
+    if (!data.program_slug || !data.naziv) {
+      return NextResponse.json({ error: "Manjka program ali naziv" }, { status: 400 });
     }
     const postavka = await ustvariCenik(ocisti(data));
     return NextResponse.json({ uspeh: true, postavka }, { status: 201 });
