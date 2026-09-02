@@ -3,7 +3,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
+import TerminiSekcija from "@/components/TerminiSekcija";
+import CenikSekcija from "@/components/CenikSekcija";
 import { Wrench, Clock, MapPin, Check } from "lucide-react";
+
+// Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Servis smuči | Alpska šola Rogla",
@@ -145,6 +152,16 @@ export default function ServisPage() {
           </div>
         </div>
       </section>
+
+      {/* Termini — ureja se v CMS: /admin/termini */}
+      <TerminiSekcija
+        programSlug="servis"
+        badge="Kdaj smo odprti"
+        naslov="Termini"
+      />
+
+      {/* Cenik — ureja se v CMS: /admin/cenik */}
+      <CenikSekcija programSlug="servis" />
 
       <ProgramCta
         programSlug="servis"
