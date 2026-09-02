@@ -3,7 +3,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
+import TerminiSekcija from "@/components/TerminiSekcija";
+import CenikSekcija from "@/components/CenikSekcija";
 import { Check, Waves, MapPin, Calendar, Camera, Users } from "lucide-react";
+
+// Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Tečaj plavanja | Alpska šola Rogla",
@@ -130,44 +137,16 @@ export default function PlavalniTecajPage() {
         </div>
       </section>
 
-      {/* Paket */}
-      <section className="bg-white py-16 lg:py-20">
-        <div className="max-w-2xl mx-auto px-4 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-2">
-              Šola plavanja
-            </h2>
-            <p className="text-sm text-slate-600">10 šolskih ur — vse vključeno</p>
-          </div>
+      {/* Termini — ureja se v CMS: /admin/termini */}
+      <TerminiSekcija
+        programSlug="plavalni-tecaj"
+        badge="Kje in kdaj"
+        naslov="Termini"
+        ozadje="bg-blue-50/40"
+      />
 
-          <div className="bg-gradient-to-br from-cyan-50 to-blue-100 border-2 border-cyan-200 rounded-3xl p-8 lg:p-10 text-center">
-            <div className="inline-block bg-white text-cyan-800 text-xs font-bold px-3 py-1 rounded-full mb-4">
-              💧 POLETNI HIT
-            </div>
-            <h3 className="text-2xl font-extrabold text-brand-navy mb-1">
-              ŠOLA PLAVANJA
-            </h3>
-            <p className="text-sm text-slate-600 mb-6">10 šolskih ur (5×2)</p>
-            <div className="text-5xl font-extrabold text-brand-navy mb-6">
-              130€
-            </div>
-            <ul className="space-y-2.5 text-left max-w-sm mx-auto mb-6">
-              {[
-                "5× 2 uri tečaja (Pon – Pet)",
-                "Izkušen učitelj plavanja / animator",
-                "Spominska majica",
-                "Diploma",
-                "Karta za plavanje vključena v tečaj",
-              ].map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <Check size={16} className="text-brand-orange shrink-0 mt-0.5" />
-                  <span className="text-slate-700">{f}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
+      {/* Paket — ureja se v CMS: /admin/cenik */}
+      <CenikSekcija programSlug="plavalni-tecaj" />
 
       {/* FAQ */}
       <section className="bg-blue-50/40 py-16 lg:py-20 border-t border-blue-100">
