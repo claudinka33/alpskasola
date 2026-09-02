@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
+import TerminiSekcija from "@/components/TerminiSekcija";
+import CenikSekcija from "@/components/CenikSekcija";
 import Link from "next/link";
 import {
   Waves,
@@ -41,66 +43,15 @@ function SoccerBall({ size = 24 }: { size?: number }) {
   );
 }
 
+// Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Rojstni dan z Alpsko šolo | 3 paketi praznovanja",
   description: "Praznujte rojstni dan z Alpsko šolo. 3 paketi: Vodna zabava, Športna norišnica, Nogometna zabava. Za otroke 4-12 let.",
 };
-
-const paketi = [
-  {
-    id: "vodna",
-    naslov: "Vodna zabava",
-    podnaslov: "v Termah Zreče",
-    icon: Waves,
-    barva: "from-cyan-50 to-blue-100",
-    border: "border-cyan-300",
-    accent: "bg-cyan-500 text-white",
-    textAccent: "text-cyan-700",
-    bullets: [
-      "Plavanje in zabavne igre z animatorji",
-      "Posebna vodna animacija prilagojena starosti otrok",
-      "Darilce za slavljenca",
-      "Pogostitev (hrana in pijača)",
-      "Vesela, topla in varna atmosfera v Termah Zreče",
-    ],
-    lokacija: "Terme Zreče — bazenski kompleks",
-  },
-  {
-    id: "sportna",
-    naslov: "Športna norišnica",
-    podnaslov: "na prostem",
-    icon: Activity,
-    barva: "from-orange-50 to-amber-100",
-    border: "border-orange-300",
-    accent: "bg-brand-orange text-white",
-    textAccent: "text-orange-700",
-    bullets: [
-      "Slavljenec izbere 3 aktivnosti (med dvema ognjema, mini rokomet, poligon...)",
-      "Animatorji vodijo zabavo od začetka do konca",
-      "Darilce za slavljenca",
-      "Pogostitev (hrana in pijača)",
-    ],
-    lokacija: "Zunanji prostori (po dogovoru)",
-  },
-  {
-    id: "nogomet",
-    naslov: "Nogometna zabava",
-    podnaslov: "pravih prvakov",
-    icon: SoccerBall,
-    barva: "from-green-50 to-emerald-100",
-    border: "border-green-300",
-    accent: "bg-green-600 text-white",
-    textAccent: "text-green-700",
-    bullets: [
-      "Pravi nogometni trening za otroke",
-      "Mini turnir z medaljami za vse igralce",
-      "Spretnostne vaje in goli",
-      "Darilce za slavljenca",
-      "Pogostitev po tekmi",
-    ],
-    lokacija: "Nogometno igrišče (po dogovoru)",
-  },
-];
 
 const aktivnostiSportna = [
   "Med dvema ognjema", "Mini rokomet", "Poligon z ovirami", "Štafetne igre",
@@ -133,66 +84,18 @@ export default function RojstniDanPage() {
         </div>
       </section>
 
-      {/* 3 paketi */}
-      <section className="bg-blue-50/40 py-16 lg:py-20 border-y border-blue-100">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
-              <span className="w-6 h-px bg-brand-orange" />
-              Izberite paket
-              <span className="w-6 h-px bg-brand-orange" />
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy">
-              3 nepozabne zabave
-            </h2>
-          </div>
+      {/* 3 paketi — ureja se v CMS: /admin/cenik */}
+      <CenikSekcija
+        programSlug="praznovanje-rojstnega-dne"
+        ozadje="bg-blue-50/40 border-y border-blue-100"
+      />
 
-          <div className="grid lg:grid-cols-3 gap-5">
-            {paketi.map((p) => {
-              const Icon = p.icon;
-              return (
-                <div
-                  key={p.id}
-                  className={`bg-gradient-to-br ${p.barva} rounded-3xl border-2 ${p.border} p-6 lg:p-7 flex flex-col`}
-                >
-                  <div className={`w-14 h-14 ${p.accent} rounded-2xl flex items-center justify-center mb-4`}>
-                    <Icon size={26} />
-                  </div>
-                  <h3 className="text-2xl font-extrabold text-brand-navy leading-tight mb-1">
-                    {p.naslov}
-                  </h3>
-                  <p className={`text-sm ${p.textAccent} font-semibold mb-5`}>
-                    {p.podnaslov}
-                  </p>
-
-                  <ul className="space-y-2.5 mb-6 flex-1">
-                    {p.bullets.map((b, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                        <Check size={16} className={`shrink-0 mt-0.5 ${p.textAccent}`} />
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="border-t border-slate-200 pt-4 text-xs text-slate-600 mb-4">
-                    <strong className="block text-brand-navy mb-1">
-                      <MapPin size={12} className="inline mr-1" /> Lokacija
-                    </strong>
-                    {p.lokacija}
-                  </div>
-
-                  <Link
-                    href={`/prijava?program=praznovanje-rojstnega-dne&paket=${p.id}`}
-                    className="inline-flex items-center justify-center gap-2 bg-white text-brand-navy hover:bg-brand-navy hover:text-white transition-colors px-5 py-3 rounded-xl font-bold text-sm border-2 border-brand-navy"
-                  >
-                    Rezerviraj termin <ArrowRight size={14} />
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* Termini — ureja se v CMS: /admin/termini */}
+      <TerminiSekcija
+        programSlug="praznovanje-rojstnega-dne"
+        badge="Prosti termini"
+        naslov="Kdaj praznujemo"
+      />
 
       {/* SLIKA POD PAKETI (16:9) */}
       <section className="bg-white py-12 lg:py-16">
