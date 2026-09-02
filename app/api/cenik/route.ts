@@ -32,6 +32,8 @@ function ocisti(data: any) {
     enota: data.enota || null,
     opomba: data.opomba || null,
     vkljuceno: data.vkljuceno || null,
+    barva: data.barva || null,
+    znacka: data.znacka || null,
     poudarjen: data.poudarjen ?? false,
     aktiven: data.aktiven ?? true,
     vrstni_red:
