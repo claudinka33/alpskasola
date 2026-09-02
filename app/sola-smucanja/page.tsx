@@ -4,61 +4,20 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
 import SmucanjeTabs from "@/components/SmucanjeTabs";
-import { Check, Mountain, Snowflake, Bus, Utensils, Camera, AlertCircle } from "lucide-react";
+import TerminiSekcija from "@/components/TerminiSekcija";
+import CenikSekcija from "@/components/CenikSekcija";
+import { Mountain, Snowflake, Bus, Utensils } from "lucide-react";
+
+// Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Tečaji smučanja in bordanja | Alpska šola Rogla",
   description:
     "Tečaji smučanja in bordanja za vse stopnje. MINI Alpska šola (4-6 let), Šola smučanja (6+) in Šola bordanja (5+). Začnemo 10. januarja 2026.",
 };
-
-const paketi = [
-  {
-    naslov: "MINI ŠOLA SMUČANJA",
-    podnaslov: "Paket 6 sobot + zaključna prireditev",
-    cena: "350€",
-    barva: "from-purple-50 to-purple-100 border-purple-200",
-    barvaTekst: "text-purple-900",
-    features: [
-      "Paket 6 sobot + zaključna prireditev",
-      "Starost 4 – 6 let",
-      "Pričnemo 10.1.2026",
-      "Medalja in FIS brošura",
-      "Smučamo soboto 9.30 – 13.00",
-    ],
-  },
-  {
-    naslov: "ŠOLA SMUČANJA",
-    podnaslov: "Paket 8 sobot",
-    cena: "480€",
-    barva: "from-orange-50 to-orange-100 border-orange-200",
-    barvaTekst: "text-orange-900",
-    popular: true,
-    features: [
-      "8x tečaj od 9h – 15h",
-      "8x organiziran prevoz iz Celja",
-      "Kosilo s čajem v hotelu Planja",
-      "Medalja + FIS brošura",
-      "Začnemo 10.1.2026",
-      "Cena karte 27,50€ (ni v paketu)",
-    ],
-  },
-  {
-    naslov: "ŠOLA BORDANJA",
-    podnaslov: "Paket 8 sobot",
-    cena: "480€",
-    barva: "from-blue-50 to-blue-100 border-blue-200",
-    barvaTekst: "text-blue-900",
-    features: [
-      "8x tečaj od 9h – 15h",
-      "8x organiziran prevoz iz Celja",
-      "Kosilo s čajem v hotelu Planja",
-      "Medalja + FIS brošura",
-      "Začnemo 10.1.2026",
-      "Cena karte 27,50€ (ni v paketu)",
-    ],
-  },
-];
 
 const fakti = [
   {
@@ -148,69 +107,15 @@ export default function SolaSmucanjaPage() {
         </div>
       </section>
 
-      {/* Paketi */}
-      <section className="bg-white py-16 lg:py-20">
-        <div className="max-w-6xl mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
-              <span className="w-6 h-px bg-brand-orange" />
-              Cenik
-              <span className="w-6 h-px bg-brand-orange" />
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy tracking-tight mb-2">
-              Izberite svoj paket
-            </h2>
-            <p className="text-sm text-slate-600">
-              Tri možnosti, prilagojene starosti in panogi.
-            </p>
-          </div>
+      {/* Termini — ureja se v CMS: /admin/termini */}
+      <TerminiSekcija
+        programSlug="sola-smucanja"
+        badge="Kje in kdaj"
+        naslov="Termini"
+      />
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {paketi.map((p, i) => (
-              <div
-                key={i}
-                className={`relative rounded-2xl border-2 p-6 lg:p-7 bg-gradient-to-br ${p.barva} ${
-                  p.popular ? "ring-2 ring-brand-orange ring-offset-2" : ""
-                }`}
-              >
-                {p.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-orange text-white text-xs font-bold px-3 py-1 rounded-full">
-                    ⭐ NAJBOLJ POPULAREN
-                  </span>
-                )}
-                <h3 className={`text-xs font-bold uppercase tracking-wider mb-1 ${p.barvaTekst}`}>
-                  {p.naslov}
-                </h3>
-                <p className="text-sm text-slate-600 mb-4">{p.podnaslov}</p>
-                <div className="mb-5">
-                  <span className="text-4xl font-extrabold text-brand-navy">
-                    {p.cena}
-                  </span>
-                </div>
-                <ul className="space-y-2 mb-6">
-                  {p.features.map((f, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm">
-                      <Check
-                        size={16}
-                        className="text-brand-orange shrink-0 mt-0.5"
-                      />
-                      <span className="text-slate-700">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 text-sm">
-            <AlertCircle size={18} className="text-amber-700 shrink-0 mt-0.5" />
-            <span className="text-amber-900">
-              <strong>Dnevna smučarska karta</strong> na voljo po akcijski ceni{" "}
-              <strong>27,50€</strong> (ni vštetо v paketu).
-            </span>
-          </div>
-        </div>
-      </section>
+      {/* Cenik in paketi — ureja se v CMS: /admin/cenik */}
+      <CenikSekcija programSlug="sola-smucanja" />
 
       {/* FAQ */}
       <section className="bg-blue-50/40 py-16 lg:py-20 border-t border-blue-100">
