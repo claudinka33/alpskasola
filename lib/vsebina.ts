@@ -35,6 +35,13 @@ export async function zagotoviVsebino() {
   await sql`ALTER TABLE cenik ADD COLUMN IF NOT EXISTS barva TEXT;`;
   await sql`ALTER TABLE cenik ADD COLUMN IF NOT EXISTS znacka TEXT;`;
 
+  // Ikona, lokacija in gumb na kartici
+  await sql`ALTER TABLE cenik ADD COLUMN IF NOT EXISTS ikona TEXT;`;
+  await sql`ALTER TABLE cenik ADD COLUMN IF NOT EXISTS lokacija TEXT;`;
+  await sql`ALTER TABLE cenik ADD COLUMN IF NOT EXISTS gumb TEXT;`;
+  await sql`ALTER TABLE cenik ADD COLUMN IF NOT EXISTS gumb_povezava TEXT;`;
+  await sql`ALTER TABLE cenik ALTER COLUMN cena DROP NOT NULL;`;
+
   // Glava sekcije cenika (naslov nad karticami + rumena opomba pod njimi)
   await sql`
     CREATE TABLE IF NOT EXISTS cenik_sekcija (
@@ -57,17 +64,23 @@ export async function zagotoviVsebino() {
 
   try {
     await uvoziSmucanje();
+    await uvoziPlavanje();
+    await uvoziRojstniDan();
   } catch (e) {
-    console.error("uvoziSmucanje:", e);
+    console.error("uvoz vsebine:", e);
   }
+}
+
+async function seedOpravljen(kljuc: string) {
+  const ze = await sql`SELECT 1 FROM vsebina_seed WHERE kljuc = ${kljuc};`;
+  return ze.rows.length > 0;
 }
 
 // Enkratni uvoz treh paketov, ki so bili prej zapisani v kodi strani /sola-smucanja.
 // Zažene se natanko enkrat — če postavke pozneje izbrišeš, se ne vrnejo.
 async function uvoziSmucanje() {
   const KLJUC = "sola-smucanja-v1";
-  const ze = await sql`SELECT 1 FROM vsebina_seed WHERE kljuc = ${KLJUC};`;
-  if (ze.rows.length > 0) return;
+  if (await seedOpravljen(KLJUC)) return;
 
   await sql`
     INSERT INTO cenik_sekcija (program_slug, badge, naslov, podnaslov, opomba_spodaj)
@@ -103,6 +116,68 @@ Cena karte 27,50€ (ni v paketu)');`;
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 
+// Enkratni uvoz paketa plavalnega tečaja.
+async function uvoziPlavanje() {
+  const KLJUC = "plavalni-tecaj-v1";
+  if (await seedOpravljen(KLJUC)) return;
+
+  await sql`
+    INSERT INTO cenik_sekcija (program_slug, badge, naslov, podnaslov)
+    VALUES ('plavalni-tecaj', NULL, 'Šola plavanja', '10 šolskih ur — vse vključeno')
+    ON CONFLICT (program_slug) DO NOTHING;`;
+
+  await sql`
+    INSERT INTO cenik (program_slug, naziv, podnaslov, cena, barva, znacka, vrstni_red, vkljuceno)
+    VALUES ('plavalni-tecaj', 'ŠOLA PLAVANJA', '10 šolskih ur (5×2)', '130€', 'cyan', '💧 POLETNI HIT', 0,
+      '5× 2 uri tečaja (Pon – Pet)
+Izkušen učitelj plavanja / animator
+Spominska majica
+Diploma
+Karta za plavanje vključena v tečaj');`;
+
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Enkratni uvoz treh paketov praznovanja rojstnega dne.
+async function uvoziRojstniDan() {
+  const KLJUC = "rojstni-dan-v1";
+  if (await seedOpravljen(KLJUC)) return;
+
+  await sql`
+    INSERT INTO cenik_sekcija (program_slug, badge, naslov)
+    VALUES ('praznovanje-rojstnega-dne', 'Izberite paket', '3 nepozabne zabave')
+    ON CONFLICT (program_slug) DO NOTHING;`;
+
+  await sql`
+    INSERT INTO cenik (program_slug, naziv, podnaslov, cena, barva, ikona, lokacija, gumb, gumb_povezava, vrstni_red, vkljuceno)
+    VALUES
+      ('praznovanje-rojstnega-dne', 'Vodna zabava', 'v Termah Zreče', NULL, 'cyan', 'voda',
+       'Terme Zreče — bazenski kompleks', 'Rezerviraj termin',
+       '/prijava?program=praznovanje-rojstnega-dne&paket=vodna', 0,
+       'Plavanje in zabavne igre z animatorji
+Posebna vodna animacija prilagojena starosti otrok
+Darilce za slavljenca
+Pogostitev (hrana in pijača)
+Vesela, topla in varna atmosfera v Termah Zreče'),
+      ('praznovanje-rojstnega-dne', 'Športna norišnica', 'na prostem', NULL, 'oranzna', 'sport',
+       'Zunanji prostori (po dogovoru)', 'Rezerviraj termin',
+       '/prijava?program=praznovanje-rojstnega-dne&paket=sportna', 1,
+       'Slavljenec izbere 3 aktivnosti (med dvema ognjema, mini rokomet, poligon...)
+Animatorji vodijo zabavo od začetka do konca
+Darilce za slavljenca
+Pogostitev (hrana in pijača)'),
+      ('praznovanje-rojstnega-dne', 'Nogometna zabava', 'pravih prvakov', NULL, 'zelena', 'zoga',
+       'Nogometno igrišče (po dogovoru)', 'Rezerviraj termin',
+       '/prijava?program=praznovanje-rojstnega-dne&paket=nogomet', 2,
+       'Pravi nogometni trening za otroke
+Mini turnir z medaljami za vse igralce
+Spretnostne vaje in goli
+Darilce za slavljenca
+Pogostitev po tekmi');`;
+
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
 // ---------- TIPI ----------
 
 export type CenikPostavka = {
@@ -110,12 +185,16 @@ export type CenikPostavka = {
   program_slug: string;
   naziv: string;
   podnaslov: string | null;
-  cena: string;
+  cena: string | null;
   enota: string | null;
   opomba: string | null;
   vkljuceno: string | null; // ena vrstica = ena kljukica
   barva: string | null;
   znacka: string | null;
+  ikona: string | null;
+  lokacija: string | null;
+  gumb: string | null;
+  gumb_povezava: string | null;
   poudarjen: boolean;
   aktiven: boolean;
   vrstni_red: number;
@@ -190,9 +269,11 @@ export async function pridobiCenik(program_slug?: string) {
 export async function ustvariCenik(d: Partial<CenikPostavka>) {
   await zagotoviVsebino();
   const r = await sql<CenikPostavka>`
-    INSERT INTO cenik (program_slug, naziv, podnaslov, cena, enota, opomba, vkljuceno, barva, znacka, poudarjen, aktiven, vrstni_red)
-    VALUES (${d.program_slug!}, ${d.naziv!}, ${d.podnaslov || null}, ${d.cena!}, ${d.enota || null},
+    INSERT INTO cenik (program_slug, naziv, podnaslov, cena, enota, opomba, vkljuceno, barva, znacka,
+                       ikona, lokacija, gumb, gumb_povezava, poudarjen, aktiven, vrstni_red)
+    VALUES (${d.program_slug!}, ${d.naziv!}, ${d.podnaslov || null}, ${d.cena || null}, ${d.enota || null},
             ${d.opomba || null}, ${d.vkljuceno || null}, ${d.barva || null}, ${d.znacka || null},
+            ${d.ikona || null}, ${d.lokacija || null}, ${d.gumb || null}, ${d.gumb_povezava || null},
             ${d.poudarjen ?? false}, ${d.aktiven ?? true}, ${d.vrstni_red ?? 0})
     RETURNING *;`;
   return r.rows[0];
@@ -204,12 +285,16 @@ export async function posodobiCenik(id: number, d: Partial<CenikPostavka>) {
     program_slug = ${d.program_slug!},
     naziv = ${d.naziv!},
     podnaslov = ${d.podnaslov || null},
-    cena = ${d.cena!},
+    cena = ${d.cena || null},
     enota = ${d.enota || null},
     opomba = ${d.opomba || null},
     vkljuceno = ${d.vkljuceno || null},
     barva = ${d.barva || null},
     znacka = ${d.znacka || null},
+    ikona = ${d.ikona || null},
+    lokacija = ${d.lokacija || null},
+    gumb = ${d.gumb || null},
+    gumb_povezava = ${d.gumb_povezava || null},
     poudarjen = ${d.poudarjen ?? false},
     aktiven = ${d.aktiven ?? true},
     vrstni_red = ${d.vrstni_red ?? 0}
