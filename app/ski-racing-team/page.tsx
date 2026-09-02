@@ -3,7 +3,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
+import TerminiSekcija from "@/components/TerminiSekcija";
+import CenikSekcija from "@/components/CenikSekcija";
 import { Trophy, Target, Users, Award } from "lucide-react";
+
+// Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Tekmovalne ekipe | Alpska šola Rogla",
@@ -168,6 +175,16 @@ export default function SkiRacingTeamPage() {
           </div>
         </div>
       </section>
+
+      {/* Termini — ureja se v CMS: /admin/termini */}
+      <TerminiSekcija
+        programSlug="ski-racing-team"
+        badge="Termini in tekme"
+        naslov="Koledar"
+      />
+
+      {/* Cenik — ureja se v CMS: /admin/cenik */}
+      <CenikSekcija programSlug="ski-racing-team" />
 
       <ProgramCta
         programSlug="ski-racing-team"
