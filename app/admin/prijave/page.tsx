@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer } from "lucide-react";
+import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer, Trash2 } from "lucide-react";
 
 const programLabels: Record<string, string> = {
   "sola-smucanja": "Smučanje",
@@ -55,6 +55,8 @@ export default function PrijavePage() {
   const [seznamPogled, setSeznamPogled] = useState(false);
   const [izbrana, setIzbrana] = useState<Prijava | null>(null);
   const [vsePrijave, setVsePrijave] = useState<Prijava[]>([]);
+  const [izbrani, setIzbrani] = useState<number[]>([]);
+  const [brisem, setBrisem] = useState(false);
 
   const naloziPrijave = async () => {
     setLoading(true);
@@ -97,6 +99,31 @@ export default function PrijavePage() {
     naloziPrijave();
     if (izbrana?.id === id) {
       setIzbrana({ ...izbrana, status });
+    }
+  };
+
+  const preklopiIzbiro = (id: number) =>
+    setIzbrani((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+
+  const izbrisiPrijave = async (ids: number[]) => {
+    if (ids.length === 0) return;
+    const besedilo =
+      ids.length === 1
+        ? "Izbrišem to prijavnico? Tega ni mogoče razveljaviti."
+        : `Izbrišem ${ids.length} prijavnic? Tega ni mogoče razveljaviti.`;
+    if (!confirm(besedilo)) return;
+    setBrisem(true);
+    try {
+      for (const id of ids) {
+        await fetch(`/api/prijave/${id}`, { method: "DELETE" });
+      }
+      setIzbrani([]);
+      setIzbrana(null);
+      await naloziPrijave();
+      const d = await fetch("/api/prijave").then((r) => r.json());
+      setVsePrijave(d.prijave || []);
+    } finally {
+      setBrisem(false);
     }
   };
 
@@ -243,6 +270,15 @@ export default function PrijavePage() {
           >
             <Download size={16} /> Izvozi CSV
           </button>
+          {izbrani.length > 0 && (
+            <button
+              onClick={() => izbrisiPrijave(izbrani)}
+              disabled={brisem}
+              className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-red-700 disabled:opacity-50"
+            >
+              <Trash2 size={16} /> Izbriši izbrane ({izbrani.length})
+            </button>
+          )}
           <Link
             href="/admin/prijave/nova"
             className="inline-flex items-center gap-2 bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-brand-orange-dark transition-colors"
@@ -373,6 +409,15 @@ export default function PrijavePage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>
+                  <th className="px-3 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      checked={prikazane.length > 0 && izbrani.length === prikazane.length}
+                      onChange={(e) => setIzbrani(e.target.checked ? prikazane.map((p) => p.id) : [])}
+                      className="w-4 h-4 accent-brand-orange"
+                      title="Izberi vse prikazane"
+                    />
+                  </th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Otrok</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Program</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Starš</th>
@@ -394,6 +439,14 @@ export default function PrijavePage() {
                       onClick={() => setIzbrana(p)}
                       className="border-b border-slate-100 hover:bg-orange-50/30 cursor-pointer transition-colors"
                     >
+                      <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={izbrani.includes(p.id)}
+                          onChange={() => preklopiIzbiro(p.id)}
+                          className="w-4 h-4 accent-brand-orange"
+                        />
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-orange-100 text-brand-orange flex items-center justify-center font-bold text-xs">
@@ -571,6 +624,19 @@ export default function PrijavePage() {
               <div className="text-xs text-slate-400 pt-3 border-t border-slate-100">
                 <Calendar size={12} className="inline mr-1" />
                 Prijava ustvarjena: {new Date(izbrana.ustvarjeno).toLocaleString("sl-SI")}
+              </div>
+
+              <div className="pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => izbrisiPrijave([izbrana.id])}
+                  disabled={brisem}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
+                >
+                  <Trash2 size={15} /> Izbriši to prijavnico
+                </button>
+                <p className="text-xs text-slate-400 mt-1">
+                  Pobriše tudi njena plačila in zapise prisotnosti.
+                </p>
               </div>
             </div>
           </div>

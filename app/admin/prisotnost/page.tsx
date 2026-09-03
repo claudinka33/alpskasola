@@ -14,6 +14,7 @@ import {
   Percent,
   MapPin,
   CalendarDays,
+  Trash2,
 } from "lucide-react";
 
 type Program = { id: number; slug: string; naziv: string };
@@ -233,6 +234,20 @@ export default function PrisotnostPage() {
     }
   };
 
+  const izbrisiVadbo = async () => {
+    if (!srecanje || !izbrana) return;
+    if (!confirm(`Izbrišem vadbo ${slDatum(srecanje.datum)}? Prisotnost te vadbe bo izgubljena.`)) return;
+    await fetch(`/api/prisotnost?srecanje=${srecanje.id}`, { method: "DELETE" });
+    setSrecanje(null);
+    setVrstice([]);
+    const [sr, pv] = await Promise.all([
+      fetch(`/api/prisotnost?termin=${izbrana.id}`).then((r) => r.json()),
+      fetch(`/api/prisotnost?povzetek=${izbrana.id}`).then((r) => r.json()),
+    ]);
+    setSrecanja(sr.srecanja || []);
+    setPovzetek(pv.povzetek || []);
+  };
+
   const naloziUre = async () => {
     const q = izbrana ? `&program=${izbrana.program_slug}` : "";
     const d = await fetch(`/api/prisotnost?ure=1${q}`).then((r) => r.json());
@@ -427,10 +442,19 @@ export default function PrisotnostPage() {
         <div className="bg-white rounded-2xl border border-slate-200/70 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h2 className="text-lg font-extrabold text-brand-navy">Vadba {slDatum(srecanje.datum)}</h2>
-            <span className="text-sm font-semibold text-slate-600">
-              <Users size={14} className="inline mr-1" />
-              {prisotnih} / {vrstice.length} prisotnih
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold text-slate-600">
+                <Users size={14} className="inline mr-1" />
+                {prisotnih} / {vrstice.length} prisotnih
+              </span>
+              <button
+                onClick={izbrisiVadbo}
+                title="Izbriši to vadbo"
+                className="p-2 text-slate-400 hover:text-red-600"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-[1fr_auto] gap-4 mb-4">

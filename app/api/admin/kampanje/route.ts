@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pridobiTrenutniAdmin } from "@/lib/auth";
-import { pridobiKampanje, pridobiKontakte, ustvariKampanjo } from "@/lib/db";
+import { pridobiKampanje, pridobiKontakte, ustvariKampanjo, izbrisiKampanjo } from "@/lib/db";
 import { zagotoviTabele } from "@/lib/migracije";
 import { zagotoviModule } from "@/lib/moduli";
 import { posljiKampanjoPaket } from "@/lib/email";
@@ -88,6 +88,19 @@ export async function POST(req: NextRequest) {
     } as any);
 
     return NextResponse.json({ kampanja, prejemniki }, { status: 201 });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const admin = await pridobiTrenutniAdmin();
+    if (!admin) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    const id = parseInt(req.nextUrl.searchParams.get("id") || "0");
+    if (!id) return NextResponse.json({ error: "Manjka id" }, { status: 400 });
+    await izbrisiKampanjo(id);
+    return NextResponse.json({ uspeh: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

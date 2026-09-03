@@ -58,6 +58,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const id = Number(params.id);
   if (!Number.isFinite(id)) return NextResponse.json({ error: "Neveljaven ID" }, { status: 400 });
 
+  // Pobriši še vse, kar visi na tej prijavi (plačila, prisotnost)
+  try {
+    await sql`DELETE FROM placila WHERE prijava_id = ${id};`;
+    await sql`DELETE FROM prisotnost WHERE prijava_id = ${id};`;
+  } catch (e) {
+    console.error("Čiščenje ob brisanju prijave:", e);
+  }
   await sql`DELETE FROM prijave WHERE id = ${id};`;
   return NextResponse.json({ uspeh: true });
 }

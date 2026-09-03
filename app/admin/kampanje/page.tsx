@@ -186,6 +186,12 @@ export default function KampanjePage() {
     naloziPredloge();
   };
 
+  const izbrisiKampanjo = async (id: number, zadeva: string) => {
+    if (!confirm(`Izbrišem kampanjo "${zadeva}" iz zgodovine? Poslani emaili ostanejo pri prejemnikih.`)) return;
+    await fetch(`/api/admin/kampanje?id=${id}`, { method: "DELETE" });
+    naloziKampanje();
+  };
+
   const izbrisiPredlogo = async (id: number, naziv: string) => {
     if (!confirm(`Izbrišem predlogo "${naziv}"?`)) return;
     await fetch(`/api/predloge?id=${id}`, { method: "DELETE" });
@@ -857,6 +863,13 @@ export default function KampanjePage() {
                       className="shrink-0 p-1.5 text-slate-400 hover:text-brand-orange"
                     >
                       <Copy size={14} />
+                    </button>
+                    <button
+                      onClick={() => izbrisiKampanjo(k.id, k.zadeva)}
+                      title="Izbriši iz zgodovine"
+                      className="shrink-0 p-1.5 text-slate-300 hover:text-red-600"
+                    >
+                      <Trash2 size={14} />
                     </button>
                   </li>
                 ))}

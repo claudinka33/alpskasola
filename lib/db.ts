@@ -382,6 +382,10 @@ export async function ustvariKampanjo(d: Partial<Kampanja>) {
   return r.rows[0];
 }
 
+export async function izbrisiKampanjo(id: number) {
+  await sql`DELETE FROM kampanje WHERE id = ${id};`;
+}
+
 export async function posodobiKampanjo(id: number, poslano_st: number, status: string) {
   await sql`UPDATE kampanje SET poslano_st = ${poslano_st}, status = ${status} WHERE id = ${id};`;
 }
