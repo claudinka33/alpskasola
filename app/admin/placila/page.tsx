@@ -156,7 +156,7 @@ export default function PlacilaPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
             <Euro size={26} className="text-brand-orange" /> Plačila
           </h1>
           <p className="text-sm text-slate-600 mt-1">
@@ -175,10 +175,10 @@ export default function PlacilaPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-wrap gap-3 items-end">
+      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Program</label>
-          <select value={program} onChange={(e) => { setProgram(e.target.value); setTerminId(null); }} className={S}>
+          <select value={program} onChange={(e) => { setProgram(e.target.value); setTerminId(null); }} className={`${S} w-full sm:w-auto`}>
             <option value="">Izberi program</option>
             {programi.map((p) => (
               <option key={p.slug} value={p.slug}>{p.naziv}</option>
@@ -190,7 +190,7 @@ export default function PlacilaPage() {
           <select
             value={terminId ?? ""}
             onChange={(e) => setTerminId(e.target.value ? parseInt(e.target.value) : null)}
-            className={`${S} max-w-[300px]`}
+            className={`${S} w-full sm:max-w-[300px]`}
           >
             <option value="">Vse skupine</option>
             {termini.filter((t) => t.program_slug === program).map((t) => (
@@ -228,6 +228,7 @@ export default function PlacilaPage() {
           <p className="py-16 text-center text-sm text-slate-400">Ni otrok za prikaz.</p>
         ) : (
           <div className="overflow-x-auto">
+            <p className="sm:hidden text-[11px] text-slate-400 px-4 pt-3">Tabelo povleci levo za ostale mesece.</p>
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>

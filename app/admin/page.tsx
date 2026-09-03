@@ -59,7 +59,7 @@ export default async function AdminDashboardPage() {
       {/* Glava */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-brand-navy mb-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-1">
             Živjo, {admin.ime.split(" ")[0]} 👋
           </h1>
           <p className="text-sm text-slate-600 capitalize">{danesNiz}</p>

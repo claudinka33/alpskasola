@@ -116,7 +116,7 @@ export default function UrePage() {
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
             <Clock size={26} className="text-brand-orange" /> Ure učiteljev
           </h1>
           <p className="text-sm text-slate-600 mt-1">
@@ -132,7 +132,7 @@ export default function UrePage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-wrap gap-3 items-end">
+      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Od</label>
           <input type="date" value={od} onChange={(e) => setOd(e.target.value)} className={S} />
@@ -141,7 +141,7 @@ export default function UrePage() {
           <label className="block text-xs font-semibold text-slate-600 mb-1">Do</label>
           <input type="date" value={doDatum} onChange={(e) => setDoDatum(e.target.value)} className={S} />
         </div>
-        <div className="flex gap-2 pb-0.5">
+        <div className="flex flex-wrap gap-2 pb-0.5">
           {([
             ["mesec", "Ta mesec"],
             ["prejsnji", "Prejšnji mesec"],

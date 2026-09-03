@@ -9,6 +9,13 @@ const poppins = Poppins({
   display: "swap",
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#0C2340",
+};
+
 export const metadata: Metadata = {
   title: "Alpska šola Rogla — Migaj z nami, zmaguj zase",
   description: "Največja šola smučanja v Sloveniji. 15+ let izkušenj, 15.000+ zadovoljnih otrok.",

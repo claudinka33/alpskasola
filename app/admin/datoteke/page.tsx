@@ -74,7 +74,7 @@ export default function DatotekePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
           <HardDrive size={26} className="text-brand-orange" /> Datoteke
         </h1>
         <p className="text-sm text-slate-600 mt-1">

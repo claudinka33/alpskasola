@@ -303,7 +303,7 @@ export default function PrisotnostPage() {
     return (
       <div>
         <div className="mb-6">
-          <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
             <CheckCircle2 size={26} className="text-brand-orange" /> Prisotnost
           </h1>
           <p className="text-sm text-slate-600 mt-1">
@@ -311,7 +311,7 @@ export default function PrisotnostPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-5 flex flex-wrap gap-3 items-center">
+        <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-5 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
           <select
             value={filterProgram}
             onChange={(e) => setFilterProgram(e.target.value)}
@@ -429,15 +429,15 @@ export default function PrisotnostPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-wrap gap-3 items-end">
-        <div>
+      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row gap-3 sm:items-end">
+        <div className="flex-1">
           <label className="block text-xs font-semibold text-slate-600 mb-1">Datum vadbe</label>
-          <input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} className={S} />
+          <input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} className={`${S} w-full`} />
         </div>
         <button
           onClick={odpriVadbo}
           disabled={!datum || nalagam}
-          className="inline-flex items-center gap-2 bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 bg-brand-orange text-white px-4 py-3 rounded-lg text-sm font-bold disabled:opacity-50"
         >
           {nalagam ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} Odpri vadbo
         </button>
@@ -582,17 +582,19 @@ export default function PrisotnostPage() {
                   <li
                     key={v.prijava_id}
                     onClick={() => kljukica(v)}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 border cursor-pointer ${
-                      v.prisoten ? "bg-green-50 border-green-200" : "bg-slate-50 border-transparent hover:bg-slate-100"
+                    className={`flex items-center gap-3 rounded-xl px-3 py-3.5 border-2 cursor-pointer select-none ${
+                      v.prisoten
+                        ? "bg-green-50 border-green-300"
+                        : "bg-slate-50 border-transparent hover:bg-slate-100"
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={v.prisoten}
                       onChange={() => {}}
-                      className="w-5 h-5 accent-green-600 shrink-0 pointer-events-none"
+                      className="w-6 h-6 accent-green-600 shrink-0 pointer-events-none"
                     />
-                    <span className="flex-1 font-semibold text-brand-navy text-sm">
+                    <span className="flex-1 font-semibold text-brand-navy text-base">
                       {v.otrok_ime} {v.otrok_priimek}
                       {v.gost && (
                         <span className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
@@ -628,7 +630,7 @@ export default function PrisotnostPage() {
             <button
               onClick={shrani}
               disabled={!spremenjeno || shranjujem}
-              className="inline-flex items-center gap-2 bg-brand-orange text-white px-5 py-2.5 rounded-lg text-sm font-bold disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-2 bg-brand-orange text-white px-5 py-3 rounded-lg text-sm font-bold disabled:opacity-40 w-full sm:w-auto"
             >
               {shranjujem ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {shranjujem ? "Shranjujem..." : "Shrani"}

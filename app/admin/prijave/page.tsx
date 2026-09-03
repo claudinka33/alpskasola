@@ -293,9 +293,9 @@ export default function PrijavePage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-brand-navy mb-1">Prijavnice</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-1">Prijavnice</h1>
           <p className="text-sm text-slate-600">{prikazane.length} prijav prikazanih</p>
         </div>
         <div className="flex gap-2">
@@ -350,7 +350,7 @@ export default function PrijavePage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-wrap gap-3">
+      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row sm:flex-wrap gap-3">
         <div className="flex-1 min-w-[200px] relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -466,7 +466,53 @@ export default function PrijavePage() {
             </ol>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Telefon: kartice */}
+          <ul className="md:hidden divide-y divide-slate-100">
+            {prikazane.map((p) => {
+              const c = getStatusConfig(p.status);
+              return (
+                <li key={p.id} className="p-4 flex gap-3">
+                  <input
+                    type="checkbox"
+                    checked={izbrani.includes(p.id)}
+                    onChange={() => preklopiIzbiro(p.id)}
+                    className="w-5 h-5 accent-brand-orange shrink-0 mt-0.5"
+                  />
+                  <button onClick={() => setIzbrana(p)} className="flex-1 min-w-0 text-left">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-bold text-brand-navy">
+                        {p.otrok_ime} {p.otrok_priimek}
+                      </span>
+                      <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${c.bg} ${c.text}`}>
+                        {c.label.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      {programLabels[p.program] || p.program}
+                      {p.termin ? ` · ${p.termin}` : ""}
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {p.starsi_ime} {p.starsi_priimek} · {p.telefon}
+                    </div>
+                    {zeBil(p).length > 0 && (
+                      <div className="text-[10px] font-bold text-orange-800 bg-orange-100 rounded-full px-2 py-0.5 inline-block mt-1.5">
+                        Že bil: {zeBil(p).join(", ")}
+                      </div>
+                    )}
+                    {p.opomba && (
+                      <div className="text-xs text-slate-600 mt-1.5 whitespace-pre-line line-clamp-3">
+                        {p.opomba}
+                      </div>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Računalnik: tabela */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>
@@ -560,6 +606,7 @@ export default function PrijavePage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
