@@ -299,7 +299,7 @@ export default function PrijavePage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-1">Prijavnice</h1>
           <p className="text-sm text-slate-600">{prikazane.length} prijav prikazanih</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
           <button
             onClick={() => setSeznamPogled((v) => !v)}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors ${
@@ -489,40 +489,86 @@ export default function PrijavePage() {
             {prikazane.map((p) => {
               const c = getStatusConfig(p.status);
               return (
-                <li key={p.id} className="p-4 flex gap-3">
-                  <input
-                    type="checkbox"
-                    checked={izbrani.includes(p.id)}
-                    onChange={() => preklopiIzbiro(p.id)}
-                    className="w-5 h-5 accent-brand-orange shrink-0 mt-0.5"
-                  />
-                  <button onClick={() => setIzbrana(p)} className="flex-1 min-w-0 text-left">
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-bold text-brand-navy">
-                        {p.otrok_ime} {p.otrok_priimek}
-                      </span>
-                      <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${c.bg} ${c.text}`}>
-                        {c.label.toUpperCase()}
-                      </span>
+                <li key={p.id} className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={izbrani.includes(p.id)}
+                        onChange={() => preklopiIzbiro(p.id)}
+                        className="w-5 h-5 accent-brand-orange shrink-0 mt-0.5"
+                      />
+                      <div className="min-w-0">
+                        <div className="font-bold text-brand-navy leading-snug">
+                          {p.otrok_ime} {p.otrok_priimek}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {p.otrok_rojstvo
+                            ? new Date(p.otrok_rojstvo).toLocaleDateString("sl-SI")
+                            : ""}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs text-slate-500 mt-0.5">
+                    <span
+                      className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${c.bg} ${c.text}`}
+                    >
+                      {c.label.toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div className="mt-2 text-xs text-slate-600">
+                    <div className="font-semibold text-brand-navy">
                       {programLabels[p.program] || p.program}
-                      {p.termin ? ` · ${p.termin}` : ""}
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                      {p.starsi_ime} {p.starsi_priimek} · {p.telefon}
+                    {p.termin && <div className="text-slate-500">{p.termin}</div>}
+                  </div>
+
+                  <div className="mt-2">
+                    <div className="text-sm text-slate-700">
+                      {p.starsi_ime} {p.starsi_priimek}
                     </div>
-                    {zeBil(p).length > 0 && (
-                      <div className="text-[10px] font-bold text-orange-800 bg-orange-100 rounded-full px-2 py-0.5 inline-block mt-1.5">
-                        Že bil: {zeBil(p).join(", ")}
-                      </div>
+                    {p.telefon && (
+                      <a
+                        href={`tel:${p.telefon}`}
+                        className="block text-sm font-semibold text-brand-orange"
+                      >
+                        {p.telefon}
+                      </a>
                     )}
-                    {p.opomba && (
-                      <div className="text-xs text-slate-600 mt-1.5 whitespace-pre-line line-clamp-3">
-                        {p.opomba}
-                      </div>
+                    {p.email && (
+                      <a href={`mailto:${p.email}`} className="block text-sm text-slate-600 break-all">
+                        {p.email}
+                      </a>
                     )}
-                  </button>
+                  </div>
+
+                  {zeBil(p).length > 0 && (
+                    <div className="text-[10px] font-bold text-orange-800 bg-orange-100 rounded-full px-2 py-0.5 inline-block mt-2">
+                      Že bil: {zeBil(p).join(", ")}
+                    </div>
+                  )}
+
+                  {p.opomba && (
+                    <div className="text-xs text-slate-600 mt-2 whitespace-pre-line bg-slate-50 rounded-lg px-3 py-2">
+                      {p.opomba}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => setIzbrana(p)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-brand-navy border border-slate-200 rounded-lg px-3 py-2"
+                    >
+                      Podrobnosti
+                    </button>
+                    <button
+                      onClick={() => izbrisiPrijave([p.id])}
+                      className="ml-auto p-2 text-slate-300 hover:text-red-600"
+                      aria-label="Izbriši"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </li>
               );
             })}
