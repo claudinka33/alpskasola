@@ -15,6 +15,8 @@ import {
   MapPin,
   CalendarDays,
   Trash2,
+  Save,
+  AlertCircle,
 } from "lucide-react";
 
 type Program = { id: number; slug: string; naziv: string };
@@ -68,6 +70,9 @@ export default function PrisotnostPage() {
   const [nalagam, setNalagam] = useState(false);
   const [novUcitelj, setNovUcitelj] = useState("");
   const [premik, setPremik] = useState<Vrstica | null>(null);
+  const [spremenjeno, setSpremenjeno] = useState(false);
+  const [shranjujem, setShranjujem] = useState(false);
+  const [shranjeno, setShranjeno] = useState(false);
   const [dodajOtroka, setDodajOtroka] = useState(false);
 
   const naloziPregled = async () => {
@@ -141,6 +146,7 @@ export default function PrisotnostPage() {
   };
 
   const nazaj = () => {
+    if (!potrdiOpustitev()) return;
     setIzbrana(null);
     setSrecanje(null);
     naloziPregled();
@@ -149,6 +155,8 @@ export default function PrisotnostPage() {
   const naloziVrstice = async (srecanje_id: number) => {
     const d = await fetch(`/api/prisotnost?srecanje=${srecanje_id}`).then((r) => r.json());
     setVrstice(d.prisotnost || []);
+    setSpremenjeno(false);
+    setShranjeno(false);
   };
 
   const odpriVadbo = async () => {
@@ -170,42 +178,66 @@ export default function PrisotnostPage() {
     }
   };
 
+  const potrdiOpustitev = () =>
+    !spremenjeno || confirm("Imaš neshranjene spremembe. Jih zavržem?");
+
   const odpriObstojece = async (s: Srecanje) => {
+    if (!potrdiOpustitev()) return;
     setSrecanje(s);
     setDatum(s.datum.slice(0, 10));
     await naloziVrstice(s.id);
   };
 
-  const kljukica = async (v: Vrstica) => {
-    if (!srecanje) return;
+  // Kljukica in glava se spreminjata samo lokalno — v bazo gre šele ob gumbu Shrani.
+  const kljukica = (v: Vrstica) => {
     setVrstice((vs) => vs.map((x) => (x.prijava_id === v.prijava_id ? { ...x, prisoten: !x.prisoten } : x)));
-    await fetch("/api/prisotnost", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        akcija: "kljukica",
-        srecanje_id: srecanje.id,
-        prijava_id: v.prijava_id,
-        prisoten: !v.prisoten,
-      }),
-    });
+    setSpremenjeno(true);
+    setShranjeno(false);
   };
 
-  const shraniGlavo = async (spr: Partial<Srecanje>) => {
+  const oznaciVse = (prisoten: boolean) => {
+    setVrstice((vs) => vs.map((x) => ({ ...x, prisoten })));
+    setSpremenjeno(true);
+    setShranjeno(false);
+  };
+
+  const shrani = async () => {
     if (!srecanje) return;
-    const novo = { ...srecanje, ...spr };
-    setSrecanje(novo);
-    await fetch("/api/prisotnost", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        akcija: "srecanje",
-        srecanje_id: srecanje.id,
-        ucitelji: novo.ucitelji,
-        trajanje_min: novo.trajanje_min,
-        opomba: novo.opomba,
-      }),
-    });
+    setShranjujem(true);
+    try {
+      await fetch("/api/prisotnost", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          akcija: "shrani",
+          srecanje_id: srecanje.id,
+          ucitelji: srecanje.ucitelji,
+          trajanje_min: srecanje.trajanje_min,
+          opomba: srecanje.opomba,
+          prisotnost: vrstice.map((v) => ({ prijava_id: v.prijava_id, prisoten: v.prisoten })),
+        }),
+      });
+      setSpremenjeno(false);
+      setShranjeno(true);
+      setTimeout(() => setShranjeno(false), 3000);
+      if (izbrana) {
+        const [sr, pv] = await Promise.all([
+          fetch(`/api/prisotnost?termin=${izbrana.id}`).then((r) => r.json()),
+          fetch(`/api/prisotnost?povzetek=${izbrana.id}`).then((r) => r.json()),
+        ]);
+        setSrecanja(sr.srecanja || []);
+        setPovzetek(pv.povzetek || []);
+      }
+    } finally {
+      setShranjujem(false);
+    }
+  };
+
+  const shraniGlavo = (spr: Partial<Srecanje>) => {
+    if (!srecanje) return;
+    setSrecanje({ ...srecanje, ...spr });
+    setSpremenjeno(true);
+    setShranjeno(false);
   };
 
   const izbraniUcitelji = (srecanje?.ucitelji || "").split(";").map((x) => x.trim()).filter(Boolean);
@@ -525,6 +557,23 @@ export default function PrisotnostPage() {
           </div>
 
           <div className="border-t border-slate-100 pt-4">
+            {vrstice.length > 0 && (
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  onClick={() => oznaciVse(true)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-brand-navy hover:border-green-400"
+                >
+                  Vsi prisotni
+                </button>
+                <button
+                  onClick={() => oznaciVse(false)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:border-slate-400"
+                >
+                  Počisti
+                </button>
+              </div>
+            )}
+
             {vrstice.length === 0 ? (
               <p className="text-sm text-slate-400 py-6 text-center">Na ta termin ni prijavljenih otrok.</p>
             ) : (
@@ -572,6 +621,32 @@ export default function PrisotnostPage() {
             >
               <UserPlus size={15} /> Otrok je prišel iz druge skupine (samo danes)
             </button>
+          </div>
+
+          {/* Shranjevanje */}
+          <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 px-5 py-4 bg-white border-t border-slate-200 rounded-b-2xl flex flex-wrap items-center gap-3">
+            <button
+              onClick={shrani}
+              disabled={!spremenjeno || shranjujem}
+              className="inline-flex items-center gap-2 bg-brand-orange text-white px-5 py-2.5 rounded-lg text-sm font-bold disabled:opacity-40"
+            >
+              {shranjujem ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {shranjujem ? "Shranjujem..." : "Shrani"}
+            </button>
+
+            {spremenjeno && !shranjujem && (
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700">
+                <AlertCircle size={15} /> Neshranjene spremembe
+              </span>
+            )}
+            {shranjeno && (
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700">
+                <CheckCircle2 size={15} /> Shranjeno
+              </span>
+            )}
+            {!spremenjeno && !shranjeno && (
+              <span className="text-sm text-slate-400">Vse je shranjeno.</span>
+            )}
           </div>
         </div>
       )}
@@ -643,6 +718,7 @@ export default function PrisotnostPage() {
           onDodano={async () => {
             setDodajOtroka(false);
             await naloziVrstice(srecanje.id);
+            setSpremenjeno(true);
           }}
         />
       )}

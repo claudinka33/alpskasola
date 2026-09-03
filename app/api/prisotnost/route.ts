@@ -6,6 +6,7 @@ import {
   nastaviPrisotnost,
   posodobiSrecanje,
   izbrisiSrecanje,
+  shraniVadbo,
   dodajGosta,
   odstraniIzSrecanja,
   premakniOtroka,
@@ -78,6 +79,15 @@ export async function PUT(req: NextRequest) {
           ucitelji: d.ucitelji || "",
           trajanje_min: d.trajanje_min ? parseInt(d.trajanje_min) : 60,
           opomba: d.opomba || null,
+        });
+        break;
+      case "shrani":
+        await shraniVadbo({
+          srecanje_id: d.srecanje_id,
+          ucitelji: d.ucitelji || "",
+          trajanje_min: d.trajanje_min ? parseInt(d.trajanje_min) : 60,
+          opomba: d.opomba || null,
+          prisotnost: Array.isArray(d.prisotnost) ? d.prisotnost : [],
         });
         break;
       case "gost":

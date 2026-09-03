@@ -225,6 +225,30 @@ export async function posodobiSrecanje(id: number, d: { ucitelji?: string; traja
     WHERE id = ${id};`;
 }
 
+// Shrani celo vadbo naenkrat: učitelje, trajanje, opombo in vse kljukice
+export async function shraniVadbo(d: {
+  srecanje_id: number;
+  ucitelji: string;
+  trajanje_min: number;
+  opomba: string | null;
+  prisotnost: { prijava_id: number; prisoten: boolean }[];
+}) {
+  await zagotoviModule();
+  await sql`
+    UPDATE srecanja SET
+      ucitelji = ${d.ucitelji || ""},
+      trajanje_min = ${d.trajanje_min || 60},
+      opomba = ${d.opomba || null}
+    WHERE id = ${d.srecanje_id};`;
+
+  for (const v of d.prisotnost) {
+    await sql`
+      INSERT INTO prisotnost (srecanje_id, prijava_id, prisoten)
+      VALUES (${d.srecanje_id}, ${v.prijava_id}, ${v.prisoten})
+      ON CONFLICT (srecanje_id, prijava_id) DO UPDATE SET prisoten = EXCLUDED.prisoten;`;
+  }
+}
+
 export async function izbrisiSrecanje(id: number) {
   await zagotoviModule();
   await sql`DELETE FROM srecanja WHERE id = ${id};`;
