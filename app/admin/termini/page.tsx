@@ -12,6 +12,7 @@ import {
   Eye,
   EyeOff,
   CalendarDays,
+  Tags,
 } from "lucide-react";
 
 type Termin = {
@@ -31,6 +32,7 @@ type Termin = {
   ura: string | null;
   skupina: string | null;
   na_strani: boolean;
+  oznaka: string | null;
 };
 type Program = { id: number; slug: string; naziv: string };
 
@@ -52,6 +54,8 @@ export default function TerminiPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [modal, setModal] = useState<Termin | "nov" | null>(null);
+  const [popravljam, setPopravljam] = useState(false);
+  const [rezultatOznak, setRezultatOznak] = useState("");
 
   const programNaziv = (slug: string) => programi.find((p) => p.slug === slug)?.naziv || slug;
 
@@ -91,6 +95,25 @@ export default function TerminiPage() {
       body: JSON.stringify({ ...t, id: undefined, naziv: `${t.naziv} (kopija)`, aktiven: false }),
     });
     nalozi();
+  };
+
+  const popraviOznake = async () => {
+    if (!filter) return;
+    setPopravljam(true);
+    setRezultatOznak("");
+    try {
+      const r = await fetch("/api/oznake-popravek", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ program_slug: filter }),
+      });
+      const d = await r.json();
+      setRezultatOznak(
+        r.ok ? `Posodobljenih kontaktov: ${d.posodobljenih}` : d.error || "Napaka."
+      );
+    } finally {
+      setPopravljam(false);
+    }
   };
 
   const izbrisi = async (t: Termin) => {
@@ -137,6 +160,29 @@ export default function TerminiPage() {
         </select>
       </div>
 
+      {filter && (
+        <div className="bg-orange-50/60 border border-orange-200 rounded-2xl p-4 mb-4 flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[240px]">
+            <h2 className="text-sm font-extrabold text-brand-navy mb-1">Oznake za nazaj</h2>
+            <p className="text-xs text-slate-600">
+              Obstoječim prijavam tega programa pripiše oznako termina, ki so ga izbrali, in jo
+              doda staršem v bazi kontaktov. Varno je pognati večkrat.
+            </p>
+          </div>
+          <button
+            onClick={popraviOznake}
+            disabled={popravljam}
+            className="inline-flex items-center gap-2 bg-brand-navy text-white px-4 py-2 rounded-lg text-sm font-bold disabled:opacity-50"
+          >
+            {popravljam ? <Loader2 size={15} className="animate-spin" /> : <Tags size={15} />}
+            Poveži oznake za nazaj
+          </button>
+          {rezultatOznak && (
+            <span className="text-sm font-semibold text-green-700 w-full">{rezultatOznak}</span>
+          )}
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
         {loading ? (
           <div className="py-16 text-center">
@@ -170,6 +216,11 @@ export default function TerminiPage() {
                       <td className="px-4 py-3 font-semibold text-brand-navy">
                         {t.naziv}
                         {t.lokacija && <span className="block text-xs font-normal text-slate-400">{t.lokacija}</span>}
+                        {t.oznaka && (
+                          <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
+                            {t.oznaka}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                         {t.dan || t.ura ? (
@@ -262,6 +313,7 @@ function TerminModal({
     datum_do: termin?.datum_do ? termin.datum_do.slice(0, 10) : "",
     cena: termin?.cena?.toString() || "",
     sezona: termin?.sezona || "",
+    oznaka: termin?.oznaka || "",
     status: termin?.status || "odprt",
     aktiven: termin?.aktiven ?? true,
     vrstni_red: termin?.vrstni_red?.toString() || "0",
@@ -365,8 +417,31 @@ function TerminModal({
             </div>
             <div>
               <label className={L}>Sezona</label>
-              <input value={form.sezona} onChange={(e) => setForm({ ...form, sezona: e.target.value })} className={I} placeholder="poletje-2026" />
+              <input value={form.sezona} onChange={(e) => setForm({ ...form, sezona: e.target.value })} className={I} placeholder="npr. Oktober 2026 – Maj 2027" />
             </div>
+          </div>
+
+          <div className="bg-orange-50/60 border border-orange-200 rounded-xl p-4">
+            <label className={L}>Oznaka za emailing</label>
+            <div className="flex gap-2">
+              <input
+                value={form.oznaka}
+                onChange={(e) => setForm({ ...form, oznaka: e.target.value })}
+                className={I}
+                placeholder="Športna abeceda Vojnik 1. skupina 2026"
+              />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, oznaka: predlagajOznako(form, programi) })}
+                className="shrink-0 px-3 py-2 rounded-lg border border-orange-300 text-brand-orange text-xs font-bold hover:bg-orange-100"
+              >
+                Predlagaj
+              </button>
+            </div>
+            <p className="text-xs text-slate-600 mt-2">
+              Starši, ki se prijavijo na ta termin, dobijo to oznako. V Emailingu lahko potem
+              pišeš samo tej skupini.
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -408,4 +483,18 @@ function TerminModal({
       </div>
     </div>
   );
+}
+
+// Sestavi predlog oznake iz programa, naziva termina in leta.
+function predlagajOznako(
+  form: { program_slug: string; naziv: string; datum_od: string; sezona: string },
+  programi: Program[]
+) {
+  const program = programi.find((p) => p.slug === form.program_slug)?.naziv || form.program_slug;
+  const leto =
+    (form.sezona.match(/20\d{2}/) || form.datum_od.match(/20\d{2}/) || [
+      String(new Date().getFullYear()),
+    ])[0];
+  const naziv = form.naziv.trim();
+  return [program, naziv, leto].filter(Boolean).join(" ").replace(/\s+/g, " ");
 }
