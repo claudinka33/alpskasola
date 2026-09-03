@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { pridobiTrenutniAdmin } from "@/lib/auth";
+import { pridobiAdminaSPravicami } from "@/lib/auth";
+import { imaPravico } from "@/lib/pravice";
 import { pridobiStatistiko, pridobiPrijave, pridobiProgrami } from "@/lib/db";
 import { pregledTable } from "@/lib/moduli";
 import Link from "next/link";
@@ -21,8 +22,14 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
-  const admin = await pridobiTrenutniAdmin();
+  const admin = await pridobiAdminaSPravicami();
   if (!admin) redirect("/admin/login");
+
+  // Tabla pokaže samo tisto, kar uporabnik sme videti
+  const vidiPrijave = imaPravico(admin, "prijave");
+  const vidiPrisotnost = imaPravico(admin, "prisotnost");
+  const vidiPlacila = imaPravico(admin, "placila");
+  const vidiUre = imaPravico(admin, "ure");
 
   const [stats, vsePrijave, programi, tabla] = await Promise.all([
     pridobiStatistiko(),
@@ -53,20 +60,23 @@ export default async function AdminDashboardPage() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-brand-navy mb-1">
-            Pozdravljena, {admin.ime.split(" ")[0]} 👋
+            Živjo, {admin.ime.split(" ")[0]} 👋
           </h1>
           <p className="text-sm text-slate-600 capitalize">{danesNiz}</p>
         </div>
-        <Link
-          href="/admin/prijave/nova"
-          className="inline-flex items-center gap-2 bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-brand-orange-dark transition-colors"
-        >
-          <Plus size={16} /> Nova prijava
-        </Link>
+        {vidiPrijave && (
+          <Link
+            href="/admin/prijave/nova"
+            className="inline-flex items-center gap-2 bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-brand-orange-dark transition-colors"
+          >
+            <Plus size={16} /> Nova prijava
+          </Link>
+        )}
       </div>
 
       {/* Kaj čaka */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {vidiPrisotnost && (
         <Kartica
           href="/admin/prisotnost"
           icon={CheckCircle2}
@@ -82,31 +92,42 @@ export default async function AdminDashboardPage() {
               : "Vadb danes · vse vpisano"
           }
         />
-        <Kartica
-          href="/admin/prijave"
-          icon={Clock}
-          barva="amber"
-          vrednost={String(stats.nove)}
-          label="Novih prijav čaka"
-        />
-        <Kartica
-          href="/admin/placila"
-          icon={AlertTriangle}
-          barva="red"
-          vrednost={`${Math.round(tabla?.dolg || 0)}€`}
-          label={`Neplačano · ${tabla?.dolznikov || 0} dolžnikov`}
-        />
-        <Kartica
-          href="/admin/prisotnost"
-          icon={Users}
-          barva="blue"
-          vrednost={String(tabla?.razporejeni || 0)}
-          label={`Otrok v skupinah · ${stats.skupaj} prijav skupaj`}
-        />
+        )}
+        {vidiPrijave && (
+          <Kartica
+            href="/admin/prijave"
+            icon={Clock}
+            barva="amber"
+            vrednost={String(stats.nove)}
+            label="Novih prijav čaka"
+          />
+        )}
+        {vidiPlacila && (
+          <Kartica
+            href="/admin/placila"
+            icon={AlertTriangle}
+            barva="red"
+            vrednost={`${Math.round(tabla?.dolg || 0)}€`}
+            label={`Neplačano · ${tabla?.dolznikov || 0} dolžnikov`}
+          />
+        )}
+        {vidiPrisotnost && (
+          <Kartica
+            href="/admin/prisotnost"
+            icon={Users}
+            barva="blue"
+            vrednost={String(tabla?.razporejeni || 0)}
+            label={
+              vidiPrijave
+                ? `Otrok v skupinah · ${stats.skupaj} prijav skupaj`
+                : "Otrok v skupinah"
+            }
+          />
+        )}
       </div>
 
       {/* Vadbe danes */}
-      {vadbe.length > 0 && (
+      {vidiPrisotnost && vadbe.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-6">
           <h2 className="text-lg font-extrabold text-brand-navy mb-4">Danes na sporedu</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -146,7 +167,7 @@ export default async function AdminDashboardPage() {
         </div>
       )}
 
-      {vadbe.length === 0 && prihodnje.length > 0 && (
+      {vidiPrisotnost && vadbe.length === 0 && prihodnje.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-6">
           <h2 className="text-lg font-extrabold text-brand-navy mb-1">Prihodnje vadbe</h2>
           <p className="text-xs text-slate-500 mb-4">Naslednjih 14 dni.</p>
@@ -172,6 +193,7 @@ export default async function AdminDashboardPage() {
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Zadnje prijave */}
+        {vidiPrijave && (
         <div className="bg-white rounded-2xl border border-slate-200/70 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-extrabold text-brand-navy">Zadnje prijave</h2>
@@ -206,8 +228,10 @@ export default async function AdminDashboardPage() {
             </ul>
           )}
         </div>
+        )}
 
         {/* Skupine */}
+        {vidiPrisotnost && (
         <div className="bg-white rounded-2xl border border-slate-200/70 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-extrabold text-brand-navy">Skupine</h2>
@@ -266,10 +290,11 @@ export default async function AdminDashboardPage() {
             </ul>
           )}
         </div>
+        )}
       </div>
 
       {/* Ure učiteljev */}
-      {tabla && tabla.ure.length > 0 && (
+      {vidiUre && tabla && tabla.ure.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200/70 p-6">
           <h2 className="text-lg font-extrabold text-brand-navy mb-1">Ure učiteljev ta mesec</h2>
           <p className="text-xs text-slate-500 mb-4">Sešteto iz vpisanih vadb od prvega v mesecu.</p>
