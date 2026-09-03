@@ -16,6 +16,8 @@ export type Prijava = {
   opomba: string | null;
   status: string;
   termin: string | null;
+  termin_id: number | null;
+  oznaka: string | null;
   cena: number | null;
   ustvarjeno: string;
 };
@@ -37,11 +39,11 @@ export async function ustvariPrijavo(
   const result = await sql<Prijava>`
     INSERT INTO prijave (
       program, otrok_ime, otrok_priimek, otrok_rojstvo, otrok_znanje,
-      starsi_ime, starsi_priimek, email, telefon, naslov, posta, opomba, termin, cena, dodatno
+      starsi_ime, starsi_priimek, email, telefon, naslov, posta, opomba, termin, termin_id, oznaka, cena, dodatno
     ) VALUES (
       ${data.program}, ${data.otrok_ime}, ${data.otrok_priimek}, ${data.otrok_rojstvo}, ${data.otrok_znanje},
       ${data.starsi_ime}, ${data.starsi_priimek}, ${data.email}, ${data.telefon},
-      ${data.naslov}, ${data.posta}, ${data.opomba}, ${data.termin}, ${data.cena},
+      ${data.naslov}, ${data.posta}, ${data.opomba}, ${data.termin}, ${data.termin_id ?? null}, ${data.oznaka ?? null}, ${data.cena},
       ${dodatno ? JSON.stringify(dodatno) : null}
     ) RETURNING *;
   `;
@@ -141,6 +143,8 @@ export type Termin = {
   ura: string | null;
   skupina: string | null;
   na_strani: boolean;
+  // Oznaka za ciljano pošiljanje emailov (npr. "Športna abeceda Vojnik 1. skupina 2026")
+  oznaka: string | null;
 };
 
 export async function pridobiTermini(program_slug?: string) {
@@ -159,10 +163,10 @@ export async function pridobiTerminiAktivni(program_slug: string) {
 
 export async function ustvariTermin(d: Partial<Termin>) {
   const r = await sql<Termin>`
-    INSERT INTO termini (program_slug, naziv, lokacija, datum_od, datum_do, cena, status, aktiven, sezona, vrstni_red, opomba, dan, ura, skupina, na_strani)
+    INSERT INTO termini (program_slug, naziv, lokacija, datum_od, datum_do, cena, status, aktiven, sezona, vrstni_red, opomba, dan, ura, skupina, na_strani, oznaka)
     VALUES (${d.program_slug!}, ${d.naziv!}, ${d.lokacija || null}, ${d.datum_od || null}, ${d.datum_do || null},
             ${d.cena ?? null}, ${d.status || "odprt"}, ${d.aktiven ?? true}, ${d.sezona || null}, ${d.vrstni_red ?? 0}, ${d.opomba || null},
-            ${d.dan || null}, ${d.ura || null}, ${d.skupina || null}, ${d.na_strani ?? true})
+            ${d.dan || null}, ${d.ura || null}, ${d.skupina || null}, ${d.na_strani ?? true}, ${d.oznaka || null})
     RETURNING *;`;
   return r.rows[0];
 }
@@ -175,7 +179,8 @@ export async function posodobiTermin(id: number, d: Partial<Termin>) {
     aktiven = ${d.aktiven ?? true}, sezona = ${d.sezona || null},
     vrstni_red = ${d.vrstni_red ?? 0}, opomba = ${d.opomba || null},
     dan = ${d.dan || null}, ura = ${d.ura || null},
-    skupina = ${d.skupina || null}, na_strani = ${d.na_strani ?? true}
+    skupina = ${d.skupina || null}, na_strani = ${d.na_strani ?? true},
+    oznaka = ${d.oznaka || null}
     WHERE id = ${id};`;
 }
 
@@ -371,8 +376,8 @@ export async function pridobiKampanje() {
 
 export async function ustvariKampanjo(d: Partial<Kampanja>) {
   const r = await sql<Kampanja>`
-    INSERT INTO kampanje (zadeva, naslov, vsebina, filter_opis, prejemniki_st, status)
-    VALUES (${d.zadeva!}, ${d.naslov || null}, ${d.vsebina!}, ${d.filter_opis || null}, ${d.prejemniki_st ?? 0}, 'posilja')
+    INSERT INTO kampanje (zadeva, naslov, vsebina, filter_opis, prejemniki_st, status, bloki)
+    VALUES (${d.zadeva!}, ${d.naslov || null}, ${d.vsebina!}, ${d.filter_opis || null}, ${d.prejemniki_st ?? 0}, 'posilja', ${(d as any).bloki || null})
     RETURNING *;`;
   return r.rows[0];
 }
