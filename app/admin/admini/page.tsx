@@ -133,9 +133,9 @@ export default function UporabnikiPage() {
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
             <Users size={26} className="text-brand-orange" /> Uporabniki
           </h1>
           <p className="text-sm text-slate-600 mt-1">Uporabniki z dostopom do CMS-ja.</p>
@@ -211,7 +211,8 @@ export default function UporabnikiPage() {
             <Loader2 size={32} className="animate-spin text-brand-orange mx-auto" />
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr className="text-left text-xs font-bold text-slate-500 uppercase tracking-wide border-b border-slate-100">
                 <th className="px-6 py-3">Ime</th>
@@ -276,6 +277,7 @@ export default function UporabnikiPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

@@ -129,9 +129,9 @@ export default function TerminiPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
             <CalendarDays size={26} className="text-brand-orange" /> Termini
           </h1>
           <p className="text-sm text-slate-600 mt-1">
@@ -194,7 +194,7 @@ export default function TerminiPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[860px]">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>
                   {["Program", "Termin", "Kdaj", "Cena", "Status", "Vidnost", "Akcije"].map((h, i) => (
@@ -213,11 +213,11 @@ export default function TerminiPage() {
                   return (
                     <tr key={t.id} className="border-b border-slate-100 hover:bg-slate-50">
                       <td className="px-4 py-3 text-slate-600">{programNaziv(t.program_slug)}</td>
-                      <td className="px-4 py-3 font-semibold text-brand-navy">
+                      <td className="px-4 py-3 font-semibold text-brand-navy min-w-[220px]">
                         {t.naziv}
                         {t.lokacija && <span className="block text-xs font-normal text-slate-400">{t.lokacija}</span>}
                         {t.oznaka && (
-                          <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
+                          <span className="inline-block mt-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-orange-100 text-orange-800 whitespace-normal break-words max-w-[220px]">
                             {t.oznaka}
                           </span>
                         )}

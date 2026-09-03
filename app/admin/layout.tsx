@@ -57,10 +57,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 lg:flex">
+    <div className="min-h-screen bg-slate-50 lg:flex overflow-x-hidden">
       <Meni skupine={skupine} ime={admin.ime} vloga={admin.vloga} />
 
-      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 min-w-0 max-w-full p-4 sm:p-6 lg:p-8">
         {sme ? (
           children
         ) : (

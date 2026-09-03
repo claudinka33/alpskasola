@@ -372,7 +372,7 @@ export default function KontaktiPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2 mb-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2 mb-1">
             <Users size={26} className="text-brand-orange" /> Kontakti
           </h1>
           <p className="text-sm text-slate-600">
@@ -492,7 +492,7 @@ export default function KontaktiPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[820px]">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Starš</th>

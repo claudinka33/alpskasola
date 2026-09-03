@@ -72,9 +72,13 @@ export default function Meni({
     };
   }, [odprt]);
 
-  const naslov =
-    skupine.flatMap((s) => s.postavke).find((p) => pot === p.href || pot.startsWith(p.href + "/"))
-      ?.label || "CMS";
+  // Najbolj natančno ujemanje: /admin/termini pripada Terminom, ne Pregledu
+  const trenutna = skupine
+    .flatMap((s) => s.postavke)
+    .filter((p) => pot === p.href || pot.startsWith(p.href + "/"))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+
+  const naslov = trenutna?.label || "CMS";
 
   const vsebina = (
     <>
@@ -97,7 +101,7 @@ export default function Meni({
               )}
               {s.postavke.map((p) => {
                 const Ikona = IKONE[p.kljuc] || FileText;
-                const aktiven = pot === p.href || pot.startsWith(p.href + "/");
+                const aktiven = trenutna?.href === p.href;
                 return (
                   <Link
                     key={p.href}

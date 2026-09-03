@@ -298,7 +298,7 @@ export default function PrijavePage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-1">Prijavnice</h1>
           <p className="text-sm text-slate-600">{prikazane.length} prijav prikazanih</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setSeznamPogled((v) => !v)}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors ${
