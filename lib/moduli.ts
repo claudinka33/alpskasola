@@ -253,6 +253,33 @@ export async function premakniOtroka(prijava_id: number, nov_termin_id: number) 
     WHERE id = ${prijava_id};`;
 }
 
+// Pregled vseh skupin: koliko otrok, koliko vadb, kdaj zadnja
+export async function pregledSkupin() {
+  await zagotoviModule();
+  const r = await sql<{
+    id: number;
+    program_slug: string;
+    naziv: string;
+    lokacija: string | null;
+    dan: string | null;
+    ura: string | null;
+    aktiven: boolean;
+    st_otrok: number;
+    st_vadb: number;
+    zadnja_vadba: string | null;
+  }>`
+    SELECT t.id, t.program_slug, t.naziv, t.lokacija, t.dan, t.ura, t.aktiven,
+           COUNT(DISTINCT p.id)::int AS st_otrok,
+           COUNT(DISTINCT s.id)::int AS st_vadb,
+           MAX(s.datum)::text AS zadnja_vadba
+    FROM termini t
+    LEFT JOIN prijave p ON p.termin_id = t.id
+    LEFT JOIN srecanja s ON s.termin_id = t.id
+    GROUP BY t.id, t.program_slug, t.naziv, t.lokacija, t.dan, t.ura, t.aktiven, t.vrstni_red
+    ORDER BY t.program_slug, t.vrstni_red, t.id;`;
+  return r.rows;
+}
+
 // Povzetek prisotnosti po otroku za en termin
 export async function povzetekPrisotnosti(termin_id: number) {
   await zagotoviModule();
