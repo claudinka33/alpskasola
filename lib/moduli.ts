@@ -284,13 +284,13 @@ export async function pregledSkupin() {
 
 // ---------- ZAČETNA TABLA ----------
 
-const DNEVI = ["Nedelja", "Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek", "Sobota"];
-
 export async function pregledTable() {
   await zagotoviModule();
-  const imeDneva = DNEVI[new Date().getDay()];
 
-  // Vadbe, ki so danes na sporedu (po dnevu v tednu, vpisanem pri terminu)
+  // Vadbe danes.
+  // Termin šteje za današnji, če je datum znotraj njegovega obdobja IN velja eno od:
+  //   a) vpisan je dan v tednu, ki se ujema z današnjim (tedenske vadbe skozi sezono),
+  //   b) dneva v tednu ni, ima pa obdobje od–do (strnjeni tečaji, vsak dan v tednu tečaja).
   const danes = await sql<{
     id: number;
     naziv: string;
@@ -305,9 +305,44 @@ export async function pregledTable() {
            EXISTS (SELECT 1 FROM srecanja s WHERE s.termin_id = t.id AND s.datum = CURRENT_DATE) AS vpisano
     FROM termini t
     LEFT JOIN prijave p ON p.termin_id = t.id
-    WHERE t.aktiven = true AND t.dan IS NOT NULL AND trim(lower(t.dan)) = lower(${imeDneva})
+    WHERE t.aktiven = true
+      AND (t.datum_od IS NULL OR CURRENT_DATE >= t.datum_od)
+      AND (t.datum_do IS NULL OR CURRENT_DATE <= t.datum_do)
+      AND (
+        (t.dan IS NOT NULL AND trim(lower(t.dan)) = lower(
+          (ARRAY['Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota','Nedelja'])[EXTRACT(ISODOW FROM CURRENT_DATE)::int]))
+        OR (t.dan IS NULL AND t.datum_od IS NOT NULL AND t.datum_do IS NOT NULL)
+      )
     GROUP BY t.id, t.naziv, t.program_slug, t.lokacija, t.ura, t.vrstni_red
     ORDER BY t.ura NULLS LAST, t.vrstni_red, t.id;`;
+
+  // Kaj pride v naslednjih 14 dneh (po istih pravilih)
+  const prihodnje = await sql<{
+    datum: string;
+    id: number;
+    naziv: string;
+    program_slug: string;
+    ura: string | null;
+    st_otrok: number;
+  }>`
+    WITH dnevi AS (
+      SELECT generate_series(CURRENT_DATE + 1, CURRENT_DATE + 14, interval '1 day')::date AS d
+    )
+    SELECT d.d::text AS datum, t.id, t.naziv, t.program_slug, t.ura,
+           COUNT(DISTINCT p.id)::int AS st_otrok
+    FROM dnevi d
+    JOIN termini t ON t.aktiven = true
+      AND (t.datum_od IS NULL OR d.d >= t.datum_od)
+      AND (t.datum_do IS NULL OR d.d <= t.datum_do)
+      AND (
+        (t.dan IS NOT NULL AND trim(lower(t.dan)) = lower(
+          (ARRAY['Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota','Nedelja'])[EXTRACT(ISODOW FROM d.d)::int]))
+        OR (t.dan IS NULL AND t.datum_od IS NOT NULL AND t.datum_do IS NOT NULL)
+      )
+    LEFT JOIN prijave p ON p.termin_id = t.id
+    GROUP BY d.d, t.id, t.naziv, t.program_slug, t.ura, t.vrstni_red
+    ORDER BY d.d, t.ura NULLS LAST, t.vrstni_red
+    LIMIT 12;`;
 
   // Otroci, razporejeni v skupine
   const razporejeni = await sql<{ st: number }>`
@@ -392,6 +427,7 @@ export async function pregledTable() {
 
   return {
     danes: danes.rows,
+    prihodnje: prihodnje.rows,
     razporejeni: razporejeni.rows[0]?.st ?? 0,
     dolg: dolg.rows[0]?.dolg ?? 0,
     dolznikov: dolg.rows[0]?.dolznikov ?? 0,

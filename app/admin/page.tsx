@@ -42,6 +42,10 @@ export default async function AdminDashboardPage() {
 
   const vadbe = tabla?.danes || [];
   const nevpisane = vadbe.filter((v) => !v.vpisano).length;
+  const prihodnje = tabla?.prihodnje || [];
+
+  const dan = (d: string) =>
+    new Date(d).toLocaleDateString("sl-SI", { weekday: "short", day: "2-digit", month: "2-digit" });
 
   return (
     <div>
@@ -70,7 +74,9 @@ export default async function AdminDashboardPage() {
           vrednost={String(vadbe.length)}
           label={
             vadbe.length === 0
-              ? "Danes ni vadb"
+              ? prihodnje.length > 0
+                ? `Danes ni vadb · naslednja ${dan(prihodnje[0].datum)}`
+                : "Danes ni vadb"
               : nevpisane > 0
               ? `Vadb danes · ${nevpisane} brez prisotnosti`
               : "Vadb danes · vse vpisano"
@@ -137,6 +143,30 @@ export default async function AdminDashboardPage() {
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {vadbe.length === 0 && prihodnje.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200/70 p-6 mb-6">
+          <h2 className="text-lg font-extrabold text-brand-navy mb-1">Prihodnje vadbe</h2>
+          <p className="text-xs text-slate-500 mb-4">Naslednjih 14 dni.</p>
+          <ul className="divide-y divide-slate-100">
+            {prihodnje.map((v, i) => (
+              <li key={`${v.id}-${v.datum}-${i}`} className="flex items-center gap-3 py-2.5 text-sm">
+                <span className="w-24 shrink-0 text-xs font-bold text-brand-orange capitalize">
+                  {dan(v.datum)}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-brand-navy truncate">{v.naziv}</div>
+                  <div className="text-xs text-slate-500">
+                    {naziv(v.program_slug)}
+                    {v.ura ? ` · ${v.ura}` : ""}
+                  </div>
+                </div>
+                <span className="shrink-0 text-xs text-slate-500">{v.st_otrok} otrok</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
