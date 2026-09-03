@@ -72,6 +72,8 @@ export async function zagotoviModule() {
       mesec_do TEXT NOT NULL DEFAULT '2027-05',
       privzeti_znesek NUMERIC(10,2)
     );`;
+  // Način plačevanja: 'mesecno' (npr. Športna abeceda) ali 'enkratno' (npr. plavalni tečaj)
+  await sql`ALTER TABLE placila_nastavitve ADD COLUMN IF NOT EXISTS nacin TEXT NOT NULL DEFAULT 'mesecno';`;
 
   // Blok-zapis kampanje, da jo je mogoče kasneje podvojiti in urejati
   await sql`ALTER TABLE kampanje ADD COLUMN IF NOT EXISTS bloki TEXT;`;
@@ -313,18 +315,38 @@ export async function pregledTable() {
 
   // Neplačano po vseh programih, ki imajo nastavljeno obdobje plačevanja
   const dolg = await sql<{ dolg: number; dolznikov: number }>`
-    SELECT
-      COALESCE(SUM(CASE WHEN pl.placano THEN 0
-                        ELSE COALESCE(pl.znesek, pn.privzeti_znesek, t.cena, 0) END), 0)::float AS dolg,
-      COUNT(DISTINCT p.id) FILTER (WHERE pl.placano IS NOT TRUE)::int AS dolznikov
-    FROM placila_nastavitve pn
-    JOIN prijave p ON p.program = pn.program_slug
-    CROSS JOIN LATERAL generate_series(
-      to_date(pn.mesec_od || '-01', 'YYYY-MM-DD'),
-      to_date(pn.mesec_do || '-01', 'YYYY-MM-DD'),
-      interval '1 month') AS gs
-    LEFT JOIN placila pl ON pl.prijava_id = p.id AND pl.mesec = to_char(gs, 'YYYY-MM')
-    LEFT JOIN termini t ON t.id = p.termin_id;`;
+    WITH vrstice AS (
+      -- mesečni programi: ena vrstica na otroka na mesec
+      SELECT p.id AS prijava_id,
+             CASE WHEN pl.placano THEN 0
+                  ELSE COALESCE(pl.znesek, pn.privzeti_znesek, t.cena, 0) END AS znesek,
+             COALESCE(pl.placano, false) AS placano
+      FROM placila_nastavitve pn
+      JOIN prijave p ON p.program = pn.program_slug
+      CROSS JOIN LATERAL generate_series(
+        to_date(pn.mesec_od || '-01', 'YYYY-MM-DD'),
+        to_date(pn.mesec_do || '-01', 'YYYY-MM-DD'),
+        interval '1 month') AS gs
+      LEFT JOIN placila pl ON pl.prijava_id = p.id AND pl.mesec = to_char(gs, 'YYYY-MM')
+      LEFT JOIN termini t ON t.id = p.termin_id
+      WHERE pn.nacin = 'mesecno'
+
+      UNION ALL
+
+      -- enkratni programi: ena vrstica na otroka
+      SELECT p.id AS prijava_id,
+             CASE WHEN pl.placano THEN 0
+                  ELSE COALESCE(pl.znesek, pn.privzeti_znesek, t.cena, 0) END AS znesek,
+             COALESCE(pl.placano, false) AS placano
+      FROM placila_nastavitve pn
+      JOIN prijave p ON p.program = pn.program_slug
+      LEFT JOIN placila pl ON pl.prijava_id = p.id AND pl.mesec = 'enkratno'
+      LEFT JOIN termini t ON t.id = p.termin_id
+      WHERE pn.nacin = 'enkratno'
+    )
+    SELECT COALESCE(SUM(znesek), 0)::float AS dolg,
+           COUNT(DISTINCT prijava_id) FILTER (WHERE NOT placano)::int AS dolznikov
+    FROM vrstice;`;
 
   // Skupine z zasedenostjo in deležem prisotnosti
   const skupine = await sql<{
@@ -426,8 +448,13 @@ export async function ureUciteljev(program_slug?: string, od?: string, do_?: str
 
 export async function pridobiNastavitvePlacil(program_slug: string) {
   await zagotoviModule();
-  const r = await sql<{ program_slug: string; mesec_od: string; mesec_do: string; privzeti_znesek: string | null }>`
-    SELECT * FROM placila_nastavitve WHERE program_slug = ${program_slug};`;
+  const r = await sql<{
+    program_slug: string;
+    mesec_od: string;
+    mesec_do: string;
+    privzeti_znesek: string | null;
+    nacin: string;
+  }>`SELECT * FROM placila_nastavitve WHERE program_slug = ${program_slug};`;
   return r.rows[0] || null;
 }
 
@@ -436,15 +463,17 @@ export async function shraniNastavitvePlacil(d: {
   mesec_od: string;
   mesec_do: string;
   privzeti_znesek: number | null;
+  nacin?: string;
 }) {
   await zagotoviModule();
   await sql`
-    INSERT INTO placila_nastavitve (program_slug, mesec_od, mesec_do, privzeti_znesek)
-    VALUES (${d.program_slug}, ${d.mesec_od}, ${d.mesec_do}, ${d.privzeti_znesek})
+    INSERT INTO placila_nastavitve (program_slug, mesec_od, mesec_do, privzeti_znesek, nacin)
+    VALUES (${d.program_slug}, ${d.mesec_od}, ${d.mesec_do}, ${d.privzeti_znesek}, ${d.nacin || "mesecno"})
     ON CONFLICT (program_slug) DO UPDATE SET
       mesec_od = EXCLUDED.mesec_od,
       mesec_do = EXCLUDED.mesec_do,
-      privzeti_znesek = EXCLUDED.privzeti_znesek;`;
+      privzeti_znesek = EXCLUDED.privzeti_znesek,
+      nacin = EXCLUDED.nacin;`;
 }
 
 export async function pridobiPlacila(program_slug: string, termin_id?: number) {

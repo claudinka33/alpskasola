@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       mesec_do: d.mesec_do || "2027-05",
       privzeti_znesek:
         d.privzeti_znesek !== "" && d.privzeti_znesek != null ? Number(d.privzeti_znesek) : null,
+      nacin: d.nacin === "enkratno" ? "enkratno" : "mesecno",
     });
     return NextResponse.json({ uspeh: true });
   } catch (e: any) {

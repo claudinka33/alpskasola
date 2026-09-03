@@ -17,7 +17,12 @@ type Vrstica = {
   opomba: string | null;
   email?: string;
 };
-type Nastavitve = { mesec_od: string; mesec_do: string; privzeti_znesek: string | null } | null;
+type Nastavitve = {
+  mesec_od: string;
+  mesec_do: string;
+  privzeti_znesek: string | null;
+  nacin?: string;
+} | null;
 
 const MESECI = ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "avg", "sep", "okt", "nov", "dec"];
 
@@ -84,7 +89,11 @@ export default function PlacilaPage() {
 
   const mesecOd = nastavitve?.mesec_od || "2026-10";
   const mesecDo = nastavitve?.mesec_do || "2027-05";
-  const meseci = useMemo(() => razponMesecev(mesecOd, mesecDo), [mesecOd, mesecDo]);
+  const enkratno = nastavitve?.nacin === "enkratno";
+  const meseci = useMemo(
+    () => (enkratno ? ["enkratno"] : razponMesecev(mesecOd, mesecDo)),
+    [mesecOd, mesecDo, enkratno]
+  );
 
   // Privzeti znesek: nastavitev programa, sicer cena termina
   const privzetiZnesek = (termin_id: number | null) => {
@@ -151,7 +160,9 @@ export default function PlacilaPage() {
             <Euro size={26} className="text-brand-orange" /> Plačila
           </h1>
           <p className="text-sm text-slate-600 mt-1">
-            Mesečna evidenca plačil po otrocih. Obkljukaj mesec, ko je plačilo prispelo.
+            {enkratno
+              ? "Enkratno plačilo za tečaj. Obkljukaj otroka, ko je plačilo prispelo."
+              : "Mesečna evidenca plačil po otrocih. Obkljukaj mesec, ko je plačilo prispelo."}
           </p>
         </div>
         {program && (
@@ -159,7 +170,7 @@ export default function PlacilaPage() {
             onClick={() => setUrejamNastavitve(true)}
             className="inline-flex items-center gap-2 bg-white border border-slate-200 text-brand-navy px-4 py-2.5 rounded-lg text-sm font-semibold hover:border-brand-orange"
           >
-            <Settings2 size={16} /> Obdobje in znesek
+            <Settings2 size={16} /> Način in znesek
           </button>
         )}
       </div>
@@ -223,11 +234,21 @@ export default function PlacilaPage() {
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-brand-navy sticky left-0 bg-slate-50">
                     Otrok
                   </th>
+                  {enkratno && (
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-brand-navy">
+                      Skupina
+                    </th>
+                  )}
                   {meseci.map((m) => (
                     <th key={m} className="px-2 py-3 text-[10px] font-semibold uppercase text-brand-navy text-center">
-                      {oznakaMeseca(m)}
+                      {enkratno ? "Plačano" : oznakaMeseca(m)}
                     </th>
                   ))}
+                  {enkratno && (
+                    <th className="px-4 py-3 text-xs font-semibold uppercase text-brand-navy text-right">
+                      Znesek
+                    </th>
+                  )}
                   <th className="px-4 py-3 text-xs font-semibold uppercase text-brand-navy text-right">Dolg</th>
                 </tr>
               </thead>
@@ -237,6 +258,11 @@ export default function PlacilaPage() {
                     <td className="px-4 py-2.5 font-semibold text-brand-navy whitespace-nowrap sticky left-0 bg-white">
                       {o.ime}
                     </td>
+                    {enkratno && (
+                      <td className="px-4 py-2.5 text-slate-600 text-xs">
+                        {termini.find((t) => t.id === o.termin_id)?.naziv || "—"}
+                      </td>
+                    )}
                     {meseci.map((m) => {
                       const p = o.placila[m];
                       return (
@@ -259,6 +285,15 @@ export default function PlacilaPage() {
                         </td>
                       );
                     })}
+                    {enkratno && (
+                      <td className="px-4 py-2.5 text-right text-slate-600 whitespace-nowrap">
+                        {(o.placila["enkratno"]?.znesek != null
+                          ? Number(o.placila["enkratno"].znesek)
+                          : privzetiZnesek(o.termin_id) ?? 0
+                        ).toFixed(0)}
+                        €
+                      </td>
+                    )}
                     <td className="px-4 py-2.5 text-right whitespace-nowrap">
                       {o.dolg > 0 ? (
                         <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
@@ -287,7 +322,12 @@ export default function PlacilaPage() {
       {urejamNastavitve && (
         <NastavitveModal
           program_slug={program}
-          zacetne={{ mesec_od: mesecOd, mesec_do: mesecDo, privzeti_znesek: nastavitve?.privzeti_znesek || "" }}
+          zacetne={{
+            mesec_od: mesecOd,
+            mesec_do: mesecDo,
+            privzeti_znesek: nastavitve?.privzeti_znesek || "",
+            nacin: nastavitve?.nacin || "mesecno",
+          }}
           onClose={() => setUrejamNastavitve(false)}
           onShranjeno={() => {
             setUrejamNastavitve(false);
@@ -329,7 +369,7 @@ function NastavitveModal({
   onShranjeno,
 }: {
   program_slug: string;
-  zacetne: { mesec_od: string; mesec_do: string; privzeti_znesek: string };
+  zacetne: { mesec_od: string; mesec_do: string; privzeti_znesek: string; nacin: string };
   onClose: () => void;
   onShranjeno: () => void;
 }) {
@@ -354,10 +394,31 @@ function NastavitveModal({
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl w-full max-w-md p-6">
         <div className="flex items-start justify-between mb-4">
-          <h2 className="text-lg font-extrabold text-brand-navy">Obdobje plačevanja</h2>
+          <h2 className="text-lg font-extrabold text-brand-navy">Način plačevanja</h2>
           <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-700"><X size={18} /></button>
         </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
+
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {[
+            ["mesecno", "Mesečno", "npr. Športna abeceda"],
+            ["enkratno", "Enkratno", "npr. plavalni tečaj"],
+          ].map(([v, l, o]) => (
+            <button
+              key={v}
+              onClick={() => setF({ ...f, nacin: v })}
+              className={`text-left rounded-xl border-2 px-4 py-3 ${
+                f.nacin === v
+                  ? "border-brand-orange bg-orange-50/60"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <div className="text-sm font-bold text-brand-navy">{l}</div>
+              <div className="text-[11px] text-slate-500">{o}</div>
+            </button>
+          ))}
+        </div>
+
+        <div className={`grid grid-cols-2 gap-3 mb-3 ${f.nacin === "enkratno" ? "hidden" : ""}`}>
           <div>
             <label className={L}>Od meseca</label>
             <input type="month" value={f.mesec_od} onChange={(e) => setF({ ...f, mesec_od: e.target.value })} className={I} />
@@ -368,13 +429,13 @@ function NastavitveModal({
           </div>
         </div>
         <div className="mb-4">
-          <label className={L}>Mesečni znesek (€)</label>
+          <label className={L}>{f.nacin === "enkratno" ? "Cena tečaja (€)" : "Mesečni znesek (€)"}</label>
           <input
             type="number"
             value={f.privzeti_znesek}
             onChange={(e) => setF({ ...f, privzeti_znesek: e.target.value })}
             className={I}
-            placeholder="35"
+            placeholder={f.nacin === "enkratno" ? "130" : "35"}
           />
           <p className="text-xs text-slate-500 mt-1">
             Če pustiš prazno, se vzame cena, ki je vpisana pri terminu.
@@ -430,7 +491,9 @@ function CelicaModal({
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl w-full max-w-sm p-6">
         <div className="flex items-start justify-between mb-4">
-          <h2 className="text-lg font-extrabold text-brand-navy">Plačilo — {oznakaMeseca(mesec)}</h2>
+          <h2 className="text-lg font-extrabold text-brand-navy">
+            Plačilo{mesec === "enkratno" ? " za tečaj" : ` — ${oznakaMeseca(mesec)}`}
+          </h2>
           <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-700"><X size={18} /></button>
         </div>
         <label className="flex items-center gap-2 mb-3 cursor-pointer">
