@@ -325,7 +325,8 @@ export async function shraniNastavitvePlacil(d: {
 export async function pridobiPlacila(program_slug: string, termin_id?: number) {
   await zagotoviModule();
   const r = await sql<Placilo & { otrok_ime: string; otrok_priimek: string; termin_id: number | null }>`
-    SELECT pl.*, p.otrok_ime, p.otrok_priimek, p.termin_id
+    SELECT p.id AS prijava_id, pl.mesec, pl.placano, pl.znesek, pl.datum, pl.opomba,
+           p.otrok_ime, p.otrok_priimek, p.termin_id
     FROM prijave p
     LEFT JOIN placila pl ON pl.prijava_id = p.id
     WHERE p.program = ${program_slug}
