@@ -280,6 +280,104 @@ export async function pregledSkupin() {
   return r.rows;
 }
 
+// ---------- ZAČETNA TABLA ----------
+
+const DNEVI = ["Nedelja", "Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek", "Sobota"];
+
+export async function pregledTable() {
+  await zagotoviModule();
+  const imeDneva = DNEVI[new Date().getDay()];
+
+  // Vadbe, ki so danes na sporedu (po dnevu v tednu, vpisanem pri terminu)
+  const danes = await sql<{
+    id: number;
+    naziv: string;
+    program_slug: string;
+    lokacija: string | null;
+    ura: string | null;
+    st_otrok: number;
+    vpisano: boolean;
+  }>`
+    SELECT t.id, t.naziv, t.program_slug, t.lokacija, t.ura,
+           COUNT(DISTINCT p.id)::int AS st_otrok,
+           EXISTS (SELECT 1 FROM srecanja s WHERE s.termin_id = t.id AND s.datum = CURRENT_DATE) AS vpisano
+    FROM termini t
+    LEFT JOIN prijave p ON p.termin_id = t.id
+    WHERE t.aktiven = true AND t.dan IS NOT NULL AND trim(lower(t.dan)) = lower(${imeDneva})
+    GROUP BY t.id, t.naziv, t.program_slug, t.lokacija, t.ura, t.vrstni_red
+    ORDER BY t.ura NULLS LAST, t.vrstni_red, t.id;`;
+
+  // Otroci, razporejeni v skupine
+  const razporejeni = await sql<{ st: number }>`
+    SELECT COUNT(*)::int AS st FROM prijave WHERE termin_id IS NOT NULL;`;
+
+  // Neplačano po vseh programih, ki imajo nastavljeno obdobje plačevanja
+  const dolg = await sql<{ dolg: number; dolznikov: number }>`
+    SELECT
+      COALESCE(SUM(CASE WHEN pl.placano THEN 0
+                        ELSE COALESCE(pl.znesek, pn.privzeti_znesek, t.cena, 0) END), 0)::float AS dolg,
+      COUNT(DISTINCT p.id) FILTER (WHERE pl.placano IS NOT TRUE)::int AS dolznikov
+    FROM placila_nastavitve pn
+    JOIN prijave p ON p.program = pn.program_slug
+    CROSS JOIN LATERAL generate_series(
+      to_date(pn.mesec_od || '-01', 'YYYY-MM-DD'),
+      to_date(pn.mesec_do || '-01', 'YYYY-MM-DD'),
+      interval '1 month') AS gs
+    LEFT JOIN placila pl ON pl.prijava_id = p.id AND pl.mesec = to_char(gs, 'YYYY-MM')
+    LEFT JOIN termini t ON t.id = p.termin_id;`;
+
+  // Skupine z zasedenostjo in deležem prisotnosti
+  const skupine = await sql<{
+    id: number;
+    naziv: string;
+    program_slug: string;
+    st_otrok: number;
+    st_vadb: number;
+    zadnja_vadba: string | null;
+    odstotek: number | null;
+  }>`
+    WITH otroci AS (
+      SELECT termin_id, COUNT(*)::int AS st FROM prijave WHERE termin_id IS NOT NULL GROUP BY termin_id
+    ),
+    vadbe AS (
+      SELECT termin_id, COUNT(*)::int AS st, MAX(datum)::text AS zadnja FROM srecanja GROUP BY termin_id
+    ),
+    prisot AS (
+      SELECT s.termin_id,
+             COUNT(pr.id)::int AS zapisov,
+             COUNT(pr.id) FILTER (WHERE pr.prisoten)::int AS prisotnih
+      FROM srecanja s JOIN prisotnost pr ON pr.srecanje_id = s.id
+      GROUP BY s.termin_id
+    )
+    SELECT t.id, t.naziv, t.program_slug,
+           COALESCE(o.st, 0) AS st_otrok,
+           COALESCE(v.st, 0) AS st_vadb,
+           v.zadnja AS zadnja_vadba,
+           CASE WHEN COALESCE(pr.zapisov, 0) > 0
+                THEN ROUND(pr.prisotnih * 100.0 / pr.zapisov)::int
+                ELSE NULL END AS odstotek
+    FROM termini t
+    LEFT JOIN otroci o ON o.termin_id = t.id
+    LEFT JOIN vadbe v ON v.termin_id = t.id
+    LEFT JOIN prisot pr ON pr.termin_id = t.id
+    WHERE COALESCE(o.st, 0) > 0
+    ORDER BY t.program_slug, t.vrstni_red, t.id;`;
+
+  // Ure učiteljev v tekočem mesecu
+  const prvi = new Date();
+  const od = `${prvi.getFullYear()}-${String(prvi.getMonth() + 1).padStart(2, "0")}-01`;
+  const ure = await ureUciteljev(undefined, od, undefined);
+
+  return {
+    danes: danes.rows,
+    razporejeni: razporejeni.rows[0]?.st ?? 0,
+    dolg: dolg.rows[0]?.dolg ?? 0,
+    dolznikov: dolg.rows[0]?.dolznikov ?? 0,
+    skupine: skupine.rows,
+    ure,
+  };
+}
+
 // Povzetek prisotnosti po otroku za en termin
 export async function povzetekPrisotnosti(termin_id: number) {
   await zagotoviModule();
