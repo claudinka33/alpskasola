@@ -17,12 +17,27 @@ import {
   ArrowDown,
   X,
   Search,
+  Save,
+  Copy,
+  FileText,
+  Trash2,
 } from "lucide-react";
+
+type Predloga = {
+  id: number;
+  naziv: string;
+  zadeva: string;
+  naslov: string | null;
+  vsebina: string;
+  bloki: string | null;
+  ustvarjeno: string;
+};
 
 type Kampanja = {
   id: number;
   zadeva: string;
   naslov: string | null;
+  bloki?: string | null;
   vsebina: string;
   filter_opis: string | null;
   prejemniki_st: number;
@@ -121,6 +136,9 @@ export default function KampanjePage() {
   const [testStanje, setTestStanje] = useState<"" | "posiljam" | "poslano" | "napaka">("");
   const [posiljanje, setPosiljanje] = useState<{ skupaj: number; poslano: number } | null>(null);
   const [napaka, setNapaka] = useState("");
+  const [predloge, setPredloge] = useState<Predloga[]>([]);
+  const [shraniPredlogoOdprt, setShraniPredlogoOdprt] = useState(false);
+  const [nazivPredloge, setNazivPredloge] = useState("");
 
   const vsebina = blokiVVsebino(bloki, termini);
 
@@ -130,6 +148,50 @@ export default function KampanjePage() {
       setKontakti(d.kontakti || []);
     } catch {}
   };
+  const naloziPredloge = async () => {
+    try {
+      const d = await fetch("/api/predloge").then((r) => r.json());
+      setPredloge(d.predloge || []);
+    } catch {}
+  };
+
+  // Naloži blokovni zapis v urejevalnik (iz predloge ali pretekle kampanje)
+  const uporabi = (vir: { zadeva: string; naslov: string | null; bloki: string | null }) => {
+    setZadeva(vir.zadeva || "");
+    setNaslov(vir.naslov || "");
+    if (vir.bloki) {
+      try {
+        const b = JSON.parse(vir.bloki) as Blok[];
+        if (Array.isArray(b) && b.length > 0) {
+          setBloki(b.map((x) => ({ ...x, kljuc: novKljuc() })));
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+      } catch {}
+    }
+    alert("Ta kampanja nima shranjenih blokov, prenesla sem samo zadevo in naslov.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const shraniPredlogo = async () => {
+    const naziv = nazivPredloge.trim();
+    if (!naziv) return;
+    await fetch("/api/predloge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ naziv, zadeva, naslov, vsebina, bloki: JSON.stringify(bloki) }),
+    });
+    setNazivPredloge("");
+    setShraniPredlogoOdprt(false);
+    naloziPredloge();
+  };
+
+  const izbrisiPredlogo = async (id: number, naziv: string) => {
+    if (!confirm(`Izbrišem predlogo "${naziv}"?`)) return;
+    await fetch(`/api/predloge?id=${id}`, { method: "DELETE" });
+    naloziPredloge();
+  };
+
   const naloziKampanje = async () => {
     try {
       const d = await fetch("/api/admin/kampanje").then((r) => r.json());
@@ -147,6 +209,7 @@ export default function KampanjePage() {
     naloziKontakte();
     naloziKampanje();
     naloziTermine();
+    naloziPredloge();
   }, []);
 
   const vseOznake = useMemo(
@@ -259,7 +322,7 @@ export default function KampanjePage() {
       const res = await fetch("/api/admin/kampanje", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ zadeva, naslov, vsebina, oznake, samoNaroceni }),
+        body: JSON.stringify({ zadeva, naslov, vsebina, oznake, samoNaroceni, bloki: JSON.stringify(bloki) }),
       });
       const d = await res.json();
       if (!res.ok) return setNapaka(d.error || "Napaka pri ustvarjanju kampanje.");
@@ -712,6 +775,66 @@ export default function KampanjePage() {
             </p>
           </div>
 
+          {/* Predloge */}
+          <div className="bg-white rounded-2xl border border-slate-200/70 p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-brand-navy flex items-center gap-2">
+                <FileText size={15} className="text-brand-orange" /> Predloge
+              </h2>
+              <button
+                onClick={() => setShraniPredlogoOdprt((v) => !v)}
+                disabled={!zadeva && !vsebina}
+                className="inline-flex items-center gap-1 text-xs font-bold text-brand-orange disabled:opacity-40"
+              >
+                <Save size={13} /> Shrani to
+              </button>
+            </div>
+
+            {shraniPredlogoOdprt && (
+              <div className="flex gap-2 mb-3">
+                <input
+                  value={nazivPredloge}
+                  onChange={(e) => setNazivPredloge(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && shraniPredlogo()}
+                  placeholder="Ime predloge, npr. Plavalni tečaj – info"
+                  className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs outline-none focus:border-brand-orange"
+                />
+                <button
+                  onClick={shraniPredlogo}
+                  className="px-3 py-2 rounded-lg bg-brand-navy text-white text-xs font-bold"
+                >
+                  Shrani
+                </button>
+              </div>
+            )}
+
+            {predloge.length === 0 ? (
+              <p className="text-xs text-slate-400">
+                Še ni predlog. Napiši mail in ga shrani, da ga naslednjič samo odpreš.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {predloge.map((p) => (
+                  <li key={p.id} className="flex items-center gap-2 text-sm">
+                    <button
+                      onClick={() => uporabi({ zadeva: p.zadeva, naslov: p.naslov, bloki: p.bloki })}
+                      className="flex-1 text-left min-w-0 hover:text-brand-orange"
+                    >
+                      <span className="font-semibold text-brand-navy block truncate">{p.naziv}</span>
+                      <span className="text-[11px] text-slate-400 block truncate">{p.zadeva}</span>
+                    </button>
+                    <button
+                      onClick={() => izbrisiPredlogo(p.id, p.naziv)}
+                      className="shrink-0 p-1.5 text-slate-300 hover:text-red-600"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           {/* Zgodovina */}
           <div className="bg-white rounded-2xl border border-slate-200/70 p-6">
             <h2 className="text-sm font-bold text-brand-navy mb-3">Zadnje kampanje</h2>
@@ -720,12 +843,21 @@ export default function KampanjePage() {
             ) : (
               <ul className="space-y-3">
                 {kampanje.slice(0, 8).map((k) => (
-                  <li key={k.id} className="text-sm border-b border-slate-100 pb-2 last:border-0">
-                    <div className="font-semibold text-brand-navy truncate">{k.zadeva}</div>
-                    <div className="text-[11px] text-slate-400">
-                      {new Date(k.ustvarjeno).toLocaleDateString("sl-SI")} · {k.poslano_st}/{k.prejemniki_st} poslanih
-                      {k.filter_opis ? ` · ${k.filter_opis}` : ""}
+                  <li key={k.id} className="text-sm border-b border-slate-100 pb-2 last:border-0 flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-brand-navy truncate">{k.zadeva}</div>
+                      <div className="text-[11px] text-slate-400">
+                        {new Date(k.ustvarjeno).toLocaleDateString("sl-SI")} · {k.poslano_st}/{k.prejemniki_st} poslanih
+                        {k.filter_opis ? ` · ${k.filter_opis}` : ""}
+                      </div>
                     </div>
+                    <button
+                      onClick={() => uporabi({ zadeva: k.zadeva, naslov: k.naslov, bloki: k.bloki || null })}
+                      title="Podvoji in uredi"
+                      className="shrink-0 p-1.5 text-slate-400 hover:text-brand-orange"
+                    >
+                      <Copy size={14} />
+                    </button>
                   </li>
                 ))}
               </ul>

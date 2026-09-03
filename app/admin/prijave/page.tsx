@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer } from "lucide-react";
 
@@ -54,6 +54,7 @@ export default function PrijavePage() {
   const [filterTermin, setFilterTermin] = useState("");
   const [seznamPogled, setSeznamPogled] = useState(false);
   const [izbrana, setIzbrana] = useState<Prijava | null>(null);
+  const [vsePrijave, setVsePrijave] = useState<Prijava[]>([]);
 
   const naloziPrijave = async () => {
     setLoading(true);
@@ -75,6 +76,11 @@ export default function PrijavePage() {
 
   useEffect(() => {
     naloziPrijave();
+    // Vse prijave (brez filtrov) — za oznako "že bil pri nas"
+    fetch("/api/prijave")
+      .then((r) => r.json())
+      .then((d) => setVsePrijave(d.prijave || []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -98,12 +104,13 @@ export default function PrijavePage() {
     const headers = [
       "ID", "Program", "Termin", "Otrok ime", "Otrok priimek", "Rojstvo", "Znanje",
       "Starš ime", "Starš priimek", "Email", "Telefon", "Naslov", "Pošta",
-      "Opomba", "Status", "Ustvarjeno",
+      "Opomba", "Že bil pri nas", "Status", "Ustvarjeno",
     ];
     const rows = prikazane.map((p) => [
       p.id, programLabels[p.program] || p.program, p.termin || "", p.otrok_ime, p.otrok_priimek,
       p.otrok_rojstvo, p.otrok_znanje || "", p.starsi_ime, p.starsi_priimek,
       p.email, p.telefon, p.naslov || "", p.posta || "", p.opomba || "",
+      zeBil(p).join(", "),
       p.status, new Date(p.ustvarjeno).toLocaleString("sl-SI"),
     ]);
     const csv = [headers, ...rows]
@@ -119,6 +126,29 @@ export default function PrijavePage() {
   };
 
   const getStatusConfig = (s: string) => statusi.find((x) => x.value === s) || statusi[0];
+
+  // Zgodovina po otroku (ime + priimek, ne po staršu) — kje vse je že bil.
+  const kljucOtroka = (p: { otrok_ime: string; otrok_priimek: string }) =>
+    `${p.otrok_ime} ${p.otrok_priimek}`.toLowerCase().replace(/\s+/g, " ").trim();
+
+  const zgodovina = useMemo(() => {
+    const m: Record<string, Set<string>> = {};
+    for (const p of vsePrijave) {
+      const k = kljucOtroka(p);
+      if (!m[k]) m[k] = new Set();
+      m[k].add(p.program);
+    }
+    return m;
+  }, [vsePrijave]);
+
+  // Programi, na katerih je otrok že bil (razen tekočega)
+  const zeBil = (p: Prijava) => {
+    const vsi = zgodovina[kljucOtroka(p)];
+    if (!vsi) return [] as string[];
+    return Array.from(vsi)
+      .filter((x) => x !== p.program)
+      .map((x) => programLabels[x] || x);
+  };
 
   // Dodatni stolpci: ko je izbran program, pokaži polja po meri (npr. alergije),
   // ki se pojavijo v prijavah tega programa
@@ -152,6 +182,8 @@ export default function PrijavePage() {
             <td>${p.otrok_rojstvo ? new Date(p.otrok_rojstvo).toLocaleDateString("sl-SI") : ""}</td>
             <td>${p.starsi_ime} ${p.starsi_priimek}</td>
             <td>${p.telefon}</td>
+            <td class="opomba">${(p.opomba || "").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</td>
+            <td class="ze">${zeBil(p).join(", ")}</td>
             <td>${(statusi.find((s) => s.value === p.status)?.label || p.status).toUpperCase()}</td>
           </tr>`
       )
@@ -163,10 +195,12 @@ export default function PrijavePage() {
         table{width:100%;border-collapse:collapse;font-size:13px}
         th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e2e8f0}
         th{font-size:11px;text-transform:uppercase;color:#64748b}
+        td.opomba{font-size:11px;color:#334155;max-width:260px}
+        td.ze{font-size:11px;color:#9a3412;white-space:nowrap}
       </style></head><body>
       <h1>Seznam prijavljenih otrok — ${naslov}</h1>
       <p>${prikazane.length} prijav · natisnjeno ${new Date().toLocaleDateString("sl-SI")}</p>
-      <table><thead><tr><th></th><th>Otrok</th><th>Rojstvo</th><th>Starš</th><th>Telefon</th><th>Status</th></tr></thead>
+      <table><thead><tr><th></th><th>Otrok</th><th>Rojstvo</th><th>Starš</th><th>Telefon</th><th>Opomba</th><th>Že bil pri nas</th><th>Status</th></tr></thead>
       <tbody>${vrstice}</tbody></table></body></html>`;
     const w = window.open("", "_blank");
     if (w) {
@@ -314,6 +348,14 @@ export default function PrijavePage() {
                       {!filterTermin && p.termin && (
                         <span className="text-xs text-slate-400 ml-2 truncate">· {p.termin}</span>
                       )}
+                      {zeBil(p).length > 0 && (
+                        <span className="text-[10px] font-bold text-orange-800 bg-orange-100 rounded-full px-2 py-0.5 ml-2">
+                          Že bil: {zeBil(p).join(", ")}
+                        </span>
+                      )}
+                      {p.opomba && (
+                        <div className="text-xs text-slate-600 whitespace-pre-line mt-1">{p.opomba}</div>
+                      )}
                     </div>
                     <span className="text-xs text-slate-500 hidden sm:block">
                       {p.starsi_ime} {p.starsi_priimek} · {p.telefon}
@@ -338,6 +380,7 @@ export default function PrijavePage() {
                   {dodatniStolpci.map((s) => (
                     <th key={s} className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">{s}</th>
                   ))}
+                  <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Opomba</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Datum</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Status</th>
                 </tr>
@@ -360,6 +403,11 @@ export default function PrijavePage() {
                             <div className="font-semibold text-brand-navy">
                               {p.otrok_ime} {p.otrok_priimek}
                             </div>
+                            {zeBil(p).length > 0 && (
+                              <div className="text-[10px] font-bold text-orange-800 bg-orange-100 rounded-full px-2 py-0.5 inline-block mt-0.5">
+                                Že bil: {zeBil(p).join(", ")}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -377,6 +425,13 @@ export default function PrijavePage() {
                           {(p.dodatno || {})[s] || ""}
                         </td>
                       ))}
+                      <td className="px-4 py-3 text-slate-600 text-xs max-w-[260px]">
+                        {p.opomba ? (
+                          <span className="line-clamp-3 whitespace-pre-line">{p.opomba}</span>
+                        ) : (
+                          <span className="text-slate-300">—</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-slate-500 text-xs">
                         {new Date(p.ustvarjeno).toLocaleDateString("sl-SI")}
                       </td>

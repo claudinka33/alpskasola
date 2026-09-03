@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ustvariPrijavo, pridobiPrijave, pridobiProgrami, pridobiFormPolja, upsertKontakt } from "@/lib/db";
+import { oznakeZaPrijavo, zagotoviModule } from "@/lib/moduli";
 import { posljiPotrditevStarsu, posljiObvestiloSoli } from "@/lib/email";
 import { zagotoviTabele } from "@/lib/migracije";
 
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
     let opomba = data.opomba || null;
     try {
       await zagotoviTabele();
+      await zagotoviModule();
       const polja = (await pridobiFormPolja(data.program)).filter((p) => p.viden);
       const vrednosti = (data.dodatno || {}) as Record<string, string>;
       for (const p of polja) {
@@ -73,6 +75,17 @@ export async function POST(req: NextRequest) {
       console.error("Napaka pri nastavljivih poljih:", e);
     }
 
+    // Oznake za emailing: program + oznaka izbranega termina (če jo ima)
+    let oznake = data.program;
+    let oznakaTermina: string | null = null;
+    try {
+      oznake = await oznakeZaPrijavo(data.program, data.termin_id || null);
+      const deli = oznake.split(";");
+      oznakaTermina = deli.length > 1 ? deli[1] : null;
+    } catch (e) {
+      console.error("Napaka pri oznakah termina:", e);
+    }
+
     const prijava = await ustvariPrijavo(
       {
         program: data.program,
@@ -88,6 +101,8 @@ export async function POST(req: NextRequest) {
         posta: data.posta || null,
         opomba,
         termin: data.termin || null,
+        termin_id: data.termin_id || null,
+        oznaka: oznakaTermina,
         cena: data.cena || null,
       },
       dodatno
@@ -101,7 +116,7 @@ export async function POST(req: NextRequest) {
         email: data.email,
         telefon: data.telefon,
         otrok: `${data.otrok_ime} ${data.otrok_priimek}`,
-        oznake: data.program,
+        oznake,
         vir: "Prijavnica",
       });
     } catch (e) {
