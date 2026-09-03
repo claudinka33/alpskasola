@@ -304,7 +304,13 @@ export async function ureUciteljevPodrobno(od?: string, do_?: string) {
       AND (${do_ || null}::date IS NULL OR s.datum <= ${do_ || null}::date)
     ORDER BY s.datum DESC;`;
 
-  type PoProgramu = { program_slug: string; srecanj: number; minut: number };
+  type Skupina = { naziv: string; srecanj: number; minut: number };
+  type PoProgramu = {
+    program_slug: string;
+    srecanj: number;
+    minut: number;
+    skupine: Record<string, Skupina>;
+  };
   const m: Record<string, { srecanj: number; minut: number; poProgramih: Record<string, PoProgramu> }> = {};
 
   for (const v of r.rows) {
@@ -312,13 +318,20 @@ export async function ureUciteljevPodrobno(od?: string, do_?: string) {
       if (!m[ime]) m[ime] = { srecanj: 0, minut: 0, poProgramih: {} };
       m[ime].srecanj += 1;
       m[ime].minut += v.trajanje_min || 0;
+
       const pp = (m[ime].poProgramih[v.program_slug] ??= {
         program_slug: v.program_slug,
         srecanj: 0,
         minut: 0,
+        skupine: {},
       });
       pp.srecanj += 1;
       pp.minut += v.trajanje_min || 0;
+
+      const kljuc = v.termin_naziv || "Brez skupine";
+      const sk = (pp.skupine[kljuc] ??= { naziv: kljuc, srecanj: 0, minut: 0 });
+      sk.srecanj += 1;
+      sk.minut += v.trajanje_min || 0;
     }
   }
 
@@ -329,7 +342,15 @@ export async function ureUciteljevPodrobno(od?: string, do_?: string) {
       minut: v.minut,
       ure: +(v.minut / 60).toFixed(2),
       poProgramih: Object.values(v.poProgramih)
-        .map((p) => ({ ...p, ure: +(p.minut / 60).toFixed(2) }))
+        .map((p) => ({
+          program_slug: p.program_slug,
+          srecanj: p.srecanj,
+          minut: p.minut,
+          ure: +(p.minut / 60).toFixed(2),
+          skupine: Object.values(p.skupine)
+            .map((x) => ({ ...x, ure: +(x.minut / 60).toFixed(2) }))
+            .sort((a, b) => b.minut - a.minut),
+        }))
         .sort((a, b) => b.minut - a.minut),
     }))
     .sort((a, b) => b.minut - a.minut);
@@ -401,10 +422,9 @@ export async function pregledTable() {
   const razporejeni = await sql<{ st: number }>`
     SELECT COUNT(*)::int AS st FROM prijave WHERE termin_id IS NOT NULL;`;
 
-  // Neplačano po vseh programih, ki imajo nastavljeno obdobje plačevanja
+  // Neplačano: mesečni in enkratni programi skupaj
   const dolg = await sql<{ dolg: number; dolznikov: number }>`
     WITH vrstice AS (
-      -- mesečni programi: ena vrstica na otroka na mesec
       SELECT p.id AS prijava_id,
              CASE WHEN pl.placano THEN 0
                   ELSE COALESCE(pl.znesek, pn.privzeti_znesek, t.cena, 0) END AS znesek,
@@ -421,7 +441,6 @@ export async function pregledTable() {
 
       UNION ALL
 
-      -- enkratni programi: ena vrstica na otroka
       SELECT p.id AS prijava_id,
              CASE WHEN pl.placano THEN 0
                   ELSE COALESCE(pl.znesek, pn.privzeti_znesek, t.cena, 0) END AS znesek,
@@ -471,6 +490,8 @@ export async function pregledTable() {
     LEFT JOIN vadbe v ON v.termin_id = t.id
     LEFT JOIN prisot pr ON pr.termin_id = t.id
     WHERE COALESCE(o.st, 0) > 0
+      AND t.aktiven = true
+      AND (t.datum_do IS NULL OR t.datum_do >= CURRENT_DATE)
     ORDER BY t.program_slug, t.vrstni_red, t.id;`;
 
   // Ure učiteljev v tekočem mesecu

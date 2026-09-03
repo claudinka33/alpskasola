@@ -3,7 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, Clock, FileSpreadsheet, ChevronDown, ChevronRight } from "lucide-react";
 
-type PoProgramu = { program_slug: string; srecanj: number; minut: number; ure: number };
+type Skupina = { naziv: string; srecanj: number; minut: number; ure: number };
+type PoProgramu = {
+  program_slug: string;
+  srecanj: number;
+  minut: number;
+  ure: number;
+  skupine: Skupina[];
+};
 type Ucitelj = { ime: string; srecanj: number; minut: number; ure: number; poProgramih: PoProgramu[] };
 type Program = { id: number; slug: string; naziv: string };
 
@@ -84,17 +91,20 @@ export default function UrePage() {
     const vrstice: any[] = [];
     for (const u of ure) {
       for (const p of u.poProgramih) {
-        vrstice.push({
-          Učitelj: u.ime,
-          Program: naziv(p.program_slug),
-          Vadb: p.srecanj,
-          Ur: p.ure,
-        });
+        for (const sk of p.skupine) {
+          vrstice.push({
+            Učitelj: u.ime,
+            Program: naziv(p.program_slug),
+            Skupina: sk.naziv,
+            Vadb: sk.srecanj,
+            Ur: sk.ure,
+          });
+        }
       }
-      vrstice.push({ Učitelj: u.ime, Program: "SKUPAJ", Vadb: u.srecanj, Ur: u.ure });
+      vrstice.push({ Učitelj: u.ime, Program: "SKUPAJ", Skupina: "", Vadb: u.srecanj, Ur: u.ure });
     }
     const ws = XLSX.utils.json_to_sheet(vrstice);
-    ws["!cols"] = [{ wch: 26 }, { wch: 24 }, { wch: 8 }, { wch: 8 }];
+    ws["!cols"] = [{ wch: 26 }, { wch: 22 }, { wch: 38 }, { wch: 8 }, { wch: 8 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Ure učiteljev");
     XLSX.writeFile(wb, `ure-uciteljev-${od}-do-${doDatum}.xlsx`);
@@ -192,19 +202,35 @@ export default function UrePage() {
 
                   {jeOdprt && (
                     <div className="px-5 pb-4 pl-12">
-                      <table className="w-full text-sm">
-                        <tbody>
-                          {u.poProgramih.map((p) => (
-                            <tr key={p.program_slug} className="border-t border-slate-100">
-                              <td className="py-2 text-slate-700">{naziv(p.program_slug)}</td>
-                              <td className="py-2 text-slate-500 text-xs text-right w-20">
+                      <div className="space-y-3">
+                        {u.poProgramih.map((p) => (
+                          <div key={p.program_slug} className="border-t border-slate-100 pt-2">
+                            <div className="flex items-center gap-3 text-sm">
+                              <span className="flex-1 font-bold text-brand-navy">
+                                {naziv(p.program_slug)}
+                              </span>
+                              <span className="text-xs text-slate-500 w-20 text-right">
                                 {p.srecanj} vadb
-                              </td>
-                              <td className="py-2 font-bold text-brand-navy text-right w-20">{p.ure} h</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                              </span>
+                              <span className="font-bold text-brand-navy w-20 text-right">{p.ure} h</span>
+                            </div>
+                            <ul className="mt-1">
+                              {p.skupine.map((sk) => (
+                                <li
+                                  key={sk.naziv}
+                                  className="flex items-center gap-3 text-xs text-slate-600 py-1 pl-4"
+                                >
+                                  <span className="flex-1 truncate">{sk.naziv}</span>
+                                  <span className="w-20 text-right text-slate-400">{sk.srecanj} vadb</span>
+                                  <span className="w-20 text-right font-semibold text-slate-700">
+                                    {sk.ure} h
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </li>
