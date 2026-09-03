@@ -13,6 +13,8 @@ import {
   Contact,
   CalendarDays,
   Tag,
+  CheckCircle2,
+  Euro,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -49,6 +51,10 @@ export default async function AdminLayout({
               <NavItem href="/admin/prijavnica" icon={ClipboardList} label="Nastavitve prijavnice" />
               <NavItem href="/admin/email" icon={Mail} label="Sporočilo staršem" />
               <NavItem href="/admin/prijave" icon={FileText} label="Oddane prijave" />
+
+              <Skupina label="Vodenje skupin" />
+              <NavItem href="/admin/prisotnost" icon={CheckCircle2} label="Prisotnost" />
+              <NavItem href="/admin/placila" icon={Euro} label="Plačila" />
 
               <Skupina label="Obveščanje" />
               <NavItem href="/admin/kontakti" icon={Contact} label="Kontakti (baza)" />
