@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pridobiTrenutniAdmin } from "@/lib/auth";
-import { pridobiDatoteke, shraniDatoteko, izbrisiDatoteko } from "@/lib/moduli";
+import { pridobiDatoteke, shraniDatoteko, izbrisiDatoteko, velikostDatotek } from "@/lib/moduli";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -21,7 +21,8 @@ export async function GET() {
   try {
     const admin = await pridobiTrenutniAdmin();
     if (!admin) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    return NextResponse.json({ datoteke: await pridobiDatoteke() });
+    const [datoteke, poraba] = await Promise.all([pridobiDatoteke(), velikostDatotek()]);
+    return NextResponse.json({ datoteke, poraba });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

@@ -233,7 +233,7 @@ export function odjavaHash(email: string) {
 
 type KampanjaBlok =
   | { tip: "besedilo"; besedilo: string }
-  | { tip: "slika"; url: string }
+  | { tip: "slika"; url: string; sirina?: number }
   | { tip: "gumb"; napis: string; url: string }
   | { tip: "dokument"; naziv: string; url: string }
   | { tip: "podatki"; vrstice: { oznaka: string; vrednost: string }[] };
@@ -259,12 +259,14 @@ function razcleniVsebino(vsebina: string): KampanjaBlok[] {
     const surova = vrstice[i];
     const t = surova.trim();
 
-    const slika = t.match(/^SLIKA:\s*(.+)$/i);
+    // SLIKA: naslov  ali  SLIKA: naslov | 50   (50 = odstotek širine)
+    const slika = t.match(/^SLIKA:\s*(.+?)(?:\s*\|\s*(\d{1,3}))?$/i);
     if (slika) {
       const url = varenUrl(slika[1]);
       if (url) {
+        const sirina = slika[2] ? Math.min(100, Math.max(20, parseInt(slika[2]))) : undefined;
         zakljuciBesedilo();
-        bloki.push({ tip: "slika", url });
+        bloki.push({ tip: "slika", url, sirina });
         continue;
       }
     }
@@ -318,7 +320,10 @@ function razcleniVsebino(vsebina: string): KampanjaBlok[] {
 
 function blokHtml(b: KampanjaBlok) {
   if (b.tip === "slika") {
-    return `<img src="${b.url}" alt="" style="width:100%;max-width:504px;height:auto;border-radius:12px;display:block;margin:0 0 20px;" />`;
+    const odstotek = b.sirina ?? 50;
+    const sirinaPx = Math.round((504 * odstotek) / 100);
+    const poravnava = odstotek >= 100 ? "0 0 20px" : "0 auto 20px";
+    return `<img src="${b.url}" alt="" style="width:100%;max-width:${sirinaPx}px;height:auto;border-radius:12px;display:block;margin:${poravnava};" />`;
   }
 
   if (b.tip === "gumb") {

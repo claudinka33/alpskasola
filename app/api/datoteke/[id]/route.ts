@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pridobiDatoteko } from "@/lib/moduli";
 
-export const dynamic = "force-dynamic";
-
+// Brez force-dynamic, da Vercelov CDN datoteko predpomni in je baza obremenjena samo prvič.
 // Javno dostopna datoteka — email odjemalci morajo do slike brez prijave.
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const id = Number(params.id);
@@ -17,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     headers: {
       "Content-Type": d.tip,
       "Content-Disposition": `inline; filename="${encodeURIComponent(d.ime)}"`,
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
     },
   });
 }

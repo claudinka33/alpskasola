@@ -23,6 +23,7 @@ import {
   Trash2,
   Upload,
   Paperclip,
+  HardDrive,
 } from "lucide-react";
 
 type Predloga = {
@@ -66,7 +67,7 @@ type Termin = {
 
 type Blok =
   | { kljuc: string; tip: "besedilo"; besedilo: string }
-  | { kljuc: string; tip: "slika"; url: string }
+  | { kljuc: string; tip: "slika"; url: string; sirina?: number }
   | { kljuc: string; tip: "termin"; terminId: number | null }
   | { kljuc: string; tip: "gumb"; napis: string; url: string }
   | { kljuc: string; tip: "dokument"; naziv: string; url: string };
@@ -91,7 +92,8 @@ function terminObdobje(t: Termin) {
 function blokVBesedilo(b: Blok, termini: Termin[]): string {
   if (b.tip === "besedilo") return b.besedilo.trim();
 
-  if (b.tip === "slika") return b.url.trim() ? `SLIKA: ${b.url.trim()}` : "";
+  if (b.tip === "slika")
+    return b.url.trim() ? `SLIKA: ${b.url.trim()} | ${b.sirina ?? 50}` : "";
 
   if (b.tip === "gumb") {
     if (!b.napis.trim() || !b.url.trim()) return "";
@@ -157,6 +159,7 @@ export default function KampanjePage() {
     } catch {}
   };
   const [nalagam, setNalagam] = useState<string | null>(null);
+  const [knjiznica, setKnjiznica] = useState<{ kljuc: string; samoSlike: boolean } | null>(null);
 
   // Naloži sliko ali PDF na strežnik in vrne javni naslov
   const naloziDatoteko = async (kljuc: string, f: File, tip: "slika" | "dokument") => {
@@ -306,7 +309,7 @@ export default function KampanjePage() {
       tip === "besedilo"
         ? { ...osnova, tip: "besedilo", besedilo: "" }
         : tip === "slika"
-        ? { ...osnova, tip: "slika", url: "" }
+        ? { ...osnova, tip: "slika", url: "", sirina: 50 }
         : tip === "termin"
         ? { ...osnova, tip: "termin", terminId: null }
         : tip === "dokument"
@@ -531,27 +534,36 @@ export default function KampanjePage() {
                               </button>
                             </div>
                           ) : (
-                            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 text-sm font-semibold text-slate-500 cursor-pointer hover:border-brand-orange hover:text-brand-orange">
-                              {nalagam === b.kljuc ? (
-                                <>
-                                  <Loader2 size={16} className="animate-spin" /> Nalagam...
-                                </>
-                              ) : (
-                                <>
-                                  <Upload size={16} /> Naloži sliko
-                                </>
-                              )}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const f = e.target.files?.[0];
-                                  if (f) naloziDatoteko(b.kljuc, f, "slika");
-                                  e.target.value = "";
-                                }}
-                              />
-                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 text-sm font-semibold text-slate-500 cursor-pointer hover:border-brand-orange hover:text-brand-orange">
+                                {nalagam === b.kljuc ? (
+                                  <>
+                                    <Loader2 size={16} className="animate-spin" /> Nalagam...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload size={16} /> Naloži
+                                  </>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (f) naloziDatoteko(b.kljuc, f, "slika");
+                                    e.target.value = "";
+                                  }}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setKnjiznica({ kljuc: b.kljuc, samoSlike: true })}
+                                className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 text-sm font-semibold text-slate-500 hover:border-brand-orange hover:text-brand-orange"
+                              >
+                                <HardDrive size={16} /> Iz knjižnice
+                              </button>
+                            </div>
                           )}
                           <input
                             value={b.url}
@@ -559,7 +571,33 @@ export default function KampanjePage() {
                             placeholder="ali prilepi naslov slike"
                             className="w-full px-3 py-2 mt-2 rounded-lg border border-slate-200 outline-none text-xs bg-white focus:border-brand-orange"
                           />
-                          <p className="text-[11px] text-slate-400 mt-1.5">
+                          <div className="mt-3">
+                            <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">
+                              Velikost v emailu
+                            </label>
+                            <div className="flex gap-2">
+                              {[
+                                [40, "Majhna"],
+                                [50, "Srednja"],
+                                [75, "Večja"],
+                                [100, "Čez celo"],
+                              ].map(([v, l]) => (
+                                <button
+                                  key={v as number}
+                                  type="button"
+                                  onClick={() => posodobiBlok(b.kljuc, { sirina: v } as any)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${
+                                    (b.sirina ?? 50) === v
+                                      ? "bg-brand-navy text-white border-brand-navy"
+                                      : "bg-white text-slate-600 border-slate-200 hover:border-brand-navy"
+                                  }`}
+                                >
+                                  {l as string}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-2">
                             JPG, PNG, GIF ali WEBP, največ 4 MB.
                           </p>
                         </>
@@ -593,6 +631,7 @@ export default function KampanjePage() {
                               </button>
                             </div>
                           ) : (
+                            <div className="grid grid-cols-2 gap-2">
                             <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 text-sm font-semibold text-slate-500 cursor-pointer hover:border-brand-orange hover:text-brand-orange">
                               {nalagam === b.kljuc ? (
                                 <>
@@ -600,7 +639,7 @@ export default function KampanjePage() {
                                 </>
                               ) : (
                                 <>
-                                  <Upload size={16} /> Naloži PDF ali sliko
+                                  <Upload size={16} /> Naloži
                                 </>
                               )}
                               <input
@@ -614,6 +653,14 @@ export default function KampanjePage() {
                                 }}
                               />
                             </label>
+                            <button
+                              type="button"
+                              onClick={() => setKnjiznica({ kljuc: b.kljuc, samoSlike: false })}
+                              className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 text-sm font-semibold text-slate-500 hover:border-brand-orange hover:text-brand-orange"
+                            >
+                              <HardDrive size={16} /> Iz knjižnice
+                            </button>
+                            </div>
                           )}
                           <p className="text-[11px] text-slate-400 mt-1.5">
                             V emailu se pokaže kot povezava, ki jo starš klikne. Največ 4 MB.
@@ -732,12 +779,14 @@ export default function KampanjePage() {
                       ) : null;
                     }
                     if (b.tip === "slika") {
+                      const sir = b.sirina ?? 50;
                       return b.url.trim() ? (
                         <img
                           key={b.kljuc}
                           src={b.url}
                           alt=""
-                          className="w-full rounded-xl mb-4"
+                          style={{ width: `${sir}%`, margin: sir >= 100 ? "0 0 16px" : "0 auto 16px" }}
+                          className="rounded-xl block"
                         />
                       ) : null;
                     }
@@ -1026,6 +1075,93 @@ export default function KampanjePage() {
             )}
           </div>
         </div>
+      </div>
+
+      {knjiznica && (
+        <KnjiznicaModal
+          samoSlike={knjiznica.samoSlike}
+          onClose={() => setKnjiznica(null)}
+          onIzberi={(d) => {
+            const url = `${window.location.origin}/api/datoteke/${d.id}`;
+            if (knjiznica.samoSlike) posodobiBlok(knjiznica.kljuc, { url } as any);
+            else posodobiBlok(knjiznica.kljuc, { url, naziv: d.ime } as any);
+            setKnjiznica(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function KnjiznicaModal({
+  samoSlike,
+  onClose,
+  onIzberi,
+}: {
+  samoSlike: boolean;
+  onClose: () => void;
+  onIzberi: (d: { id: number; ime: string; tip: string }) => void;
+}) {
+  const [datoteke, setDatoteke] = useState<{ id: number; ime: string; tip: string; velikost: number }[]>([]);
+  const [berem, setBerem] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/datoteke")
+      .then((r) => r.json())
+      .then((d) => setDatoteke(d.datoteke || []))
+      .finally(() => setBerem(false));
+  }, []);
+
+  const prikazane = samoSlike ? datoteke.filter((d) => d.tip.startsWith("image/")) : datoteke;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl w-full max-w-2xl p-6 max-h-[85vh] flex flex-col"
+      >
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-extrabold text-brand-navy">Knjižnica datotek</h2>
+            <p className="text-xs text-slate-500">
+              Nove naložiš v razdelku <strong>Datoteke</strong> v meniju.
+            </p>
+          </div>
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-700">
+            <X size={18} />
+          </button>
+        </div>
+
+        {berem ? (
+          <div className="py-12 text-center">
+            <Loader2 size={28} className="animate-spin text-brand-orange mx-auto" />
+          </div>
+        ) : prikazane.length === 0 ? (
+          <p className="py-12 text-center text-sm text-slate-400">
+            Ni naloženih datotek. Odpri <strong>Datoteke</strong> v meniju in jih naloži.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto">
+            {prikazane.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => onIzberi(d)}
+                className="text-left border border-slate-200 rounded-xl overflow-hidden hover:border-brand-orange"
+              >
+                <div className="h-24 bg-slate-50 flex items-center justify-center overflow-hidden">
+                  {d.tip.startsWith("image/") ? (
+                    <img src={`/api/datoteke/${d.id}`} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <FileText size={28} className="text-slate-300" />
+                  )}
+                </div>
+                <div className="p-2 text-xs font-semibold text-brand-navy break-all leading-snug">
+                  {d.ime}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

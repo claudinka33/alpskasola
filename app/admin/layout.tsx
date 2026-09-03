@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Euro,
   Clock,
+  HardDrive,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -61,6 +62,7 @@ export default async function AdminLayout({
               <Skupina label="Obveščanje" />
               <NavItem href="/admin/kontakti" icon={Contact} label="Kontakti (baza)" />
               <NavItem href="/admin/kampanje" icon={Send} label="Emailing" />
+              <NavItem href="/admin/datoteke" icon={HardDrive} label="Datoteke" />
 
               <Skupina label="Vsebina strani" />
               <NavItem href="/admin/termini" icon={CalendarDays} label="Termini" />

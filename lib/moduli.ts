@@ -706,6 +706,13 @@ export async function pridobiDatoteke() {
   return r.rows;
 }
 
+export async function velikostDatotek() {
+  await zagotoviModule();
+  const r = await sql<{ skupaj: number; stevilo: number }>`
+    SELECT COALESCE(SUM(velikost), 0)::bigint AS skupaj, COUNT(*)::int AS stevilo FROM datoteke;`;
+  return { skupaj: Number(r.rows[0]?.skupaj ?? 0), stevilo: r.rows[0]?.stevilo ?? 0 };
+}
+
 export async function shraniDatoteko(d: { ime: string; tip: string; vsebina: Buffer }) {
   await zagotoviModule();
   const hex = "\\x" + d.vsebina.toString("hex");
