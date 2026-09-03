@@ -21,6 +21,8 @@ type Program = { id: number; slug: string; naziv: string };
 type Termin = { id: number; program_slug: string; naziv: string; lokacija: string | null; dan: string | null; ura: string | null };
 type Skupina = Termin & {
   aktiven: boolean;
+  datum_od: string | null;
+  datum_do: string | null;
   st_otrok: number;
   st_vadb: number;
   zadnja_vadba: string | null;
@@ -52,6 +54,7 @@ export default function PrisotnostPage() {
 
   const [filterProgram, setFilterProgram] = useState("");
   const [samoZOtroki, setSamoZOtroki] = useState(true);
+  const [tudiPretekle, setTudiPretekle] = useState(false);
 
   // Izbrana skupina (null = pregled kartic)
   const [izbrana, setIzbrana] = useState<Skupina | null>(null);
@@ -60,8 +63,7 @@ export default function PrisotnostPage() {
   const [srecanje, setSrecanje] = useState<Srecanje | null>(null);
   const [vrstice, setVrstice] = useState<Vrstica[]>([]);
   const [povzetek, setPovzetek] = useState<Povzetek[]>([]);
-  const [ure, setUre] = useState<{ ime: string; srecanj: number; ure: number }[]>([]);
-  const [zavihek, setZavihek] = useState<"vadba" | "povzetek" | "ure">("vadba");
+  const [zavihek, setZavihek] = useState<"vadba" | "povzetek">("vadba");
 
   const [nalagam, setNalagam] = useState(false);
   const [novUcitelj, setNovUcitelj] = useState("");
@@ -92,13 +94,25 @@ export default function PrisotnostPage() {
 
   const programNaziv = (slug: string) => programi.find((p) => p.slug === slug)?.naziv || slug;
 
+  // Skupina je aktualna, dokler ni potekla in ni skrita
+  const jeAktualna = (s: Skupina) => {
+    if (!s.aktiven) return false;
+    if (!s.datum_do) return true;
+    const konec = new Date(s.datum_do);
+    konec.setHours(23, 59, 59);
+    return konec >= new Date();
+  };
+
   const prikazane = useMemo(
     () =>
       skupine
         .filter((s) => !filterProgram || s.program_slug === filterProgram)
-        .filter((s) => !samoZOtroki || s.st_otrok > 0),
-    [skupine, filterProgram, samoZOtroki]
+        .filter((s) => !samoZOtroki || s.st_otrok > 0)
+        .filter((s) => tudiPretekle || jeAktualna(s)),
+    [skupine, filterProgram, samoZOtroki, tudiPretekle]
   );
+
+  const preteklih = skupine.filter((s) => !jeAktualna(s)).length;
 
   // Skupine, razvrščene po programu
   const poProgramih = useMemo(() => {
@@ -248,12 +262,6 @@ export default function PrisotnostPage() {
     setPovzetek(pv.povzetek || []);
   };
 
-  const naloziUre = async () => {
-    const q = izbrana ? `&program=${izbrana.program_slug}` : "";
-    const d = await fetch(`/api/prisotnost?ure=1${q}`).then((r) => r.json());
-    setUre(d.ure || []);
-  };
-
   const prisotnih = vrstice.filter((v) => v.prisoten).length;
   const S = "px-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white outline-none focus:border-brand-orange";
 
@@ -290,6 +298,17 @@ export default function PrisotnostPage() {
               className="w-4 h-4 accent-brand-orange"
             />
             <span className="text-sm text-slate-700">Samo skupine s prijavljenimi otroki</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={tudiPretekle}
+              onChange={(e) => setTudiPretekle(e.target.checked)}
+              className="w-4 h-4 accent-brand-orange"
+            />
+            <span className="text-sm text-slate-700">
+              Tudi pretekle{preteklih > 0 ? ` (${preteklih})` : ""}
+            </span>
           </label>
         </div>
 
@@ -396,14 +415,10 @@ export default function PrisotnostPage() {
         {([
           ["vadba", "Vadba"],
           ["povzetek", "% prisotnosti"],
-          ["ure", "Ure učiteljev"],
         ] as const).map(([v, l]) => (
           <button
             key={v}
-            onClick={() => {
-              setZavihek(v);
-              if (v === "ure") naloziUre();
-            }}
+            onClick={() => setZavihek(v)}
             className={`px-4 py-2 rounded-lg text-sm font-semibold border ${
               zavihek === v ? "bg-brand-navy text-white border-brand-navy" : "bg-white text-brand-navy border-slate-200"
             }`}
@@ -459,7 +474,12 @@ export default function PrisotnostPage() {
 
           <div className="grid sm:grid-cols-[1fr_auto] gap-4 mb-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-2">Učitelji na tej vadbi</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-2">
+                Učitelji na tej vadbi
+                <a href="/admin/ure" className="ml-2 font-bold text-brand-orange hover:underline">
+                  evidenca ur →
+                </a>
+              </label>
               <div className="flex flex-wrap gap-2 mb-2">
                 {ucitelji.map((u) => (
                   <button
@@ -600,36 +620,6 @@ export default function PrisotnostPage() {
               </tbody>
             </table>
           )}
-        </div>
-      )}
-
-      {zavihek === "ure" && (
-        <div className="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
-          {ure.length === 0 ? (
-            <p className="py-12 text-center text-sm text-slate-400">Ni zabeleženih ur.</p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200/70">
-                <tr>
-                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-brand-navy">Učitelj</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-brand-navy">Vadb</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-brand-navy">Ur skupaj</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ure.map((u) => (
-                  <tr key={u.ime} className="border-b border-slate-100">
-                    <td className="px-4 py-3 font-semibold text-brand-navy">{u.ime}</td>
-                    <td className="px-4 py-3 text-slate-600">{u.srecanj}</td>
-                    <td className="px-4 py-3 font-bold text-brand-navy">{u.ure}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          <p className="px-4 py-3 text-xs text-slate-500 border-t border-slate-100">
-            Vse vadbe programa {programNaziv(izbrana.program_slug)}, ne samo te skupine.
-          </p>
         </div>
       )}
 

@@ -15,6 +15,7 @@ import {
   Tag,
   CheckCircle2,
   Euro,
+  Clock,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -55,6 +56,7 @@ export default async function AdminLayout({
               <Skupina label="Vodenje skupin" />
               <NavItem href="/admin/prisotnost" icon={CheckCircle2} label="Prisotnost" />
               <NavItem href="/admin/placila" icon={Euro} label="Plačila" />
+              <NavItem href="/admin/ure" icon={Clock} label="Ure učiteljev" />
 
               <Skupina label="Obveščanje" />
               <NavItem href="/admin/kontakti" icon={Contact} label="Kontakti (baza)" />

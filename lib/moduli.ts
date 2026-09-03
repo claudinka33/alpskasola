@@ -266,20 +266,73 @@ export async function pregledSkupin() {
     dan: string | null;
     ura: string | null;
     aktiven: boolean;
+    datum_od: string | null;
+    datum_do: string | null;
     st_otrok: number;
     st_vadb: number;
     zadnja_vadba: string | null;
   }>`
     SELECT t.id, t.program_slug, t.naziv, t.lokacija, t.dan, t.ura, t.aktiven,
+           t.datum_od::text AS datum_od, t.datum_do::text AS datum_do,
            COUNT(DISTINCT p.id)::int AS st_otrok,
            COUNT(DISTINCT s.id)::int AS st_vadb,
            MAX(s.datum)::text AS zadnja_vadba
     FROM termini t
     LEFT JOIN prijave p ON p.termin_id = t.id
     LEFT JOIN srecanja s ON s.termin_id = t.id
-    GROUP BY t.id, t.program_slug, t.naziv, t.lokacija, t.dan, t.ura, t.aktiven, t.vrstni_red
+    GROUP BY t.id, t.program_slug, t.naziv, t.lokacija, t.dan, t.ura, t.aktiven,
+             t.datum_od, t.datum_do, t.vrstni_red
     ORDER BY t.program_slug, t.vrstni_red, t.id;`;
   return r.rows;
+}
+
+// Ure učiteljev po programih — evidenca čez vse vadbe skupaj
+export async function ureUciteljevPodrobno(od?: string, do_?: string) {
+  await zagotoviModule();
+  const r = await sql<{
+    ucitelji: string;
+    program_slug: string;
+    termin_naziv: string | null;
+    trajanje_min: number;
+    datum: string;
+  }>`
+    SELECT s.ucitelji, s.program_slug, t.naziv AS termin_naziv, s.trajanje_min, s.datum::text AS datum
+    FROM srecanja s
+    LEFT JOIN termini t ON t.id = s.termin_id
+    WHERE s.ucitelji <> ''
+      AND (${od || null}::date IS NULL OR s.datum >= ${od || null}::date)
+      AND (${do_ || null}::date IS NULL OR s.datum <= ${do_ || null}::date)
+    ORDER BY s.datum DESC;`;
+
+  type PoProgramu = { program_slug: string; srecanj: number; minut: number };
+  const m: Record<string, { srecanj: number; minut: number; poProgramih: Record<string, PoProgramu> }> = {};
+
+  for (const v of r.rows) {
+    for (const ime of v.ucitelji.split(";").map((x) => x.trim()).filter(Boolean)) {
+      if (!m[ime]) m[ime] = { srecanj: 0, minut: 0, poProgramih: {} };
+      m[ime].srecanj += 1;
+      m[ime].minut += v.trajanje_min || 0;
+      const pp = (m[ime].poProgramih[v.program_slug] ??= {
+        program_slug: v.program_slug,
+        srecanj: 0,
+        minut: 0,
+      });
+      pp.srecanj += 1;
+      pp.minut += v.trajanje_min || 0;
+    }
+  }
+
+  return Object.entries(m)
+    .map(([ime, v]) => ({
+      ime,
+      srecanj: v.srecanj,
+      minut: v.minut,
+      ure: +(v.minut / 60).toFixed(2),
+      poProgramih: Object.values(v.poProgramih)
+        .map((p) => ({ ...p, ure: +(p.minut / 60).toFixed(2) }))
+        .sort((a, b) => b.minut - a.minut),
+    }))
+    .sort((a, b) => b.minut - a.minut);
 }
 
 // ---------- ZAČETNA TABLA ----------
