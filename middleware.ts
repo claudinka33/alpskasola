@@ -16,7 +16,10 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // Pot posredujemo naprej, da lahko postavitev preveri pravice za to stran
+  const glave = new Headers(req.headers);
+  glave.set("x-pot", pathname);
+  return NextResponse.next({ request: { headers: glave } });
 }
 
 export const config = {
