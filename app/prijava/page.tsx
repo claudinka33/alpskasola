@@ -213,6 +213,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
           termin: izbranTermin
             ? `${izbranTermin.naziv}${datumObseg(izbranTermin) ? " (" + datumObseg(izbranTermin) + ")" : ""}`
             : null,
+          termin_id: izbranTermin?.id ?? null,
           cena: izbranTermin?.cena ?? null,
         }),
       });
