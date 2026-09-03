@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer, Trash2 } from "lucide-react";
+import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer, Trash2, FileSpreadsheet } from "lucide-react";
 
 const programLabels: Record<string, string> = {
   "sola-smucanja": "Smučanje",
@@ -124,6 +124,59 @@ export default function PrijavePage() {
       setVsePrijave(d.prijave || []);
     } finally {
       setBrisem(false);
+    }
+  };
+
+  // Naloži SheetJS ob prvem izvozu (brez dodatne odvisnosti v projektu)
+  const naloziXlsx = () =>
+    new Promise<any>((res, rej) => {
+      const w = window as any;
+      if (w.XLSX) return res(w.XLSX);
+      const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+      sc.onload = () => res((window as any).XLSX);
+      sc.onerror = () => rej(new Error("Ni bilo mogoče naložiti knjižnice za Excel."));
+      document.head.appendChild(sc);
+    });
+
+  const izvoziExcel = async () => {
+    try {
+      const XLSX = await naloziXlsx();
+      const vrstice = prikazane.map((p) => ({
+        Otrok: `${p.otrok_ime} ${p.otrok_priimek}`,
+        Rojstvo: p.otrok_rojstvo ? new Date(p.otrok_rojstvo).toLocaleDateString("sl-SI") : "",
+        Program: programLabels[p.program] || p.program,
+        Termin: p.termin || "",
+        Predznanje: p.otrok_znanje || "",
+        Starš: `${p.starsi_ime} ${p.starsi_priimek}`,
+        Telefon: p.telefon,
+        Email: p.email,
+        Naslov: [p.naslov, p.posta].filter(Boolean).join(", "),
+        Opomba: p.opomba || "",
+        "Že bil pri nas": zeBil(p).join(", "),
+        Status: statusi.find((s) => s.value === p.status)?.label || p.status,
+        Oddano: new Date(p.ustvarjeno).toLocaleDateString("sl-SI"),
+      }));
+      const ws = XLSX.utils.json_to_sheet(vrstice);
+      ws["!cols"] = [
+        { wch: 22 }, { wch: 12 }, { wch: 18 }, { wch: 28 }, { wch: 16 },
+        { wch: 22 }, { wch: 14 }, { wch: 28 }, { wch: 26 }, { wch: 40 },
+        { wch: 20 }, { wch: 12 }, { wch: 12 },
+      ];
+      ws["!autofilter"] = { ref: XLSX.utils.encode_range(XLSX.utils.decode_range(ws["!ref"])) };
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Prijavnice");
+      const ime = [
+        "prijavnice",
+        filterProgram ? (programLabels[filterProgram] || filterProgram) : null,
+        new Date().toISOString().split("T")[0],
+      ]
+        .filter(Boolean)
+        .join("-")
+        .replace(/\s+/g, "_");
+      XLSX.writeFile(wb, `${ime}.xlsx`);
+    } catch (e: any) {
+      alert(e.message || "Izvoz ni uspel.");
     }
   };
 
@@ -264,11 +317,19 @@ export default function PrijavePage() {
             <Printer size={16} /> Natisni
           </button>
           <button
-            onClick={izvoziCsv}
+            onClick={izvoziExcel}
             disabled={prikazane.length === 0}
             className="inline-flex items-center gap-2 bg-white text-brand-navy px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 hover:border-slate-300 transition-colors disabled:opacity-50"
           >
-            <Download size={16} /> Izvozi CSV
+            <FileSpreadsheet size={16} /> Izvozi Excel
+          </button>
+          <button
+            onClick={izvoziCsv}
+            disabled={prikazane.length === 0}
+            title="Izvoz v CSV"
+            className="inline-flex items-center gap-2 bg-white text-slate-500 px-3 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 hover:border-slate-300 transition-colors disabled:opacity-50"
+          >
+            <Download size={16} />
           </button>
           {izbrani.length > 0 && (
             <button
