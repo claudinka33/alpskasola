@@ -235,6 +235,7 @@ type KampanjaBlok =
   | { tip: "besedilo"; besedilo: string }
   | { tip: "slika"; url: string }
   | { tip: "gumb"; napis: string; url: string }
+  | { tip: "dokument"; naziv: string; url: string }
   | { tip: "podatki"; vrstice: { oznaka: string; vrednost: string }[] };
 
 function varenUrl(url: string) {
@@ -264,6 +265,17 @@ function razcleniVsebino(vsebina: string): KampanjaBlok[] {
       if (url) {
         zakljuciBesedilo();
         bloki.push({ tip: "slika", url });
+        continue;
+      }
+    }
+
+    const dokument = t.match(/^DOKUMENT:\s*(.+?)\s*\|\s*(.+)$/i);
+    if (dokument) {
+      const url = varenUrl(dokument[2]);
+      const naziv = dokument[1].trim();
+      if (url && naziv) {
+        zakljuciBesedilo();
+        bloki.push({ tip: "dokument", naziv, url });
         continue;
       }
     }
@@ -313,6 +325,17 @@ function blokHtml(b: KampanjaBlok) {
     return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px;">
       <tr><td style="background:${ORANGE};border-radius:10px;">
         <a href="${b.url}" style="display:inline-block;padding:13px 28px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${escapeHtml(b.napis)}</a>
+      </td></tr>
+    </table>`;
+  }
+
+  if (b.tip === "dokument") {
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0 0 20px;">
+      <tr><td style="border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;background:#f8fafc;">
+        <a href="${b.url}" style="color:${ORANGE};font-size:14px;font-weight:700;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">
+          &#128206; ${escapeHtml(b.naziv)}
+        </a>
+        <div style="color:#94a3b8;font-size:12px;margin-top:2px;font-family:Arial,Helvetica,sans-serif;">Klikni za ogled ali prenos</div>
       </td></tr>
     </table>`;
   }

@@ -21,6 +21,8 @@ import {
   Copy,
   FileText,
   Trash2,
+  Upload,
+  Paperclip,
 } from "lucide-react";
 
 type Predloga = {
@@ -66,7 +68,8 @@ type Blok =
   | { kljuc: string; tip: "besedilo"; besedilo: string }
   | { kljuc: string; tip: "slika"; url: string }
   | { kljuc: string; tip: "termin"; terminId: number | null }
-  | { kljuc: string; tip: "gumb"; napis: string; url: string };
+  | { kljuc: string; tip: "gumb"; napis: string; url: string }
+  | { kljuc: string; tip: "dokument"; naziv: string; url: string };
 
 const novKljuc = () => Math.random().toString(36).slice(2, 10);
 
@@ -93,6 +96,11 @@ function blokVBesedilo(b: Blok, termini: Termin[]): string {
   if (b.tip === "gumb") {
     if (!b.napis.trim() || !b.url.trim()) return "";
     return `GUMB: ${b.napis.trim()} | ${b.url.trim()}`;
+  }
+
+  if (b.tip === "dokument") {
+    if (!b.naziv.trim() || !b.url.trim()) return "";
+    return `DOKUMENT: ${b.naziv.trim()} | ${b.url.trim()}`;
   }
 
   const t = termini.find((x) => x.id === b.terminId);
@@ -148,6 +156,30 @@ export default function KampanjePage() {
       setKontakti(d.kontakti || []);
     } catch {}
   };
+  const [nalagam, setNalagam] = useState<string | null>(null);
+
+  // Naloži sliko ali PDF na strežnik in vrne javni naslov
+  const naloziDatoteko = async (kljuc: string, f: File, tip: "slika" | "dokument") => {
+    setNalagam(kljuc);
+    try {
+      const fd = new FormData();
+      fd.append("datoteka", f);
+      const r = await fetch("/api/datoteke", { method: "POST", body: fd });
+      const d = await r.json();
+      if (!r.ok) {
+        alert(d.error || "Nalaganje ni uspelo.");
+        return;
+      }
+      const url = `${window.location.origin}${d.url}`;
+      if (tip === "slika") posodobiBlok(kljuc, { url } as any);
+      else posodobiBlok(kljuc, { url, naziv: d.ime } as any);
+    } catch {
+      alert("Nalaganje ni uspelo.");
+    } finally {
+      setNalagam(null);
+    }
+  };
+
   const naloziPredloge = async () => {
     try {
       const d = await fetch("/api/predloge").then((r) => r.json());
@@ -277,6 +309,8 @@ export default function KampanjePage() {
         ? { ...osnova, tip: "slika", url: "" }
         : tip === "termin"
         ? { ...osnova, tip: "termin", terminId: null }
+        : tip === "dokument"
+        ? { ...osnova, tip: "dokument", naziv: "", url: "" }
         : { ...osnova, tip: "gumb", napis: "Prijavi otroka", url: "https://www.alpskasola.com/prijava" };
     setBloki((prej) => [...prej, nov]);
   };
@@ -407,6 +441,9 @@ export default function KampanjePage() {
                 <button type="button" onClick={() => dodajBlok("besedilo")} className={gumbDodaj}>
                   <Type size={14} /> Besedilo
                 </button>
+                <button type="button" onClick={() => dodajBlok("dokument")} className={gumbDodaj}>
+                  <Paperclip size={14} /> Dokument
+                </button>
                 <button type="button" onClick={() => dodajBlok("slika")} className={gumbDodaj}>
                   <ImageIcon size={14} /> Slika
                 </button>
@@ -429,7 +466,15 @@ export default function KampanjePage() {
                   <div key={b.kljuc} className="border border-slate-200 rounded-xl bg-slate-50/60">
                     <div className="flex items-center justify-between px-3 py-2 border-b border-slate-200">
                       <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                        {b.tip === "besedilo" ? "Besedilo" : b.tip === "slika" ? "Slika" : b.tip === "termin" ? "Termin" : "Gumb"}
+                        {b.tip === "besedilo"
+                          ? "Besedilo"
+                          : b.tip === "slika"
+                          ? "Slika"
+                          : b.tip === "termin"
+                          ? "Termin"
+                          : b.tip === "dokument"
+                          ? "Dokument"
+                          : "Gumb"}
                       </span>
                       <div className="flex items-center gap-1">
                         <button
@@ -474,15 +519,104 @@ export default function KampanjePage() {
 
                       {b.tip === "slika" && (
                         <>
+                          {b.url ? (
+                            <div className="flex items-center gap-3">
+                              <img src={b.url} alt="" className="h-16 w-24 object-cover rounded-lg border border-slate-200" />
+                              <button
+                                type="button"
+                                onClick={() => posodobiBlok(b.kljuc, { url: "" } as any)}
+                                className="text-xs font-bold text-slate-500 hover:text-red-600"
+                              >
+                                Odstrani sliko
+                              </button>
+                            </div>
+                          ) : (
+                            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 text-sm font-semibold text-slate-500 cursor-pointer hover:border-brand-orange hover:text-brand-orange">
+                              {nalagam === b.kljuc ? (
+                                <>
+                                  <Loader2 size={16} className="animate-spin" /> Nalagam...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload size={16} /> Naloži sliko
+                                </>
+                              )}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) naloziDatoteko(b.kljuc, f, "slika");
+                                  e.target.value = "";
+                                }}
+                              />
+                            </label>
+                          )}
                           <input
                             value={b.url}
                             onChange={(e) => posodobiBlok(b.kljuc, { url: e.target.value } as any)}
-                            placeholder="https://www.alpskasola.com/plavanje.jpg"
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm bg-white focus:border-brand-orange"
+                            placeholder="ali prilepi naslov slike"
+                            className="w-full px-3 py-2 mt-2 rounded-lg border border-slate-200 outline-none text-xs bg-white focus:border-brand-orange"
                           />
                           <p className="text-[11px] text-slate-400 mt-1.5">
-                            Fotografijo naloži v mapo <strong>public/</strong> na GitHubu, nato tu vpiši naslov
-                            https://www.alpskasola.com/ime-datoteke.jpg
+                            JPG, PNG, GIF ali WEBP, največ 4 MB.
+                          </p>
+                        </>
+                      )}
+
+                      {b.tip === "dokument" && (
+                        <>
+                          {b.url ? (
+                            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                              <Paperclip size={16} className="text-brand-orange shrink-0" />
+                              <input
+                                value={b.naziv}
+                                onChange={(e) => posodobiBlok(b.kljuc, { naziv: e.target.value } as any)}
+                                placeholder="Ime, ki ga vidi starš"
+                                className="flex-1 bg-transparent outline-none text-sm font-semibold text-brand-navy"
+                              />
+                              <a
+                                href={b.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs font-bold text-brand-orange hover:underline shrink-0"
+                              >
+                                Odpri
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => posodobiBlok(b.kljuc, { url: "", naziv: "" } as any)}
+                                className="text-xs font-bold text-slate-400 hover:text-red-600 shrink-0"
+                              >
+                                Odstrani
+                              </button>
+                            </div>
+                          ) : (
+                            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 text-sm font-semibold text-slate-500 cursor-pointer hover:border-brand-orange hover:text-brand-orange">
+                              {nalagam === b.kljuc ? (
+                                <>
+                                  <Loader2 size={16} className="animate-spin" /> Nalagam...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload size={16} /> Naloži PDF ali sliko
+                                </>
+                              )}
+                              <input
+                                type="file"
+                                accept="application/pdf,image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) naloziDatoteko(b.kljuc, f, "dokument");
+                                  e.target.value = "";
+                                }}
+                              />
+                            </label>
+                          )}
+                          <p className="text-[11px] text-slate-400 mt-1.5">
+                            V emailu se pokaže kot povezava, ki jo starš klikne. Največ 4 MB.
                           </p>
                         </>
                       )}
@@ -605,6 +739,21 @@ export default function KampanjePage() {
                           alt=""
                           className="w-full rounded-xl mb-4"
                         />
+                      ) : null;
+                    }
+                    if (b.tip === "dokument") {
+                      return b.url.trim() ? (
+                        <div
+                          key={b.kljuc}
+                          className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-4"
+                        >
+                          <div className="text-sm font-bold text-brand-orange">
+                            📎 {b.naziv || "Dokument"}
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5">
+                            Klikni za ogled ali prenos
+                          </div>
+                        </div>
                       ) : null;
                     }
                     if (b.tip === "termin") {

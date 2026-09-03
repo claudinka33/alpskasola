@@ -91,6 +91,17 @@ export async function zagotoviModule() {
     );`;
   await sql`ALTER TABLE email_predloge ADD COLUMN IF NOT EXISTS bloki TEXT;`;
 
+  // Naložene datoteke (slike, PDF) za uporabo v emailih
+  await sql`
+    CREATE TABLE IF NOT EXISTS datoteke (
+      id SERIAL PRIMARY KEY,
+      ime TEXT NOT NULL,
+      tip TEXT NOT NULL,
+      velikost INT NOT NULL,
+      vsebina BYTEA NOT NULL,
+      ustvarjeno TIMESTAMPTZ NOT NULL DEFAULT now()
+    );`;
+
   izvedeno = true;
 }
 
@@ -675,6 +686,46 @@ export async function shraniPredlogo(d: {
 export async function izbrisiPredlogo(id: number) {
   await zagotoviModule();
   await sql`DELETE FROM email_predloge WHERE id = ${id};`;
+}
+
+// ---------- NALOŽENE DATOTEKE ----------
+
+export type Datoteka = {
+  id: number;
+  ime: string;
+  tip: string;
+  velikost: number;
+  ustvarjeno: string;
+};
+
+export async function pridobiDatoteke() {
+  await zagotoviModule();
+  const r = await sql<Datoteka>`
+    SELECT id, ime, tip, velikost, ustvarjeno::text
+    FROM datoteke ORDER BY ustvarjeno DESC LIMIT 200;`;
+  return r.rows;
+}
+
+export async function shraniDatoteko(d: { ime: string; tip: string; vsebina: Buffer }) {
+  await zagotoviModule();
+  const hex = "\\x" + d.vsebina.toString("hex");
+  const r = await sql<{ id: number }>`
+    INSERT INTO datoteke (ime, tip, velikost, vsebina)
+    VALUES (${d.ime}, ${d.tip}, ${d.vsebina.length}, ${hex}::bytea)
+    RETURNING id;`;
+  return r.rows[0].id;
+}
+
+export async function pridobiDatoteko(id: number) {
+  await zagotoviModule();
+  const r = await sql<{ ime: string; tip: string; vsebina: Buffer }>`
+    SELECT ime, tip, vsebina FROM datoteke WHERE id = ${id};`;
+  return r.rows[0] || null;
+}
+
+export async function izbrisiDatoteko(id: number) {
+  await zagotoviModule();
+  await sql`DELETE FROM datoteke WHERE id = ${id};`;
 }
 
 // ---------- OZNAKE IZ TERMINOV ----------
