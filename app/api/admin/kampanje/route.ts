@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { pridobiTrenutniAdmin } from "@/lib/auth";
 import { pridobiKampanje, pridobiKontakte, ustvariKampanjo } from "@/lib/db";
 import { zagotoviTabele } from "@/lib/migracije";
+import { zagotoviModule } from "@/lib/moduli";
 import { posljiKampanjoPaket } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ export async function GET() {
     const admin = await pridobiTrenutniAdmin();
     if (!admin) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     await zagotoviTabele();
+    await zagotoviModule();
     return NextResponse.json({ kampanje: await pridobiKampanje() });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -26,6 +28,7 @@ export async function POST(req: NextRequest) {
     const admin = await pridobiTrenutniAdmin();
     if (!admin) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     await zagotoviTabele();
+    await zagotoviModule();
 
     const d = await req.json();
     if (!d.zadeva || !d.vsebina) {
@@ -81,7 +84,8 @@ export async function POST(req: NextRequest) {
       vsebina: d.vsebina,
       filter_opis: filterOpis,
       prejemniki_st: prejemniki.length,
-    });
+      bloki: d.bloki || null,
+    } as any);
 
     return NextResponse.json({ kampanja, prejemniki }, { status: 201 });
   } catch (e: any) {
