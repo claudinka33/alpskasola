@@ -11,6 +11,7 @@ import {
   premakniOtroka,
   povzetekPrisotnosti,
   ureUciteljev,
+  pregledSkupin,
 } from "@/lib/moduli";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,9 @@ export const revalidate = 0;
 export async function GET(req: NextRequest) {
   try {
     const s = req.nextUrl.searchParams;
+    if (s.get("pregled")) {
+      return NextResponse.json({ skupine: await pregledSkupin() });
+    }
     if (s.get("ure")) {
       const ure = await ureUciteljev(
         s.get("program") || undefined,
