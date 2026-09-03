@@ -211,8 +211,63 @@ export default function UporabnikiPage() {
             <Loader2 size={32} className="animate-spin text-brand-orange mx-auto" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[720px]">
+          <>
+          {/* Telefon: kartice */}
+          <ul className="md:hidden divide-y divide-slate-100">
+            {admini.map((a) => (
+              <li key={a.id} className="p-4">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <span className="font-bold text-brand-navy">{a.ime}</span>
+                  <span
+                    className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      a.vloga === "admin"
+                        ? "bg-orange-100 text-brand-orange"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {a.vloga === "admin" ? "ADMIN" : "ZAPOSLENI"}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 break-all">{a.email}</div>
+                {a.vloga !== "admin" && (
+                  <div className="text-[11px] text-slate-400 mt-0.5">
+                    {razcleni(a.pravice).length === 0
+                      ? "brez razdelkov"
+                      : `${razcleni(a.pravice).length} razdelkov`}
+                  </div>
+                )}
+                <div className="flex items-center gap-3 mt-3">
+                  <button
+                    onClick={() => setUrejam(a)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-navy border border-slate-200 rounded-lg px-3 py-2"
+                  >
+                    <Pencil size={14} /> Uredi
+                  </button>
+                  <button
+                    onClick={() => {
+                      setGesloZa(a);
+                      setNovoGeslo("");
+                      setGesloNapaka("");
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-navy border border-slate-200 rounded-lg px-3 py-2"
+                  >
+                    <KeyRound size={14} /> Geslo
+                  </button>
+                  <button
+                    onClick={() => izbrisi(a)}
+                    className="ml-auto p-2 text-slate-400 hover:text-red-600"
+                    aria-label="Izbriši"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Računalnik: tabela */}
+          <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs font-bold text-slate-500 uppercase tracking-wide border-b border-slate-100">
                 <th className="px-6 py-3">Ime</th>
@@ -278,6 +333,7 @@ export default function UporabnikiPage() {
             </tbody>
           </table>
           </div>
+          </>
         )}
       </div>
 

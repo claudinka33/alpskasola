@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer, Trash2, FileSpreadsheet } from "lucide-react";
+import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer, Trash2, FileSpreadsheet, SlidersHorizontal } from "lucide-react";
 
 const programLabels: Record<string, string> = {
   "sola-smucanja": "Smučanje",
@@ -57,6 +57,7 @@ export default function PrijavePage() {
   const [vsePrijave, setVsePrijave] = useState<Prijava[]>([]);
   const [izbrani, setIzbrani] = useState<number[]>([]);
   const [brisem, setBrisem] = useState(false);
+  const [filtriOdprti, setFiltriOdprti] = useState(false);
 
   const naloziPrijave = async () => {
     setLoading(true);
@@ -350,7 +351,23 @@ export default function PrijavePage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row sm:flex-wrap gap-3">
+      {/* Telefon: filtri pod gumbom */}
+      <button
+        onClick={() => setFiltriOdprti((v) => !v)}
+        className="sm:hidden w-full mb-3 inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-brand-navy px-4 py-2.5 rounded-lg text-sm font-semibold"
+      >
+        <SlidersHorizontal size={16} />
+        {filtriOdprti ? "Skrij filtre" : "Iskanje in filtri"}
+        {(iskanje || filterProgram || filterStatus || filterTermin) && (
+          <span className="w-2 h-2 rounded-full bg-brand-orange" />
+        )}
+      </button>
+
+      <div
+        className={`bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex-col sm:flex sm:flex-row sm:flex-wrap gap-3 ${
+          filtriOdprti ? "flex" : "hidden sm:flex"
+        }`}
+      >
         <div className="flex-1 min-w-[200px] relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input

@@ -492,12 +492,12 @@ export default function KontaktiPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[820px]">
+            <table className="w-full text-sm min-w-[680px]">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Starš</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Email</th>
-                  <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Otrok</th>
+                  <th className="hidden lg:table-cell text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Otrok</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Oznake</th>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Obvestila</th>
                   <th className="px-2 w-[70px]"></th>
@@ -622,6 +622,11 @@ export default function KontaktiPage() {
                     >
                       <td className="px-4 py-2.5">
                         <div className="font-semibold text-brand-navy">{[k.ime, k.priimek].filter(Boolean).join(" ") || "—"}</div>
+                        {k.otrok && (
+                          <div className="text-[11px] text-slate-600">
+                            <span className="text-slate-400">otrok:</span> {k.otrok}
+                          </div>
+                        )}
                         <div className="text-[11px] text-slate-400">{k.telefon || ""}</div>
                       </td>
                       <td className="px-4 py-2.5 text-slate-600">
@@ -645,7 +650,7 @@ export default function KontaktiPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-2.5 text-slate-600 text-xs">{k.otrok || ""}</td>
+                      <td className="hidden lg:table-cell px-4 py-2.5 text-slate-600 text-xs">{k.otrok || ""}</td>
                       <td className="px-4 py-2.5">
                         <div className="flex flex-wrap gap-1 max-w-[280px]">
                           {k.oznake.split(";").map((o) => o.trim()).filter(Boolean).slice(0, 3).map((o) => (

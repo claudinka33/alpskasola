@@ -133,13 +133,15 @@ export default function UrePage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Od</label>
-          <input type="date" value={od} onChange={(e) => setOd(e.target.value)} className={S} />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Do</label>
-          <input type="date" value={doDatum} onChange={(e) => setDoDatum(e.target.value)} className={S} />
+        <div className="grid grid-cols-2 gap-3 w-full sm:w-auto">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Od</label>
+            <input type="date" value={od} onChange={(e) => setOd(e.target.value)} className={`${S} w-full`} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Do</label>
+            <input type="date" value={doDatum} onChange={(e) => setDoDatum(e.target.value)} className={`${S} w-full`} />
+          </div>
         </div>
         <div className="flex flex-wrap gap-2 pb-0.5">
           {([
