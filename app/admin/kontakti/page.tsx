@@ -15,6 +15,8 @@ import {
   Pencil,
   AlertTriangle,
   Wand2,
+  SlidersHorizontal,
+  UserPlus2,
 } from "lucide-react";
 
 type Kontakt = {
@@ -164,6 +166,8 @@ export default function KontaktiPage() {
   const [iskanje, setIskanje] = useState("");
   const [oznaka, setOznaka] = useState("");
   const [narocen, setNarocen] = useState("");
+  const [filtriOdprti, setFiltriOdprti] = useState(false);
+  const [dodajOdprt, setDodajOdprt] = useState(false);
   const [samoSumljivi, setSamoSumljivi] = useState(false);
   const [uvoz, setUvoz] = useState<{ skupaj: number; narejeno: number; preskoceni: number } | null>(null);
   const [novEmail, setNovEmail] = useState("");
@@ -424,8 +428,31 @@ export default function KontaktiPage() {
         </div>
       )}
 
+      {/* Telefon: filtri in dodajanje pod gumboma */}
+      <div className="sm:hidden grid grid-cols-2 gap-2 mb-3">
+        <button
+          onClick={() => { setFiltriOdprti((v) => !v); setDodajOdprt(false); }}
+          className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-brand-navy px-3 py-2.5 rounded-lg text-sm font-semibold"
+        >
+          <SlidersHorizontal size={16} /> Filtri
+          {(iskanje || oznaka || narocen || samoSumljivi) && (
+            <span className="w-2 h-2 rounded-full bg-brand-orange" />
+          )}
+        </button>
+        <button
+          onClick={() => { setDodajOdprt((v) => !v); setFiltriOdprti(false); }}
+          className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-brand-navy px-3 py-2.5 rounded-lg text-sm font-semibold"
+        >
+          <UserPlus2 size={16} /> Dodaj
+        </button>
+      </div>
+
       {/* Filtri */}
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-wrap gap-3">
+      <div
+        className={`bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex-wrap gap-3 sm:flex ${
+          filtriOdprti ? "flex" : "hidden sm:flex"
+        }`}
+      >
         <div className="flex-1 min-w-[200px] relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -458,7 +485,11 @@ export default function KontaktiPage() {
       </div>
 
       {/* Ročni vnos */}
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-wrap gap-2 items-center">
+      <div
+        className={`bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex-wrap gap-2 items-center sm:flex ${
+          dodajOdprt ? "flex" : "hidden sm:flex"
+        }`}
+      >
         <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mr-2">Dodaj kontakt:</span>
         <input
           value={novoIme}
@@ -491,8 +522,99 @@ export default function KontaktiPage() {
             {samoSumljivi ? "Ni sumljivih emailov. 🎉" : "Ni kontaktov. Uvozi CSV (Wix izvoz) ali dodaj ročno."}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[680px]">
+          <>
+          {/* Telefon: kartice */}
+          <ul className="lg:hidden divide-y divide-slate-100">
+            {prikazani.slice(0, 500).map((k) => {
+              const predlog = predlogEmaila(k.email);
+              const neveljaven = !veljavenEmail(k.email);
+              const oznakeSeznam = k.oznake.split(";").map((o) => o.trim()).filter(Boolean);
+              return (
+                <li key={k.id} className={`p-4 ${neveljaven || predlog ? "bg-amber-50/40" : ""}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-bold text-brand-navy">
+                        {[k.ime, k.priimek].filter(Boolean).join(" ") || "—"}
+                      </div>
+                      {k.otrok && (
+                        <div className="text-xs text-slate-600">
+                          <span className="text-slate-400">otrok:</span> {k.otrok}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => preklopiNarocen(k)}
+                      className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${
+                        k.narocen ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {k.narocen ? "NAROČEN" : "ODJAVLJEN"}
+                    </button>
+                  </div>
+
+                  <div className="mt-2 space-y-1">
+                    {k.telefon && (
+                      <a href={`tel:${k.telefon}`} className="block text-sm text-brand-orange font-semibold">
+                        {k.telefon}
+                      </a>
+                    )}
+                    <a href={`mailto:${k.email}`} className="block text-sm text-slate-600 break-all">
+                      {k.email}
+                    </a>
+                    {(neveljaven || predlog) &&
+                      (predlog ? (
+                        <button
+                          onClick={() => hitriPopravek(k)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-100 px-2 py-1 rounded"
+                        >
+                          <Wand2 size={11} /> Popravi → {predlog}
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600">
+                          <AlertTriangle size={11} /> Neveljaven email
+                        </span>
+                      ))}
+                  </div>
+
+                  {oznakeSeznam.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {oznakeSeznam.slice(0, 2).map((o) => (
+                        <span
+                          key={o}
+                          className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded truncate max-w-[160px]"
+                        >
+                          {o}
+                        </span>
+                      ))}
+                      {oznakeSeznam.length > 2 && (
+                        <span className="text-[10px] text-slate-400">+{oznakeSeznam.length - 2}</span>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => zacniUrejanje(k)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-brand-navy border border-slate-200 rounded-lg px-3 py-2"
+                    >
+                      <Pencil size={13} /> Uredi
+                    </button>
+                    <button
+                      onClick={() => izbrisi(k)}
+                      className="ml-auto p-2 text-slate-300 hover:text-red-600"
+                      aria-label="Izbriši"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Računalnik: tabela */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-200/70">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold text-brand-navy text-xs uppercase tracking-wider">Starš</th>
@@ -694,6 +816,7 @@ export default function KontaktiPage() {
               </div>
             )}
           </div>
+          </>
         )}
       </div>
     </div>
