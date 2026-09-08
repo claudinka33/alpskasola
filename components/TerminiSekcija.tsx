@@ -1,4 +1,5 @@
-import { Calendar, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { pridobiTerminiZaStran } from "@/lib/vsebina";
 
 type Props = {
@@ -54,7 +55,7 @@ export default async function TerminiSekcija({
               <div className="w-11 h-11 rounded-xl bg-orange-100 text-brand-orange flex items-center justify-center shrink-0">
                 <MapPin size={18} />
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <strong className="block text-sm font-bold text-brand-navy mb-0.5">
                   {t.naziv}
                 </strong>
@@ -73,10 +74,17 @@ export default async function TerminiSekcija({
                     {t.skupina ? `(${t.skupina})` : ""}
                   </div>
                 )}
-                {t.status === "poln" && (
-                  <span className="inline-block mt-2 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
+                {t.status === "poln" ? (
+                  <span className="inline-block mt-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
                     ZASEDENO
                   </span>
+                ) : (
+                  <Link
+                    href={`/prijava?program=${programSlug}&termin=${t.id}`}
+                    className="inline-flex items-center gap-1.5 mt-3 bg-brand-orange text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-orange-dark transition-colors"
+                  >
+                    Prijavi se na ta termin <ArrowRight size={13} />
+                  </Link>
                 )}
               </div>
             </div>

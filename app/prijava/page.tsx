@@ -58,6 +58,7 @@ function PrijavnaStranContent() {
   const searchParams = useSearchParams();
   const initialProgram = searchParams.get("program") || "";
   const initialPaket = searchParams.get("paket") || "";
+  const initialTerminId = parseInt(searchParams.get("termin") || "", 10);
 
   const [programi, setProgrami] = useState<Program[]>([]);
   const [stanje, setStanje] = useState<"obrazec" | "poslano">("obrazec");
@@ -110,7 +111,20 @@ function PrijavnaStranContent() {
     if (!form.program || jeRojstniDan) return;
     fetch(`/api/termini?program=${encodeURIComponent(form.program)}&aktivni=1`)
       .then((r) => r.json())
-      .then((d) => setTermini(d.termini || []))
+      .then((d) => {
+        const seznam: Termin[] = d.termini || [];
+        setTermini(seznam);
+        // Predizbira termina iz URL (gumb "Prijavi se na ta termin" na strani programa)
+        if (initialTerminId) {
+          const t = seznam.find((x) => x.id === initialTerminId);
+          if (t && t.status !== "poln" && t.status !== "zaseden") {
+            setIzbranTermin(t);
+            setTimeout(() => {
+              document.getElementById(`termin-${t.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 150);
+          }
+        }
+      })
       .catch(() => setTermini([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.program]);
@@ -281,6 +295,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     return (
                       <label
                         key={t.id}
+                        id={`termin-${t.id}`}
                         className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
                           poln
                             ? "opacity-50 cursor-not-allowed border-slate-200"
