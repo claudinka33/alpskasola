@@ -45,6 +45,19 @@ type Prijava = {
   ustvarjeno: string;
 };
 
+// Poenoten ključ termina: odstrani obdobje "(28. 9. 2026 – 4. 6. 2027)" in
+// poravna presledke ("( 14h - 15h )" -> "(14h - 15h)"), da isti termin
+// z različnim zapisom pade v isti zavihek.
+function terminKljuc(t: string | null | undefined): string {
+  if (!t) return "";
+  return t
+    .replace(/\(\s*\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\s*[–\-]\s*\d{1,2}\.\s*\d{1,2}\.\s*\d{4}\s*\)/g, "")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function PrijavePage() {
   const [prijave, setPrijave] = useState<Prijava[]>([]);
   const [loading, setLoading] = useState(true);
@@ -237,14 +250,16 @@ export default function PrijavePage() {
     ? Array.from(new Set(prijave.flatMap((p) => Object.keys(p.dodatno || {})))).slice(0, 4)
     : [];
 
-  // Termini, ki se pojavijo v naloženih prijavah (za filter)
+  // Termini, ki se pojavijo v naloženih prijavah (za filter).
+  // Isti termin se lahko v prijavah pojavi z različnim zapisom (z datumi ali brez,
+  // z drugačnimi presledki) — zato jih poenotimo v en zavihek.
   const terminMoznosti = Array.from(
-    new Set(prijave.map((p) => p.termin).filter(Boolean))
-  ) as string[];
+    new Set(prijave.map((p) => terminKljuc(p.termin)).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b, "sl")) as string[];
 
   // Prikazane prijave = strežniški filtri + filter po terminu (lokalno)
   const prikazane = filterTermin
-    ? prijave.filter((p) => p.termin === filterTermin)
+    ? prijave.filter((p) => terminKljuc(p.termin) === filterTermin)
     : prijave;
 
   const natisniSeznam = () => {
