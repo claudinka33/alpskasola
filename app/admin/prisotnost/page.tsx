@@ -99,9 +99,9 @@ export default function PrisotnostPage() {
 
   const programNaziv = (slug: string) => programi.find((p) => p.slug === slug)?.naziv || slug;
 
-  // Skupina je aktualna, dokler ni potekla in ni skrita
+  // Skupina je aktualna, dokler ji ne poteče "datum do".
+  // Stikalo SKRIT/PRIJAVNICA (aktiven) pomeni samo vidnost na prijavnici — tu se ne upošteva.
   const jeAktualna = (s: Skupina) => {
-    if (!s.aktiven) return false;
     if (!s.datum_do) return true;
     const konec = new Date(s.datum_do);
     konec.setHours(23, 59, 59);
@@ -366,7 +366,14 @@ export default function PrisotnostPage() {
                     className="text-left bg-white rounded-2xl border border-slate-200/70 p-5 hover:border-brand-orange hover:shadow-lg hover:shadow-brand-navy/5 transition-all"
                   >
                     <div className="flex items-start justify-between gap-2 mb-3">
-                      <h3 className="font-extrabold text-brand-navy leading-snug">{s.naziv}</h3>
+                      <div>
+                        <h3 className="font-extrabold text-brand-navy leading-snug">{s.naziv}</h3>
+                        {!jeAktualna(s) && (
+                          <span className="inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                            ZAKLJUČENO{s.datum_do ? ` · ${slDatum(s.datum_do)}` : ""}
+                          </span>
+                        )}
+                      </div>
                       <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-orange-100 text-orange-800">
                         <Users size={12} /> {s.st_otrok}
                       </span>
