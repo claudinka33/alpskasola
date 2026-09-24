@@ -329,7 +329,7 @@ export default function PrisotnostPage() {
               onChange={(e) => setSamoZOtroki(e.target.checked)}
               className="w-4 h-4 accent-brand-orange"
             />
-            <span className="text-sm text-slate-700">Samo skupine s prijavljenimi otroki</span>
+            <span className="text-sm text-slate-700">Aktualni tečaji</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -339,7 +339,7 @@ export default function PrisotnostPage() {
               className="w-4 h-4 accent-brand-orange"
             />
             <span className="text-sm text-slate-700">
-              Tudi pretekle{preteklih > 0 ? ` (${preteklih})` : ""}
+              Pretekli tečaji{preteklih > 0 ? ` (${preteklih})` : ""}
             </span>
           </label>
         </div>
