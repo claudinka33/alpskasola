@@ -704,7 +704,8 @@ export default function PrijavePage() {
                   {izbrana.otrok_ime} {izbrana.otrok_priimek}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  {programLabels[izbrana.program] || izbrana.program} · #{izbrana.id}
+                  {programLabels[izbrana.program] || izbrana.program}
+                  {izbrana.termin && <> · {izbrana.termin}</>} · #{izbrana.id}
                 </p>
               </div>
               <button
@@ -735,6 +736,27 @@ export default function PrijavePage() {
                       {s.label.toUpperCase()}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Prijava: program + termin */}
+              <div>
+                <h3 className="text-sm font-bold text-brand-navy mb-2">Prijava</h3>
+                <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-xs text-slate-500 block">Program</span>
+                    <strong className="text-brand-navy">
+                      {programLabels[izbrana.program] || izbrana.program}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-500 block">Termin</span>
+                    {izbrana.termin ? (
+                      <strong className="text-brand-navy">{izbrana.termin}</strong>
+                    ) : (
+                      <span className="text-slate-400 italic">Termin ni izbran</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
