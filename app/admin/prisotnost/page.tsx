@@ -17,6 +17,7 @@ import {
   Trash2,
   Save,
   AlertCircle,
+  Lock,
 } from "lucide-react";
 
 type Program = { id: number; slug: string; naziv: string };
@@ -29,7 +30,15 @@ type Skupina = Termin & {
   st_vadb: number;
   zadnja_vadba: string | null;
 };
-type Srecanje = { id: number; datum: string; ucitelji: string; trajanje_min: number; opomba: string | null };
+type Srecanje = {
+  id: number;
+  datum: string;
+  ucitelji: string;
+  trajanje_min: number;
+  opomba: string | null;
+  zaklenjeno?: boolean;
+  zaklene_se?: string | null;
+};
 type Vrstica = {
   prijava_id: number;
   otrok_ime: string;
@@ -44,6 +53,8 @@ type Povzetek = { prijava_id: number; otrok_ime: string; otrok_priimek: string; 
 const danes = () => new Date().toISOString().slice(0, 10);
 const slDatum = (d: string) =>
   new Date(d).toLocaleDateString("sl-SI", { day: "2-digit", month: "2-digit", year: "numeric" });
+const casZaklepa = (d: string) =>
+  new Date(d).toLocaleString("sl-SI", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 const kratekDatum = (d: string) =>
   new Date(d).toLocaleDateString("sl-SI", { day: "2-digit", month: "2-digit" });
 
@@ -74,6 +85,11 @@ export default function PrisotnostPage() {
   const [shranjujem, setShranjujem] = useState(false);
   const [shranjeno, setShranjeno] = useState(false);
   const [dodajOtroka, setDodajOtroka] = useState(false);
+  const [jeAdmin, setJeAdmin] = useState(false);
+
+  // Zaklenjeno vadbo (24 ur po vadbi) lahko ureja samo admin, ostali jo le vidijo.
+  const zaklenjeno = !!srecanje?.zaklenjeno;
+  const urejanje = !zaklenjeno || jeAdmin;
 
   const naloziPregled = async () => {
     setNalagamPregled(true);
@@ -142,6 +158,7 @@ export default function PrisotnostPage() {
       fetch(`/api/prisotnost?povzetek=${s.id}`).then((r) => r.json()),
     ]);
     setSrecanja(sr.srecanja || []);
+    setJeAdmin(!!sr.admin);
     setPovzetek(pv.povzetek || []);
   };
 
@@ -155,6 +172,10 @@ export default function PrisotnostPage() {
   const naloziVrstice = async (srecanje_id: number) => {
     const d = await fetch(`/api/prisotnost?srecanje=${srecanje_id}`).then((r) => r.json());
     setVrstice(d.prisotnost || []);
+    setJeAdmin(!!d.admin);
+    setSrecanje((s) =>
+      s && s.id === srecanje_id ? { ...s, zaklenjeno: !!d.zaklenjeno, zaklene_se: d.zaklene_se || null } : s
+    );
     setSpremenjeno(false);
     setShranjeno(false);
   };
@@ -190,12 +211,14 @@ export default function PrisotnostPage() {
 
   // Kljukica in glava se spreminjata samo lokalno — v bazo gre šele ob gumbu Shrani.
   const kljukica = (v: Vrstica) => {
+    if (!urejanje) return;
     setVrstice((vs) => vs.map((x) => (x.prijava_id === v.prijava_id ? { ...x, prisoten: !x.prisoten } : x)));
     setSpremenjeno(true);
     setShranjeno(false);
   };
 
   const oznaciVse = (prisoten: boolean) => {
+    if (!urejanje) return;
     setVrstice((vs) => vs.map((x) => ({ ...x, prisoten })));
     setSpremenjeno(true);
     setShranjeno(false);
@@ -205,7 +228,7 @@ export default function PrisotnostPage() {
     if (!srecanje) return;
     setShranjujem(true);
     try {
-      await fetch("/api/prisotnost", {
+      const res = await fetch("/api/prisotnost", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -217,6 +240,12 @@ export default function PrisotnostPage() {
           prisotnost: vrstice.map((v) => ({ prijava_id: v.prijava_id, prisoten: v.prisoten })),
         }),
       });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        alert(e.error || "Napaka pri shranjevanju.");
+        await naloziVrstice(srecanje.id);
+        return;
+      }
       setSpremenjeno(false);
       setShranjeno(true);
       setTimeout(() => setShranjeno(false), 3000);
@@ -234,7 +263,7 @@ export default function PrisotnostPage() {
   };
 
   const shraniGlavo = (spr: Partial<Srecanje>) => {
-    if (!srecanje) return;
+    if (!srecanje || !urejanje) return;
     setSrecanje({ ...srecanje, ...spr });
     setSpremenjeno(true);
     setShranjeno(false);
@@ -283,7 +312,12 @@ export default function PrisotnostPage() {
   const izbrisiVadbo = async () => {
     if (!srecanje || !izbrana) return;
     if (!confirm(`Izbrišem vadbo ${slDatum(srecanje.datum)}? Prisotnost te vadbe bo izgubljena.`)) return;
-    await fetch(`/api/prisotnost?srecanje=${srecanje.id}`, { method: "DELETE" });
+    const res = await fetch(`/api/prisotnost?srecanje=${srecanje.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      alert(e.error || "Brisanje ni uspelo.");
+      return;
+    }
     setSrecanje(null);
     setVrstice([]);
     const [sr, pv] = await Promise.all([
@@ -479,6 +513,7 @@ export default function PrisotnostPage() {
                   : "bg-white text-slate-600 border-slate-200 hover:border-brand-orange"
               }`}
             >
+              {s.zaklenjeno && <Lock size={10} className="inline mr-1 -mt-0.5" />}
               {slDatum(s.datum)}
             </button>
           ))}
@@ -501,15 +536,38 @@ export default function PrisotnostPage() {
                 <Users size={14} className="inline mr-1" />
                 {prisotnih} / {vrstice.length} prisotnih
               </span>
-              <button
-                onClick={izbrisiVadbo}
-                title="Izbriši to vadbo"
-                className="p-2 text-slate-400 hover:text-red-600"
-              >
-                <Trash2 size={16} />
-              </button>
+              {urejanje && (
+                <button
+                  onClick={izbrisiVadbo}
+                  title="Izbriši to vadbo"
+                  className="p-2 text-slate-400 hover:text-red-600"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
           </div>
+
+          {zaklenjeno && (
+            <div
+              className={`flex items-start gap-2 rounded-xl px-4 py-3 mb-4 text-sm font-semibold ${
+                jeAdmin ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              <Lock size={16} className="shrink-0 mt-0.5" />
+              <span>
+                {jeAdmin
+                  ? "Vadba je zaklenjena. Kot admin jo lahko še vedno urejaš."
+                  : "Vadba je zaklenjena (minilo je več kot 24 ur). Prisotnost je samo za ogled — za popravek se obrni na admina."}
+              </span>
+            </div>
+          )}
+          {!zaklenjeno && srecanje.zaklene_se && (
+            <p className="text-xs text-slate-400 mb-4 -mt-2">
+              <Lock size={11} className="inline mr-1 -mt-0.5" />
+              Urejanje se zaklene {casZaklepa(srecanje.zaklene_se)}.
+            </p>
+          )}
 
           <div className="grid sm:grid-cols-[1fr_auto] gap-4 mb-4">
             <div>
@@ -520,9 +578,15 @@ export default function PrisotnostPage() {
                 </a>
               </label>
               <div className="flex flex-wrap gap-2 mb-2">
-                {ucitelji.map((u) => (
+                {!urejanje && izbraniUcitelji.length === 0 && (
+                  <span className="text-xs text-slate-400">Ni vpisanih učiteljev.</span>
+                )}
+                {ucitelji
+                  .filter((u) => urejanje || izbraniUcitelji.includes(u.ime))
+                  .map((u) => (
                   <button
                     key={u.id}
+                    disabled={!urejanje}
                     onClick={() => preklopiUcitelja(u.ime)}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold border ${
                       izbraniUcitelji.includes(u.ime)
@@ -534,6 +598,7 @@ export default function PrisotnostPage() {
                   </button>
                 ))}
               </div>
+              {urejanje && (
               <div className="flex gap-2">
                 <input
                   value={novUcitelj}
@@ -549,6 +614,7 @@ export default function PrisotnostPage() {
                   <UserPlus size={14} /> Dodaj
                 </button>
               </div>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-2">
@@ -557,6 +623,7 @@ export default function PrisotnostPage() {
               <input
                 type="number"
                 value={srecanje.trajanje_min}
+                readOnly={!urejanje}
                 onChange={(e) => shraniGlavo({ trajanje_min: parseInt(e.target.value) || 60 })}
                 className={`${S} w-28`}
               />
@@ -564,7 +631,7 @@ export default function PrisotnostPage() {
           </div>
 
           <div className="border-t border-slate-100 pt-4">
-            {vrstice.length > 0 && (
+            {vrstice.length > 0 && urejanje && (
               <div className="flex items-center gap-2 mb-3">
                 <button
                   onClick={() => oznaciVse(true)}
@@ -589,10 +656,12 @@ export default function PrisotnostPage() {
                   <li
                     key={v.prijava_id}
                     onClick={() => kljukica(v)}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-3.5 border-2 cursor-pointer select-none ${
+                    className={`flex items-center gap-3 rounded-xl px-3 py-3.5 border-2 select-none ${
+                      urejanje ? "cursor-pointer" : "cursor-default"
+                    } ${
                       v.prisoten
                         ? "bg-green-50 border-green-300"
-                        : "bg-slate-50 border-transparent hover:bg-slate-100"
+                        : `bg-slate-50 border-transparent ${urejanje ? "hover:bg-slate-100" : ""}`
                     }`}
                   >
                     <input
@@ -609,6 +678,14 @@ export default function PrisotnostPage() {
                         </span>
                       )}
                     </span>
+                    {!urejanje && (
+                      <span
+                        className={`text-xs font-bold ${v.prisoten ? "text-green-700" : "text-slate-400"}`}
+                      >
+                        {v.prisoten ? "prisoten" : "odsoten"}
+                      </span>
+                    )}
+                    {urejanje && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -619,20 +696,24 @@ export default function PrisotnostPage() {
                     >
                       <ArrowRightLeft size={15} />
                     </button>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
 
+            {urejanje && (
             <button
               onClick={() => setDodajOtroka(true)}
               className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-orange hover:underline"
             >
               <UserPlus size={15} /> Otrok je prišel iz druge skupine (samo danes)
             </button>
+            )}
           </div>
 
           {/* Shranjevanje */}
+          {urejanje && (
           <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 px-5 py-4 bg-white border-t border-slate-200 rounded-b-2xl flex flex-wrap items-center gap-3">
             <button
               onClick={shrani}
@@ -657,6 +738,7 @@ export default function PrisotnostPage() {
               <span className="text-sm text-slate-400">Vse je shranjeno.</span>
             )}
           </div>
+          )}
         </div>
       )}
 
