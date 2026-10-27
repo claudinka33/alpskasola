@@ -19,7 +19,7 @@ export const RAZDELKI: Razdelek[] = [
   { kljuc: "placila", pot: "/admin/placila", naziv: "Plačila", skupina: "Vodenje skupin", opis: "Evidenca plačil in dolžnikov" },
   { kljuc: "ure", pot: "/admin/ure", naziv: "Ure učiteljev", skupina: "Vodenje skupin", opis: "Obračun ur po učiteljih" },
 
-  { kljuc: "ekipa", pot: "/admin/ekipa", naziv: "Treningi ekipe", skupina: "Tekmovalna ekipa", opis: "Prisotnost na treningih in tekmah ekipe" },
+  { kljuc: "ekipa", pot: "/admin/ekipa", naziv: "Treningi ekipe", skupina: "Tekmovalna ekipa", opis: "Prisotnost ekipe — vidijo samo admin, Zoja in Nejc" },
 
   { kljuc: "kontakti", pot: "/admin/kontakti", naziv: "Kontakti (baza)", skupina: "Obveščanje", opis: "Baza staršev, telefoni in emaili" },
   { kljuc: "kampanje", pot: "/admin/kampanje", naziv: "Emailing", skupina: "Obveščanje", opis: "Pošiljanje emailov staršem" },
@@ -51,9 +51,18 @@ export function jeAdmin(a: { vloga?: string } | null) {
   return a?.vloga === "admin";
 }
 
+// Treninge tekmovalne ekipe vidijo SAMO admin, Zoja in Nejc — ne glede na kljukice pri pravicah.
+export const EKIPA_DOSTOP = ["zoja@alpskasola.com", "nejc@alpskasola.com"];
+export function lahkoVidiEkipo(a: { vloga?: string; email?: string } | null) {
+  if (!a) return false;
+  if (jeAdmin(a)) return true;
+  return EKIPA_DOSTOP.includes(String(a.email || "").trim().toLowerCase());
+}
+
 // Ali uporabnik vidi razdelek s tem ključem
 export function imaPravico(a: AdminSPravicami | null, kljuc: string) {
   if (!a) return false;
+  if (kljuc === "ekipa") return lahkoVidiEkipo(a);
   if (jeAdmin(a)) return true;
   return a.pravice.includes(kljuc);
 }
@@ -70,6 +79,7 @@ export function smeNaPot(a: AdminSPravicami | null, pot: string) {
   )[0];
 
   if (!zadetek) return true; // neznana pot pod /admin — ne blokiramo
+  if (zadetek.kljuc === "ekipa") return lahkoVidiEkipo(a);
   return a.pravice.includes(zadetek.kljuc);
 }
 

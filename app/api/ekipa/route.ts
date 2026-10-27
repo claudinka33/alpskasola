@@ -4,7 +4,7 @@ import { imaPravico } from "@/lib/pravice";
 import {
   zagotoviEkipo,
   pridobiOtroke,
-  dodajOtroke,
+  dodajOtroka,
   posodobiOtroka,
   izbrisiOtroka,
   pridobiTreninge,
@@ -55,11 +55,16 @@ export async function POST(req: NextRequest) {
     const b = await req.json();
 
     switch (b.akcija) {
-      case "dodaj-otroke":
-        await dodajOtroke(b.ekipa, Array.isArray(b.imena) ? b.imena : []);
+      case "dodaj-otroka":
+        await dodajOtroka(b.ekipa, { ime: b.ime, letnik: b.letnik ? Number(b.letnik) : null, skupina: b.skupina });
         return NextResponse.json({ ok: true });
       case "uredi-otroka":
-        await posodobiOtroka(Number(b.id), { ime: b.ime, aktiven: b.aktiven });
+        await posodobiOtroka(Number(b.id), {
+          ime: b.ime,
+          aktiven: b.aktiven,
+          letnik: b.letnik === undefined ? undefined : b.letnik ? Number(b.letnik) : null,
+          skupina: b.skupina,
+        });
         return NextResponse.json({ ok: true });
       case "izbrisi-otroka":
         await izbrisiOtroka(Number(b.id));

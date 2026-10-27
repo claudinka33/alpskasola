@@ -41,7 +41,7 @@ const POGOJI = [
   { v: "slabi", l: "Slabi", ikona: "🌧️" },
 ];
 
-type Otrok = { id: number; ime: string; ekipa: string; aktiven: boolean };
+type Otrok = { id: number; ime: string; ekipa: string; aktiven: boolean; letnik: number | null; skupina: string };
 type Trening = {
   id: number;
   ekipa: string;
@@ -57,6 +57,8 @@ type StatVrstica = {
   otrok_id: number;
   ime: string;
   aktiven: boolean;
+  skupina: string;
+  letnik: number | null;
   prisoten_skupaj: number;
   treningi: number;
   tekme: number;
@@ -82,6 +84,21 @@ const lepDatum = (iso: string, dolg = false) => {
     ? `${dan.charAt(0).toUpperCase() + dan.slice(1)}, ${d}. ${m}. ${y}`
     : `${dan} ${d}. ${m}.`;
 };
+
+// Otroke razdeli po podskupinah (U10, U12 deklice, U12 dečki …); brez skupine gre na konec
+function poSkupinah<T extends { skupina: string; ime: string }>(seznamOtrok: T[]) {
+  const m = new Map<string, T[]>();
+  for (const o of seznamOtrok) {
+    const k = o.skupina || "Brez skupine";
+    if (!m.has(k)) m.set(k, []);
+    m.get(k)!.push(o);
+  }
+  return Array.from(m.entries())
+    .sort(([a], [b]) => (a === "Brez skupine" ? 1 : b === "Brez skupine" ? -1 : a.localeCompare(b, "sl")))
+    .map(([skupina, otroci]) => ({ skupina, otroci: otroci.sort((x, y) => x.ime.localeCompare(y.ime, "sl")) }));
+}
+
+const LETNIKI = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 - i); // npr. 2021 … 2012
 
 async function api(body: any) {
   const r = await fetch("/api/ekipa", {
@@ -143,7 +160,10 @@ export default function EkipaPage() {
   const [drugDatum, setDrugDatum] = useState(danes());
 
   // Otroci
-  const [novaImena, setNovaImena] = useState("");
+  const [novoIme, setNovoIme] = useState("");
+  const [novLetnik, setNovLetnik] = useState<number | null>(null);
+  const [novaSkupina, setNovaSkupina] = useState("");
+  const [urejam, setUrejam] = useState<number | null>(null);
 
   // Statistika
   const [stat, setStat] = useState<{ otroci: StatVrstica[]; dnevi: { skupaj: number; treningi: number; tekme: number } } | null>(null);
@@ -184,6 +204,10 @@ export default function EkipaPage() {
   }, [pogled, ekipa]);
 
   const aktivni = useMemo(() => otroci.filter((o) => o.aktiven), [otroci]);
+  const skupineEkipe = useMemo(
+    () => Array.from(new Set(otroci.map((o) => o.skupina).filter(Boolean))).sort((a, b) => a.localeCompare(b, "sl")),
+    [otroci]
+  );
 
   // Shrani z indikatorjem
   const shrani = async (fn: () => Promise<any>) => {
@@ -237,6 +261,13 @@ export default function EkipaPage() {
     shrani(() => api({ akcija: "vsi-prisotni", trening_id: dan.id, otrok_ids: ids, prisoten }));
   };
 
+  const vsiVSkupini = (ids: number[]) => {
+    if (!dan) return;
+    const vsiZe = ids.every((id) => prisotni.includes(id));
+    setPrisotni((p) => (vsiZe ? p.filter((x) => !ids.includes(x)) : Array.from(new Set([...p, ...ids]))));
+    shrani(() => api({ akcija: "vsi-prisotni", trening_id: dan.id, otrok_ids: ids, prisoten: !vsiZe }));
+  };
+
   const izbrisiDan = async () => {
     if (!dan) return;
     if (!confirm(`Izbrišem ${lepDatum(dan.datum, true)} z vso prisotnostjo?`)) return;
@@ -245,16 +276,29 @@ export default function EkipaPage() {
   };
 
   // ---------- Otroci ----------
-  const dodajOtroke = async () => {
-    const imena = novaImena.split(/\n|,/).map((x) => x.trim()).filter(Boolean);
-    if (imena.length === 0) return;
-    await api({ akcija: "dodaj-otroke", ekipa, imena });
-    setNovaImena("");
-    nalozi();
+  const dodajOtroka = async () => {
+    if (!novoIme.trim()) return;
+    try {
+      await api({ akcija: "dodaj-otroka", ekipa, ime: novoIme.trim(), letnik: novLetnik, skupina: novaSkupina });
+      setNovoIme("");
+      nalozi();
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
+  const izberiNovoSkupino = (nastavi: (v: string) => void) => {
+    const ime = prompt("Ime nove skupine (npr. U12 deklice)");
+    if (ime && ime.trim()) nastavi(ime.trim());
   };
 
   const urediOtroka = async (o: Otrok, polja: Partial<Otrok>) => {
-    await api({ akcija: "uredi-otroka", id: o.id, ...polja });
+    setOtroci((p) => p.map((x) => (x.id === o.id ? { ...x, ...polja } : x)));
+    try {
+      await api({ akcija: "uredi-otroka", id: o.id, ...polja });
+    } catch (e: any) {
+      alert(e.message);
+    }
     nalozi();
   };
 
@@ -277,7 +321,7 @@ export default function EkipaPage() {
     const prikazani = otroci.filter((o) => o.aktiven || prisotni.includes(o.id));
     return (
       <div className="max-w-2xl mx-auto pb-24">
-        <div className="flex items-center justify-between mb-4">
+        <div className="sticky top-0 z-20 -mx-4 sm:mx-0 px-4 sm:px-0 bg-slate-50/95 backdrop-blur flex items-center justify-between mb-3">
           <button
             onClick={zapriDan}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-brand-navy py-2"
@@ -383,28 +427,52 @@ export default function EkipaPage() {
               V ekipi še ni otrok. Dodaj jih pod zavihkom »Otroci«.
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {prikazani.map((o) => {
-                const je = prisotni.includes(o.id);
+            <div className="space-y-4">
+              {poSkupinah(prikazani).map((g) => {
+                const ids = g.otroci.map((o) => o.id);
+                const tuPrisotni = ids.filter((id) => prisotni.includes(id)).length;
                 return (
-                  <button
-                    key={o.id}
-                    onClick={() => preklopiOtroka(o.id)}
-                    className={`flex items-center gap-2.5 px-3 py-4 rounded-xl border-2 text-left transition active:scale-[0.97] ${
-                      je
-                        ? "bg-green-50 border-green-500 text-green-900"
-                        : "bg-white border-slate-200 text-slate-500"
-                    }`}
-                  >
-                    <span
-                      className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                        je ? "bg-green-500 text-white" : "border-2 border-slate-300"
-                      }`}
-                    >
-                      {je && <Check size={15} strokeWidth={3} />}
-                    </span>
-                    <span className="text-sm font-semibold leading-tight">{o.ime}</span>
-                  </button>
+                  <div key={g.skupina}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-extrabold text-brand-navy uppercase tracking-wide">
+                        {g.skupina}{" "}
+                        <span className="text-slate-400 font-semibold normal-case">
+                          {tuPrisotni}/{ids.length}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => vsiVSkupini(ids)}
+                        className="text-[11px] font-bold text-brand-orange px-2 py-1"
+                      >
+                        {tuPrisotni === ids.length ? "Odznači" : "Vsi"}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {g.otroci.map((o) => {
+                        const je = prisotni.includes(o.id);
+                        return (
+                          <button
+                            key={o.id}
+                            onClick={() => preklopiOtroka(o.id)}
+                            className={`flex items-center gap-2.5 px-3 py-4 min-h-[60px] rounded-xl border-2 text-left transition active:scale-[0.97] select-none ${
+                              je
+                                ? "bg-green-50 border-green-500 text-green-900"
+                                : "bg-white border-slate-200 text-slate-500"
+                            }`}
+                          >
+                            <span
+                              className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
+                                je ? "bg-green-500 text-white" : "border-2 border-slate-300"
+                              }`}
+                            >
+                              {je && <Check size={16} strokeWidth={3} />}
+                            </span>
+                            <span className="text-[15px] font-semibold leading-tight">{o.ime}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -541,42 +609,119 @@ export default function EkipaPage() {
         </>
       ) : pogled === "otroci" ? (
         <>
-          <div className="bg-white rounded-2xl border border-slate-200/70 p-5 mb-4">
-            <label className="block text-sm font-bold text-brand-navy mb-1">Dodaj otroke v ekipo {ekipa}</label>
-            <p className="text-xs text-slate-500 mb-2">Vsako ime v svojo vrstico — lahko prilepiš cel seznam naenkrat. To narediš samo enkrat.</p>
-            <textarea
-              value={novaImena}
-              onChange={(e) => setNovaImena(e.target.value)}
-              rows={4}
-              placeholder={"Ana Novak\nLuka Kovač"}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-brand-orange mb-2"
+          {/* Dodaj otroka */}
+          <div className="bg-white rounded-2xl border border-slate-200/70 p-5 mb-4 space-y-4">
+            <div className="text-sm font-bold text-brand-navy">Dodaj otroka v ekipo {ekipa}</div>
+            <input
+              value={novoIme}
+              onChange={(e) => setNovoIme(e.target.value)}
+              placeholder="Ime in priimek"
+              autoCapitalize="words"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-base outline-none focus:border-brand-orange"
             />
+            <Razdelek naslov="Letnik">
+              {LETNIKI.map((l) => (
+                <Cip key={l} aktiven={novLetnik === l} onClick={() => setNovLetnik(novLetnik === l ? null : l)}>
+                  {l}
+                </Cip>
+              ))}
+            </Razdelek>
+            <Razdelek naslov="Skupina">
+              {skupineEkipe.map((sk) => (
+                <Cip key={sk} aktiven={novaSkupina === sk} onClick={() => setNovaSkupina(novaSkupina === sk ? "" : sk)}>
+                  {sk}
+                </Cip>
+              ))}
+              {novaSkupina && !skupineEkipe.includes(novaSkupina) && (
+                <Cip aktiven onClick={() => setNovaSkupina("")}>{novaSkupina}</Cip>
+              )}
+              <button
+                type="button"
+                onClick={() => izberiNovoSkupino(setNovaSkupina)}
+                className="px-4 py-3 rounded-xl text-sm font-bold border-2 border-dashed border-slate-300 text-slate-500"
+              >
+                + Nova
+              </button>
+            </Razdelek>
             <button
-              onClick={dodajOtroke}
-              disabled={!novaImena.trim()}
-              className="inline-flex items-center gap-1.5 bg-brand-orange text-white px-4 py-2.5 rounded-xl text-sm font-bold disabled:opacity-40"
+              onClick={dodajOtroka}
+              disabled={!novoIme.trim()}
+              className="w-full inline-flex items-center justify-center gap-1.5 bg-brand-orange text-white py-3.5 rounded-xl text-base font-bold disabled:opacity-40"
             >
-              <Plus size={16} /> Dodaj
+              <Plus size={18} /> Dodaj otroka
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/70 divide-y divide-slate-100">
-            {otroci.length === 0 && <div className="p-5 text-sm text-slate-400 text-center">Ni otrok.</div>}
-            {otroci.map((o) => (
-              <div key={o.id} className={`flex items-center gap-2 px-4 py-3 ${o.aktiven ? "" : "opacity-50"}`}>
-                <span className="flex-1 text-sm font-semibold text-slate-800">{o.ime}</span>
-                <button onClick={() => preimenuj(o)} className="p-2 text-slate-400 hover:text-brand-navy" title="Preimenuj">
-                  <Pencil size={14} />
-                </button>
-                <button
-                  onClick={() => urediOtroka(o, { aktiven: !o.aktiven })}
-                  className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-500"
-                >
-                  {o.aktiven ? "Ne trenira več" : "Vrni v ekipo"}
-                </button>
-                <button onClick={() => izbrisiOtroka(o)} className="p-2 text-slate-300 hover:text-red-600" title="Izbriši">
-                  <Trash2 size={14} />
-                </button>
+          {/* Seznam po skupinah */}
+          {otroci.length === 0 && (
+            <div className="bg-white rounded-2xl border border-slate-200/70 p-5 text-sm text-slate-400 text-center">Ni otrok.</div>
+          )}
+          <div className="space-y-4">
+            {poSkupinah(otroci).map((g) => (
+              <div key={g.skupina}>
+                <div className="text-xs font-extrabold text-brand-navy uppercase tracking-wide mb-2 px-1">
+                  {g.skupina} <span className="text-slate-400 font-semibold normal-case">{g.otroci.filter((o) => o.aktiven).length}</span>
+                </div>
+                <div className="bg-white rounded-2xl border border-slate-200/70 divide-y divide-slate-100">
+                  {g.otroci.map((o) => (
+                    <div key={o.id} className={o.aktiven ? "" : "opacity-50"}>
+                      <button
+                        onClick={() => setUrejam(urejam === o.id ? null : o.id)}
+                        className="w-full flex items-center gap-2 px-4 py-3.5 text-left"
+                      >
+                        <span className="flex-1 text-[15px] font-semibold text-slate-800">{o.ime}</span>
+                        {o.letnik && <span className="text-xs font-semibold text-slate-400">{o.letnik}</span>}
+                        {!o.aktiven && <span className="text-[10px] font-bold text-slate-400">ne trenira</span>}
+                        <Pencil size={14} className="text-slate-300 ml-1" />
+                      </button>
+                      {urejam === o.id && (
+                        <div className="px-4 pb-4 space-y-3 bg-slate-50/60">
+                          <Razdelek naslov="Letnik">
+                            {LETNIKI.map((l) => (
+                              <Cip key={l} aktiven={o.letnik === l} onClick={() => urediOtroka(o, { letnik: l })}>
+                                {l}
+                              </Cip>
+                            ))}
+                          </Razdelek>
+                          <Razdelek naslov="Skupina">
+                            {skupineEkipe.map((sk) => (
+                              <Cip key={sk} aktiven={o.skupina === sk} onClick={() => urediOtroka(o, { skupina: sk })}>
+                                {sk}
+                              </Cip>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => izberiNovoSkupino((v) => urediOtroka(o, { skupina: v }))}
+                              className="px-4 py-3 rounded-xl text-sm font-bold border-2 border-dashed border-slate-300 text-slate-500"
+                            >
+                              + Nova
+                            </button>
+                          </Razdelek>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            <button
+                              onClick={() => preimenuj(o)}
+                              className="text-xs font-bold px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600"
+                            >
+                              Popravi ime
+                            </button>
+                            <button
+                              onClick={() => urediOtroka(o, { aktiven: !o.aktiven })}
+                              className="text-xs font-bold px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600"
+                            >
+                              {o.aktiven ? "Ne trenira več" : "Vrni v ekipo"}
+                            </button>
+                            <button
+                              onClick={() => izbrisiOtroka(o)}
+                              className="text-xs font-bold px-3 py-2.5 rounded-lg border border-red-100 bg-white text-red-600 ml-auto"
+                            >
+                              Izbriši
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -606,7 +751,7 @@ export default function EkipaPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-[10px] uppercase tracking-wide text-slate-400 text-right">
-                      <th className="text-left px-3 py-2.5">Otrok</th>
+                      <th className="text-left px-3 py-2.5 sticky left-0 bg-white">Otrok</th>
                       <th className="px-2">%</th>
                       <th className="px-2">Tren.</th>
                       <th className="px-2">Tekme</th>
@@ -619,12 +764,18 @@ export default function EkipaPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {stat.otroci.map((o) => {
+                    {poSkupinah(stat.otroci).flatMap((g) => [
+                      <tr key={"h-" + g.skupina} className="bg-slate-50">
+                        <td colSpan={10} className="px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-navy sticky left-0 bg-slate-50">
+                          {g.skupina}
+                        </td>
+                      </tr>,
+                      ...g.otroci.map((o) => {
                       const vsi = stat.dnevi?.skupaj || 0;
                       const pct = vsi ? Math.round((o.prisoten_skupaj / vsi) * 100) : 0;
                       return (
                         <tr key={o.otrok_id} className={`text-right ${o.aktiven ? "" : "opacity-50"}`}>
-                          <td className="text-left px-3 py-2.5 font-semibold text-slate-800 whitespace-nowrap">{o.ime}</td>
+                          <td className="text-left px-3 py-2.5 font-semibold text-slate-800 whitespace-nowrap sticky left-0 bg-white">{o.ime}</td>
                           <td className={`px-2 font-bold ${pct >= 75 ? "text-green-600" : pct >= 50 ? "text-amber-600" : "text-red-600"}`}>
                             {pct}%
                           </td>
@@ -638,7 +789,8 @@ export default function EkipaPage() {
                           <td className="px-2 pr-3 text-slate-500">{o.freestyle}</td>
                         </tr>
                       );
-                    })}
+                    }),
+                    ])}
                   </tbody>
                 </table>
               </div>

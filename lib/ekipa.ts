@@ -41,10 +41,55 @@ export async function zagotoviEkipo() {
       PRIMARY KEY (trening_id, otrok_id)
     );`;
 
+  await sql`ALTER TABLE ekipa_otroci ADD COLUMN IF NOT EXISTS letnik INT;`;
+  await sql`ALTER TABLE ekipa_otroci ADD COLUMN IF NOT EXISTS skupina TEXT NOT NULL DEFAULT '';`;
+
+  // Isti otrok (ime) v isti ekipi samo enkrat
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS ekipa_otroci_ime ON ekipa_otroci (ekipa, lower(ime));`;
+
+  // Začetni seznam ekipe U10/U12 — vpiše se samo ENKRAT v življenju baze
+  // (zastavica v ekipa_nastavitve; tudi če kasneje otroke izbrišeš, se ne vrnejo).
+  await sql`CREATE TABLE IF NOT EXISTS ekipa_nastavitve (kljuc TEXT PRIMARY KEY, ustvarjeno TIMESTAMPTZ NOT NULL DEFAULT now());`;
+  const prvic = await sql`
+    INSERT INTO ekipa_nastavitve (kljuc) VALUES ('zacetni_u10_u12')
+    ON CONFLICT (kljuc) DO NOTHING RETURNING kljuc;`;
+  if (prvic.rows.length > 0) {
+    for (const [ime, letnik, skupina] of ZACETNI_U10_U12) {
+      await sql`
+        INSERT INTO ekipa_otroci (ime, ekipa, letnik, skupina)
+        VALUES (${ime}, 'U10/U12', ${letnik}, ${skupina})
+        ON CONFLICT (ekipa, lower(ime)) DO UPDATE SET letnik = EXCLUDED.letnik, skupina = EXCLUDED.skupina;`;
+    }
+  }
+
   izvedeno = true;
 }
 
-export type EkipaOtrok = { id: number; ime: string; ekipa: string; aktiven: boolean };
+const ZACETNI_U10_U12: [string, number, string][] = [
+  ["Vita Sladič", 2017, "U10"],
+  ["Štefan Jamšek", 2018, "U10"],
+  ["Marko Podbukovšek", 2018, "U10"],
+  ["Živa Ribič", 2016, "U12 deklice"],
+  ["Tesa Komplet", 2016, "U12 deklice"],
+  ["Julija Krajnc", 2016, "U12 deklice"],
+  ["Kiara Toretto", 2015, "U12 deklice"],
+  ["Eva Kus Ambrož", 2015, "U12 deklice"],
+  ["Una Arzenšek", 2015, "U12 deklice"],
+  ["Luka Gorečan-Fijavž", 2016, "U12 dečki"],
+  ["Jošt Steinacher", 2016, "U12 dečki"],
+  ["Aleks Hren", 2016, "U12 dečki"],
+  ["Jaka Oberč", 2016, "U12 dečki"],
+  ["Tim Cilenšek", 2015, "U12 dečki"],
+];
+
+export type EkipaOtrok = {
+  id: number;
+  ime: string;
+  ekipa: string;
+  aktiven: boolean;
+  letnik: number | null;
+  skupina: string;
+};
 export type EkipaTrening = {
   id: number;
   ekipa: string;
@@ -60,23 +105,30 @@ export type EkipaTrening = {
 // ---------- OTROCI ----------
 export async function pridobiOtroke(ekipa: string) {
   const r = await sql<EkipaOtrok>`
-    SELECT id, ime, ekipa, aktiven FROM ekipa_otroci
+    SELECT id, ime, ekipa, aktiven, letnik, skupina FROM ekipa_otroci
     WHERE ekipa = ${ekipa}
-    ORDER BY aktiven DESC, ime;`;
+    ORDER BY aktiven DESC, skupina, ime;`;
   return r.rows;
 }
 
-export async function dodajOtroke(ekipa: string, imena: string[]) {
-  for (const ime of imena) {
-    const cisto = ime.trim();
-    if (!cisto) continue;
-    await sql`INSERT INTO ekipa_otroci (ime, ekipa) VALUES (${cisto}, ${ekipa});`;
-  }
+export async function dodajOtroka(ekipa: string, d: { ime: string; letnik?: number | null; skupina?: string }) {
+  const ime = (d.ime || "").trim();
+  if (!ime) return;
+  const r = await sql`
+    INSERT INTO ekipa_otroci (ime, ekipa, letnik, skupina)
+    VALUES (${ime}, ${ekipa}, ${d.letnik || null}, ${(d.skupina || "").trim()})
+    ON CONFLICT (ekipa, lower(ime)) DO NOTHING RETURNING id;`;
+  if (r.rows.length === 0) throw new Error(`${ime} je že v ekipi.`);
 }
 
-export async function posodobiOtroka(id: number, d: { ime?: string; aktiven?: boolean }) {
+export async function posodobiOtroka(
+  id: number,
+  d: { ime?: string; aktiven?: boolean; letnik?: number | null; skupina?: string }
+) {
   if (d.ime !== undefined) await sql`UPDATE ekipa_otroci SET ime = ${d.ime.trim()} WHERE id = ${id};`;
   if (d.aktiven !== undefined) await sql`UPDATE ekipa_otroci SET aktiven = ${d.aktiven} WHERE id = ${id};`;
+  if (d.letnik !== undefined) await sql`UPDATE ekipa_otroci SET letnik = ${d.letnik || null} WHERE id = ${id};`;
+  if (d.skupina !== undefined) await sql`UPDATE ekipa_otroci SET skupina = ${d.skupina.trim()} WHERE id = ${id};`;
 }
 
 export async function izbrisiOtroka(id: number) {
@@ -148,6 +200,8 @@ export async function statistika(ekipa: string) {
     otrok_id: number;
     ime: string;
     aktiven: boolean;
+    skupina: string;
+    letnik: number | null;
     prisoten_skupaj: number;
     treningi: number;
     tekme: number;
@@ -158,7 +212,7 @@ export async function statistika(ekipa: string) {
     fraj: number;
     proga: number;
   }>`
-    SELECT o.id AS otrok_id, o.ime, o.aktiven,
+    SELECT o.id AS otrok_id, o.ime, o.aktiven, o.skupina, o.letnik,
       COUNT(t.id)::int AS prisoten_skupaj,
       COUNT(t.id) FILTER (WHERE t.tip = 'trening')::int AS treningi,
       COUNT(t.id) FILTER (WHERE t.tip = 'tekma')::int AS tekme,
@@ -172,8 +226,8 @@ export async function statistika(ekipa: string) {
     LEFT JOIN ekipa_prisotnost p ON p.otrok_id = o.id AND p.prisoten
     LEFT JOIN ekipa_treningi t ON t.id = p.trening_id
     WHERE o.ekipa = ${ekipa}
-    GROUP BY o.id, o.ime, o.aktiven
-    ORDER BY o.aktiven DESC, prisoten_skupaj DESC, o.ime;`;
+    GROUP BY o.id, o.ime, o.aktiven, o.skupina, o.letnik
+    ORDER BY o.aktiven DESC, o.skupina, prisoten_skupaj DESC, o.ime;`;
   const s = await sql<{ skupaj: number; treningi: number; tekme: number }>`
     SELECT COUNT(*)::int AS skupaj,
       COUNT(*) FILTER (WHERE tip = 'trening')::int AS treningi,
