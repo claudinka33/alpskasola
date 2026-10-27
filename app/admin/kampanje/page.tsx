@@ -128,6 +128,7 @@ function blokiVVsebino(bloki: Blok[], termini: Termin[]) {
 // Skupine oznak — da je seznam prejemnikov pregleden
 const SKUPINE_OZNAK = [
   { kljuc: "ekipe", naziv: "Smučarske ekipe", ikona: "⛷️" },
+  { kljuc: "vrtci", naziv: "Vrtci", ikona: "🏫" },
   { kljuc: "plavanje", naziv: "Plavanje", ikona: "🏊" },
   { kljuc: "abeceda", naziv: "Športna abeceda", ikona: "🤸" },
   { kljuc: "ostalo", naziv: "Ostalo", ikona: "📣" },
@@ -136,6 +137,7 @@ const SKUPINE_OZNAK = [
 function skupinaOznake(o: string): string {
   const x = o.toLowerCase();
   if (x.includes("ekipa") || x.includes("akademij") || x.includes("fis") || x.includes("racing")) return "ekipe";
+  if (x.includes("vrtec") || x.includes("vrtc")) return "vrtci";
   if (x.includes("plaval") || x.includes("plavan")) return "plavanje";
   if (x.includes("abeced")) return "abeceda";
   return "ostalo";
