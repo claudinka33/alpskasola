@@ -729,7 +729,7 @@ export default function EkipaPage() {
   const danesOdprt = treningi.find((t) => t.datum === danes());
 
   return (
-    <div className="max-w-2xl mx-auto pb-16">
+    <div className={`${pogled === "statistika" ? "max-w-6xl" : "max-w-2xl"} mx-auto pb-16`}>
       <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
         <Mountain className="text-brand-orange" /> Treningi ekipe
       </h1>
@@ -1041,11 +1041,65 @@ export default function EkipaPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="bg-white rounded-2xl border border-slate-200/70 overflow-x-auto">
+                  {/* TELEFON: kartica za vsakega otroka — brez drsenja levo-desno */}
+                  <div className="md:hidden space-y-4">
+                    {poSkupinah(vrstice).map((g) => (
+                      <div key={g.skupina}>
+                        <div className="text-xs font-extrabold text-brand-navy uppercase tracking-wide mb-2 px-1">{g.skupina}</div>
+                        <div className="bg-white rounded-2xl border border-slate-200/70 divide-y divide-slate-100">
+                          {g.otroci.map((o) => {
+                            const pct = steviloDni ? Math.round((o.skupaj / steviloDni) * 100) : 0;
+                            return (
+                              <div key={o.id} className={`px-4 py-3 ${o.aktiven ? "" : "opacity-50"}`}>
+                                <div className="flex items-center gap-2">
+                                  <span className="flex-1 text-[15px] font-bold text-slate-800">{o.ime}</span>
+                                  <span className={`text-sm font-bold ${pct >= 75 ? "text-green-600" : pct >= 50 ? "text-amber-600" : "text-red-600"}`}>
+                                    {pct}%
+                                  </span>
+                                  <span className="text-right">
+                                    <span className="text-xl font-extrabold text-brand-navy">{o.skupaj}</span>
+                                    <span className="text-[10px] text-slate-400 ml-1">dni</span>
+                                  </span>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                  {stolpci.map((c, i) => (
+                                    <span
+                                      key={c.kljuc}
+                                      className={`text-[11px] px-2 py-1 rounded-lg ${
+                                        o.stevci[i] > 0 ? "bg-slate-100 text-slate-700 font-semibold" : "bg-slate-50 text-slate-300"
+                                      }`}
+                                    >
+                                      {c.naslov} <b>{o.stevci[i]}</b>
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[15px] font-extrabold text-brand-navy">Dni ekipe skupaj</span>
+                        <span className="text-xl font-extrabold text-brand-orange">{steviloDni}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {stolpci.map((c) => (
+                          <span key={c.kljuc} className="text-[11px] px-2 py-1 rounded-lg bg-white text-slate-700 font-semibold">
+                            {c.naslov} <b>{dniSezone.filter(c.ujema).length}</b>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* RAČUNALNIK: tabela */}
+                  <div className="hidden md:block bg-white rounded-2xl border border-slate-200/70 overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-[10px] uppercase tracking-wide text-slate-400 text-right">
-                          <th className="text-left px-3 py-2.5 sticky left-0 bg-white">Otrok</th>
+                          <th className="text-left px-3 py-2.5">Otrok</th>
                           <th className="px-2">%</th>
                           {stolpci.map((c) => (
                             <th key={c.kljuc} className="px-2 whitespace-nowrap">{c.naslov}</th>
@@ -1056,7 +1110,7 @@ export default function EkipaPage() {
                       <tbody className="divide-y divide-slate-100">
                         {poSkupinah(vrstice).flatMap((g) => [
                           <tr key={"h-" + g.skupina} className="bg-slate-50">
-                            <td colSpan={stolpci.length + 3} className="px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-navy sticky left-0 bg-slate-50">
+                            <td colSpan={stolpci.length + 3} className="px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-navy">
                               {g.skupina}
                             </td>
                           </tr>,
@@ -1064,7 +1118,7 @@ export default function EkipaPage() {
                             const pct = steviloDni ? Math.round((o.skupaj / steviloDni) * 100) : 0;
                             return (
                               <tr key={o.id} className={`text-right ${o.aktiven ? "" : "opacity-50"}`}>
-                                <td className="text-left px-3 py-2.5 font-semibold text-slate-800 whitespace-nowrap sticky left-0 bg-white">{o.ime}</td>
+                                <td className="text-left px-3 py-2.5 font-semibold text-slate-800 whitespace-nowrap">{o.ime}</td>
                                 <td className={`px-2 font-bold ${pct >= 75 ? "text-green-600" : pct >= 50 ? "text-amber-600" : "text-red-600"}`}>
                                   {pct}%
                                 </td>
@@ -1079,7 +1133,7 @@ export default function EkipaPage() {
                       </tbody>
                       <tfoot>
                         <tr className="text-right border-t-2 border-slate-200 bg-orange-50/60 font-extrabold text-brand-navy">
-                          <td className="text-left px-3 py-3 sticky left-0 bg-orange-50 whitespace-nowrap">Dni ekipe</td>
+                          <td className="text-left px-3 py-3 whitespace-nowrap">Dni ekipe</td>
                           <td className="px-2"></td>
                           {stolpci.map((c) => (
                             <td key={c.kljuc} className="px-2">{dniSezone.filter(c.ujema).length}</td>
