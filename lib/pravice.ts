@@ -19,6 +19,8 @@ export const RAZDELKI: Razdelek[] = [
   { kljuc: "placila", pot: "/admin/placila", naziv: "Plačila", skupina: "Vodenje skupin", opis: "Evidenca plačil in dolžnikov" },
   { kljuc: "ure", pot: "/admin/ure", naziv: "Ure učiteljev", skupina: "Vodenje skupin", opis: "Obračun ur po učiteljih" },
 
+  { kljuc: "ekipa", pot: "/admin/ekipa", naziv: "Treningi ekipe", skupina: "Tekmovalna ekipa", opis: "Prisotnost na treningih in tekmah ekipe" },
+
   { kljuc: "kontakti", pot: "/admin/kontakti", naziv: "Kontakti (baza)", skupina: "Obveščanje", opis: "Baza staršev, telefoni in emaili" },
   { kljuc: "kampanje", pot: "/admin/kampanje", naziv: "Emailing", skupina: "Obveščanje", opis: "Pošiljanje emailov staršem" },
   { kljuc: "datoteke", pot: "/admin/datoteke", naziv: "Datoteke", skupina: "Obveščanje", opis: "Slike in dokumenti za emaile" },

@@ -33,6 +33,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       ].filter((p) => vidi(p.kljuc)),
     },
     {
+      label: "Tekmovalna ekipa",
+      postavke: [
+        { kljuc: "ekipa", href: "/admin/ekipa", label: "Treningi ekipe" },
+      ].filter((p) => vidi(p.kljuc)),
+    },
+    {
       label: "Obveščanje",
       postavke: [
         { kljuc: "kontakti", href: "/admin/kontakti", label: "Kontakti (baza)" },

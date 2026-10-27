@@ -22,6 +22,7 @@ import {
   HardDrive,
   Menu,
   X,
+  Mountain,
 } from "lucide-react";
 
 const IKONE: Record<string, any> = {
@@ -32,6 +33,7 @@ const IKONE: Record<string, any> = {
   prisotnost: CheckCircle2,
   placila: Euro,
   ure: Clock,
+  ekipa: Mountain,
   kontakti: Contact,
   kampanje: Send,
   datoteke: HardDrive,

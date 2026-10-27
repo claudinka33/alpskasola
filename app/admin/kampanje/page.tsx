@@ -128,25 +128,26 @@ function blokiVVsebino(bloki: Blok[], termini: Termin[]) {
 // Skupine oznak — da je seznam prejemnikov pregleden
 const SKUPINE_OZNAK = [
   { kljuc: "ekipe", naziv: "Smučarske ekipe", ikona: "⛷️" },
-  { kljuc: "vrtci", naziv: "Vrtci", ikona: "🏫" },
+  { kljuc: "vrtci", naziv: "Vrtci · športna abeceda", ikona: "🏫" },
   { kljuc: "plavanje", naziv: "Plavanje", ikona: "🏊" },
-  { kljuc: "abeceda", naziv: "Športna abeceda", ikona: "🤸" },
   { kljuc: "ostalo", naziv: "Ostalo", ikona: "📣" },
 ] as const;
 
-function skupinaOznake(o: string): string {
+// abecedaOznake = oznake terminov športne abecede (vsak vrtec ima svoj termin/oznako)
+function skupinaOznake(o: string, abecedaOznake: Set<string>): string {
   const x = o.toLowerCase();
   if (x.includes("ekipa") || x.includes("akademij") || x.includes("fis") || x.includes("racing")) return "ekipe";
-  if (x.includes("vrtec") || x.includes("vrtc")) return "vrtci";
+  if (x.includes("vrtec") || x.includes("vrtc") || x.includes("abeced") || abecedaOznake.has(x)) return "vrtci";
   if (x.includes("plaval") || x.includes("plavan")) return "plavanje";
-  if (x.includes("abeced")) return "abeceda";
   return "ostalo";
 }
 
 // Ekipe po starosti (U6/U8 → U10/U12 → U14 → FIS → ostalo), drugo po abecedi
 function razvrstiOznake(a: string, b: string) {
   const st = (o: string) => {
-    const m = o.match(/U(\d+)/i);
+    // splošne stare oznake (npr. "Prijavnica za športno abecedo 2025", "sportna-abeceda") na konec
+    if (/prijavnica|^sportna-abeceda$|^plavalni-tecaj$/i.test(o)) return 200;
+    const m = o.match(/U(\d+)/);
     if (m) return parseInt(m[1], 10);
     if (/fis/i.test(o)) return 50;
     return 100;
@@ -169,7 +170,7 @@ export default function KampanjePage() {
   ]);
   const [oznake, setOznake] = useState<string[]>([]);
   const [iskanjeOznak, setIskanjeOznak] = useState("");
-  const [odprteSkupine, setOdprteSkupine] = useState<string[]>(["ekipe"]);
+  const [odprteSkupine, setOdprteSkupine] = useState<string[]>(["ekipe", "vrtci"]);
   const [samoNaroceni, setSamoNaroceni] = useState(true);
   const [kontakti, setKontakti] = useState<Kontakt[]>([]);
   const [termini, setTermini] = useState<Termin[]>([]);
@@ -334,12 +335,24 @@ export default function KampanjePage() {
     setOznake((prej) => (prej.includes(o) ? prej.filter((x) => x !== o) : [...prej, o]));
   };
 
+  // Oznake terminov športne abecede → spadajo med vrtce
+  const abecedaOznake = useMemo(
+    () =>
+      new Set(
+        termini
+          .filter((t: any) => /abeced/i.test(t.program_slug || ""))
+          .map((t: any) => String(t.oznaka || "").trim().toLowerCase())
+          .filter(Boolean)
+      ),
+    [termini]
+  );
+
   // Oznake razporejene po skupinah
   const skupineZOznakami = useMemo(
     () =>
       SKUPINE_OZNAK.map((sk) => {
-        const vse = vseOznake.filter((o) => skupinaOznake(o) === sk.kljuc).sort(razvrstiOznake);
-        const prikazane = prikazaneOznake.filter((o) => skupinaOznake(o) === sk.kljuc).sort(razvrstiOznake);
+        const vse = vseOznake.filter((o) => skupinaOznake(o, abecedaOznake) === sk.kljuc).sort(razvrstiOznake);
+        const prikazane = prikazaneOznake.filter((o) => skupinaOznake(o, abecedaOznake) === sk.kljuc).sort(razvrstiOznake);
         // unikatni kontakti v celotni skupini
         const emaili = new Set<string>();
         for (const k of kontakti) {
@@ -351,7 +364,7 @@ export default function KampanjePage() {
         return { ...sk, vse, prikazane, stevilo: emaili.size };
       }).filter((sk) => sk.vse.length > 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [vseOznake, iskanjeOznak, kontakti, samoNaroceni]
+    [vseOznake, iskanjeOznak, kontakti, samoNaroceni, abecedaOznake]
   );
 
   const preklopiSkupino = (kljuc: string) =>
