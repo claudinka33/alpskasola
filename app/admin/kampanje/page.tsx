@@ -24,6 +24,7 @@ import {
   Upload,
   Paperclip,
   HardDrive,
+  ChevronDown,
 } from "lucide-react";
 
 type Predloga = {
@@ -124,6 +125,34 @@ function blokiVVsebino(bloki: Blok[], termini: Termin[]) {
 }
 
 // Ali kontakt ustreza vsaj eni izmed izbranih oznak
+// Skupine oznak — da je seznam prejemnikov pregleden
+const SKUPINE_OZNAK = [
+  { kljuc: "ekipe", naziv: "Smučarske ekipe", ikona: "⛷️" },
+  { kljuc: "plavanje", naziv: "Plavanje", ikona: "🏊" },
+  { kljuc: "abeceda", naziv: "Športna abeceda", ikona: "🤸" },
+  { kljuc: "ostalo", naziv: "Ostalo", ikona: "📣" },
+] as const;
+
+function skupinaOznake(o: string): string {
+  const x = o.toLowerCase();
+  if (x.includes("ekipa") || x.includes("akademij") || x.includes("fis") || x.includes("racing")) return "ekipe";
+  if (x.includes("plaval") || x.includes("plavan")) return "plavanje";
+  if (x.includes("abeced")) return "abeceda";
+  return "ostalo";
+}
+
+// Ekipe po starosti (U6/U8 → U10/U12 → U14 → FIS → ostalo), drugo po abecedi
+function razvrstiOznake(a: string, b: string) {
+  const st = (o: string) => {
+    const m = o.match(/U(\d+)/i);
+    if (m) return parseInt(m[1], 10);
+    if (/fis/i.test(o)) return 50;
+    return 100;
+  };
+  const d = st(a) - st(b);
+  return d !== 0 ? d : a.localeCompare(b, "sl");
+}
+
 function ustrezaOznakam(k: Kontakt, oznake: string[]) {
   if (oznake.length === 0) return true;
   const moje = k.oznake.toLowerCase();
@@ -138,6 +167,7 @@ export default function KampanjePage() {
   ]);
   const [oznake, setOznake] = useState<string[]>([]);
   const [iskanjeOznak, setIskanjeOznak] = useState("");
+  const [odprteSkupine, setOdprteSkupine] = useState<string[]>(["ekipe"]);
   const [samoNaroceni, setSamoNaroceni] = useState(true);
   const [kontakti, setKontakti] = useState<Kontakt[]>([]);
   const [termini, setTermini] = useState<Termin[]>([]);
@@ -300,6 +330,36 @@ export default function KampanjePage() {
 
   const preklopiOznako = (o: string) => {
     setOznake((prej) => (prej.includes(o) ? prej.filter((x) => x !== o) : [...prej, o]));
+  };
+
+  // Oznake razporejene po skupinah
+  const skupineZOznakami = useMemo(
+    () =>
+      SKUPINE_OZNAK.map((sk) => {
+        const vse = vseOznake.filter((o) => skupinaOznake(o) === sk.kljuc).sort(razvrstiOznake);
+        const prikazane = prikazaneOznake.filter((o) => skupinaOznake(o) === sk.kljuc).sort(razvrstiOznake);
+        // unikatni kontakti v celotni skupini
+        const emaili = new Set<string>();
+        for (const k of kontakti) {
+          if (samoNaroceni && !k.narocen) continue;
+          if (vse.some((o) => k.oznake.toLowerCase().includes(o.toLowerCase()))) {
+            emaili.add(String(k.email || "").trim().toLowerCase());
+          }
+        }
+        return { ...sk, vse, prikazane, stevilo: emaili.size };
+      }).filter((sk) => sk.vse.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [vseOznake, iskanjeOznak, kontakti, samoNaroceni]
+  );
+
+  const preklopiSkupino = (kljuc: string) =>
+    setOdprteSkupine((p) => (p.includes(kljuc) ? p.filter((x) => x !== kljuc) : [...p, kljuc]));
+
+  const izberiCeloSkupino = (seznam: string[]) => {
+    const vseIzbrane = seznam.every((o) => oznake.includes(o));
+    setOznake((prej) =>
+      vseIzbrane ? prej.filter((o) => !seznam.includes(o)) : Array.from(new Set([...prej, ...seznam]))
+    );
   };
 
   // --- Upravljanje blokov ---
@@ -908,38 +968,102 @@ export default function KampanjePage() {
               </div>
             )}
 
-            {/* Seznam s kljukicami */}
-            <div className="border border-slate-200 rounded-xl max-h-[260px] overflow-y-auto mb-3 divide-y divide-slate-100">
-              <label className="flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-slate-50">
-                <input
-                  type="checkbox"
-                  checked={oznake.length === 0}
-                  onChange={() => setOznake([])}
-                  className="w-4 h-4 accent-brand-orange shrink-0"
-                />
-                <span className="text-sm font-semibold text-brand-navy">Vsi kontakti</span>
-              </label>
+            {/* Vsi kontakti */}
+            <label
+              className={`flex items-center gap-2.5 px-3 py-3 mb-2 rounded-xl border cursor-pointer transition ${
+                oznake.length === 0
+                  ? "border-brand-orange bg-orange-50"
+                  : "border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={oznake.length === 0}
+                onChange={() => setOznake([])}
+                className="w-4 h-4 accent-brand-orange shrink-0"
+              />
+              <span className="text-sm font-bold text-brand-navy flex-1">Vsi kontakti</span>
+              <span className="text-[11px] font-semibold text-slate-400">
+                {kontakti.filter((k) => !samoNaroceni || k.narocen).length}
+              </span>
+            </label>
 
-              {prikazaneOznake.length === 0 ? (
+            {/* Skupine oznak */}
+            <div className="space-y-2 mb-3">
+              {skupineZOznakami.map((sk) => {
+                const odprta = odprteSkupine.includes(sk.kljuc) || iskanjeOznak.trim() !== "";
+                const izbranihVSkupini = sk.vse.filter((o) => oznake.includes(o)).length;
+                const vseIzbrane = izbranihVSkupini === sk.vse.length;
+                if (iskanjeOznak.trim() && sk.prikazane.length === 0) return null;
+                return (
+                  <div key={sk.kljuc} className="border border-slate-200 rounded-xl overflow-hidden">
+                    <div
+                      className={`flex items-center gap-2 px-3 py-2.5 ${
+                        izbranihVSkupini > 0 ? "bg-orange-50/60" : "bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={vseIzbrane}
+                        ref={(el) => {
+                          if (el) el.indeterminate = izbranihVSkupini > 0 && !vseIzbrane;
+                        }}
+                        onChange={() => izberiCeloSkupino(sk.vse)}
+                        title="Izberi celo skupino"
+                        className="w-4 h-4 accent-brand-orange shrink-0 cursor-pointer"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => preklopiSkupino(sk.kljuc)}
+                        className="flex-1 flex items-center gap-2 text-left min-w-0"
+                      >
+                        <span className="text-base leading-none">{sk.ikona}</span>
+                        <span className="text-sm font-bold text-brand-navy truncate">{sk.naziv}</span>
+                        {izbranihVSkupini > 0 && (
+                          <span className="text-[10px] font-bold bg-brand-orange text-white px-1.5 py-0.5 rounded-full shrink-0">
+                            {izbranihVSkupini}/{sk.vse.length}
+                          </span>
+                        )}
+                        <span className="ml-auto text-[11px] font-semibold text-slate-400 shrink-0">
+                          {sk.stevilo}
+                        </span>
+                        <ChevronDown
+                          size={16}
+                          className={`text-slate-400 shrink-0 transition-transform ${odprta ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                    </div>
+
+                    {odprta && (
+                      <div className="divide-y divide-slate-100 border-t border-slate-200">
+                        {sk.prikazane.map((o) => (
+                          <label
+                            key={o}
+                            className={`flex items-center gap-2.5 pl-9 pr-3 py-2.5 cursor-pointer ${
+                              oznake.includes(o) ? "bg-orange-50/50" : "hover:bg-slate-50"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={oznake.includes(o)}
+                              onChange={() => preklopiOznako(o)}
+                              className="w-4 h-4 accent-brand-orange shrink-0"
+                            />
+                            <span className="text-[13px] text-slate-700 flex-1 truncate" title={o}>
+                              {o}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-400 shrink-0">
+                              {stevecOznak[o] ?? 0}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {iskanjeOznak.trim() && prikazaneOznake.length === 0 && (
                 <div className="px-3 py-3 text-xs text-slate-400">Ni zadetkov.</div>
-              ) : (
-                prikazaneOznake.map((o) => (
-                  <label
-                    key={o}
-                    className="flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-orange-50/40"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={oznake.includes(o)}
-                      onChange={() => preklopiOznako(o)}
-                      className="w-4 h-4 accent-brand-orange shrink-0"
-                    />
-                    <span className="text-xs text-slate-700 flex-1 truncate" title={o}>{o}</span>
-                    <span className="text-[10px] font-semibold text-slate-400 shrink-0">
-                      {stevecOznak[o] ?? 0}
-                    </span>
-                  </label>
-                ))
               )}
             </div>
 
