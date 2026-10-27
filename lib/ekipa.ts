@@ -50,6 +50,7 @@ export async function zagotoviEkipo() {
   // Začetni seznam ekipe U10/U12 — vpiše se samo ENKRAT v življenju baze
   // (zastavica v ekipa_nastavitve; tudi če kasneje otroke izbrišeš, se ne vrnejo).
   await sql`CREATE TABLE IF NOT EXISTS ekipa_nastavitve (kljuc TEXT PRIMARY KEY, ustvarjeno TIMESTAMPTZ NOT NULL DEFAULT now());`;
+  await sql`ALTER TABLE ekipa_nastavitve ADD COLUMN IF NOT EXISTS vrednost TEXT;`;
   const prvic = await sql`
     INSERT INTO ekipa_nastavitve (kljuc) VALUES ('zacetni_u10_u12')
     ON CONFLICT (kljuc) DO NOTHING RETURNING kljuc;`;
@@ -193,45 +194,60 @@ export async function nastaviVsePrisotne(trening_id: number, otrok_ids: number[]
   for (const id of otrok_ids) await nastaviPrisotnostOtroka(trening_id, id, prisoten);
 }
 
+// Shrani cel dan naenkrat (gumb »Shrani«): ustvari dan, če ga še ni, zapiše izbire
+// in prisotnost (kdor ni na seznamu prisotnih, je odsoten).
+export async function shraniDan(
+  ekipa: string,
+  datum: string,
+  p: { tip: string; voznja: string; discipline: string; pogoji: string; trenerji: string },
+  prisotni: number[]
+) {
+  const r = await sql<{ id: number }>`
+    INSERT INTO ekipa_treningi (ekipa, datum, tip, voznja, discipline, pogoji, trenerji)
+    VALUES (${ekipa}, ${datum}, ${p.tip || "trening"}, ${p.voznja || ""}, ${p.discipline || ""}, ${p.pogoji || ""}, ${p.trenerji || ""})
+    ON CONFLICT (ekipa, datum) DO UPDATE SET
+      tip = EXCLUDED.tip, voznja = EXCLUDED.voznja, discipline = EXCLUDED.discipline,
+      pogoji = EXCLUDED.pogoji, trenerji = EXCLUDED.trenerji
+    RETURNING id;`;
+  const id = r.rows[0].id;
+  await sql`DELETE FROM ekipa_prisotnost WHERE trening_id = ${id};`;
+  for (const otrok_id of prisotni) {
+    await sql`
+      INSERT INTO ekipa_prisotnost (trening_id, otrok_id, prisoten) VALUES (${id}, ${otrok_id}, true)
+      ON CONFLICT (trening_id, otrok_id) DO UPDATE SET prisoten = true;`;
+  }
+  return id;
+}
+
+// ---------- MOŽNOSTI (ekipe, trenerji, discipline …) ----------
+// Shranjene kot JSON; če jih še ni, stran uporabi privzete.
+export async function pridobiMoznosti() {
+  const r = await sql<{ vrednost: string | null }>`SELECT vrednost FROM ekipa_nastavitve WHERE kljuc = 'moznosti';`;
+  try {
+    return r.rows[0]?.vrednost ? JSON.parse(r.rows[0].vrednost) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function shraniMoznosti(m: unknown) {
+  const json = JSON.stringify(m);
+  await sql`
+    INSERT INTO ekipa_nastavitve (kljuc, vrednost) VALUES ('moznosti', ${json})
+    ON CONFLICT (kljuc) DO UPDATE SET vrednost = EXCLUDED.vrednost;`;
+}
+
 // ---------- STATISTIKA ----------
-// Za vsakega otroka: koliko dni je bil prisoten (skupaj, treningi, tekme, po disciplinah)
+// Vrne surove podatke; seštevke po disciplinah ipd. naredi stran (ker se možnosti lahko spreminjajo).
 export async function statistika(ekipa: string) {
-  const r = await sql<{
-    otrok_id: number;
-    ime: string;
-    aktiven: boolean;
-    skupina: string;
-    letnik: number | null;
-    prisoten_skupaj: number;
-    treningi: number;
-    tekme: number;
-    vsl: number;
-    sl: number;
-    sg: number;
-    freestyle: number;
-    fraj: number;
-    proga: number;
-  }>`
-    SELECT o.id AS otrok_id, o.ime, o.aktiven, o.skupina, o.letnik,
-      COUNT(t.id)::int AS prisoten_skupaj,
-      COUNT(t.id) FILTER (WHERE t.tip = 'trening')::int AS treningi,
-      COUNT(t.id) FILTER (WHERE t.tip = 'tekma')::int AS tekme,
-      COUNT(t.id) FILTER (WHERE ';' || t.discipline || ';' LIKE '%;VSL;%')::int AS vsl,
-      COUNT(t.id) FILTER (WHERE ';' || t.discipline || ';' LIKE '%;SL;%')::int AS sl,
-      COUNT(t.id) FILTER (WHERE ';' || t.discipline || ';' LIKE '%;SG;%')::int AS sg,
-      COUNT(t.id) FILTER (WHERE ';' || t.discipline || ';' LIKE '%;Freestyle;%')::int AS freestyle,
-      COUNT(t.id) FILTER (WHERE ';' || t.voznja || ';' LIKE '%;fraj;%')::int AS fraj,
-      COUNT(t.id) FILTER (WHERE ';' || t.voznja || ';' LIKE '%;proga;%')::int AS proga
-    FROM ekipa_otroci o
-    LEFT JOIN ekipa_prisotnost p ON p.otrok_id = o.id AND p.prisoten
-    LEFT JOIN ekipa_treningi t ON t.id = p.trening_id
-    WHERE o.ekipa = ${ekipa}
-    GROUP BY o.id, o.ime, o.aktiven, o.skupina, o.letnik
-    ORDER BY o.aktiven DESC, o.skupina, prisoten_skupaj DESC, o.ime;`;
-  const s = await sql<{ skupaj: number; treningi: number; tekme: number }>`
-    SELECT COUNT(*)::int AS skupaj,
-      COUNT(*) FILTER (WHERE tip = 'trening')::int AS treningi,
-      COUNT(*) FILTER (WHERE tip = 'tekma')::int AS tekme
+  const otroci = await sql<{ id: number; ime: string; aktiven: boolean; skupina: string; letnik: number | null }>`
+    SELECT id, ime, aktiven, skupina, letnik FROM ekipa_otroci WHERE ekipa = ${ekipa};`;
+  const treningi = await sql<{ id: number; datum: string; tip: string; voznja: string; discipline: string; pogoji: string }>`
+    SELECT id, to_char(datum, 'YYYY-MM-DD') AS datum, tip, voznja, discipline, pogoji
     FROM ekipa_treningi WHERE ekipa = ${ekipa};`;
-  return { otroci: r.rows, dnevi: s.rows[0] };
+  const prisotnost = await sql<{ trening_id: number; otrok_id: number }>`
+    SELECT p.trening_id, p.otrok_id FROM ekipa_prisotnost p
+    JOIN ekipa_treningi t ON t.id = p.trening_id
+    WHERE t.ekipa = ${ekipa} AND p.prisoten;`;
+  return { otroci: otroci.rows, treningi: treningi.rows, prisotnost: prisotnost.rows };
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pridobiAdminaSPravicami } from "@/lib/auth";
-import { imaPravico } from "@/lib/pravice";
+import { imaPravico, jeAdmin } from "@/lib/pravice";
 import {
   zagotoviEkipo,
   pridobiOtroke,
@@ -15,6 +15,9 @@ import {
   nastaviPrisotnostOtroka,
   nastaviVsePrisotne,
   statistika,
+  pridobiMoznosti,
+  shraniDan,
+  shraniMoznosti,
 } from "@/lib/ekipa";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +43,10 @@ export async function GET(req: NextRequest) {
     if (akcija === "treningi") return NextResponse.json(await pridobiTreninge(ekipa));
     if (akcija === "dan") return NextResponse.json(await pridobiDan(ekipa, q.get("datum") || ""));
     if (akcija === "statistika") return NextResponse.json(await statistika(ekipa));
+    if (akcija === "moznosti") {
+      const a = await pridobiAdminaSPravicami();
+      return NextResponse.json({ moznosti: await pridobiMoznosti(), admin: jeAdmin(a) });
+    }
     return NextResponse.json({ error: "Neznana akcija" }, { status: 400 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -82,6 +89,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true });
       case "vsi-prisotni":
         await nastaviVsePrisotne(Number(b.trening_id), (b.otrok_ids || []).map(Number), !!b.prisoten);
+        return NextResponse.json({ ok: true });
+      case "shrani-dan": {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(b.datum || ""))) {
+          return NextResponse.json({ error: "Napačen datum" }, { status: 400 });
+        }
+        const id = await shraniDan(b.ekipa, b.datum, b.polja || {}, (b.prisotni || []).map(Number).filter(Boolean));
+        return NextResponse.json({ ok: true, id });
+      }
+      case "shrani-moznosti":
+        // Nastavitve možnosti ureja samo admin
+        if (!jeAdmin(admin)) return NextResponse.json({ error: "Samo admin lahko ureja nastavitve." }, { status: 403 });
+        await shraniMoznosti(b.moznosti);
         return NextResponse.json({ ok: true });
       default:
         return NextResponse.json({ error: "Neznana akcija" }, { status: 400 });
