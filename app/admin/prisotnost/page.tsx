@@ -18,6 +18,7 @@ import {
   Save,
   AlertCircle,
   Lock,
+  Pencil,
 } from "lucide-react";
 import { IskalnikOtrok, StarsVrstica, ustrezaIskanju, PodatkiStarsa } from "@/components/admin/Starsi";
 
@@ -90,6 +91,8 @@ export default function PrisotnostPage() {
   const [jeAdmin, setJeAdmin] = useState(false);
   const [iskanje, setIskanje] = useState("");
   const [iskanjeSkupine, setIskanjeSkupine] = useState("");
+  const [urediSeznam, setUrediSeznam] = useState(false);
+  const [urejanUcitelj, setUrejanUcitelj] = useState<Ucitelj | null>(null);
   const [vsiOtroci, setVsiOtroci] = useState<NajdenOtrok[] | null>(null);
 
   // Iskanje otroka čez vse skupine — seznam prijav se naloži ob prvem iskanju
@@ -314,6 +317,25 @@ export default function PrisotnostPage() {
     if (srecanje && !izbraniUcitelji.includes(ime)) {
       shraniGlavo({ ucitelji: [...izbraniUcitelji, ime].join(";") });
     }
+  };
+
+  // Po popravku/izbrisu učitelja osveži seznam in odprto vadbo
+  const poUrejanjuUcitelja = async (staro: string, novo: string | null) => {
+    const u = await fetch("/api/ucitelji").then((r) => r.json());
+    setUcitelji(u.ucitelji || []);
+    if (srecanje && izbraniUcitelji.includes(staro)) {
+      const nov = izbraniUcitelji
+        .map((x) => (x === staro ? novo : x))
+        .filter((x, i, a): x is string => !!x && a.indexOf(x) === i);
+      if (novo) {
+        // Ime je na strežniku že popravljeno, zato samo posodobi prikaz
+        setSrecanje({ ...srecanje, ucitelji: nov.join(";") });
+        setSrecanja((ss) => ss.map((x) => (x.id === srecanje.id ? { ...x, ucitelji: nov.join(";") } : x)));
+      } else {
+        shraniGlavo({ ucitelji: nov.join(";") });
+      }
+    }
+    setUrejanUcitelj(null);
   };
 
   const premakniTrajno = async (nov_termin_id: number) => {
@@ -648,7 +670,21 @@ export default function PrisotnostPage() {
                 <a href="/admin/ure" className="ml-2 font-bold text-brand-orange hover:underline">
                   evidenca ur →
                 </a>
+                {urejanje && (
+                  <button
+                    type="button"
+                    onClick={() => setUrediSeznam(!urediSeznam)}
+                    className={`ml-3 inline-flex items-center gap-1 font-bold hover:underline ${
+                      urediSeznam ? "text-green-700" : "text-slate-500"
+                    }`}
+                  >
+                    <Pencil size={11} /> {urediSeznam ? "Končano" : "Popravi imena"}
+                  </button>
+                )}
               </label>
+              {urediSeznam && urejanje && (
+                <p className="text-[11px] text-slate-500 mb-2">Klikni ime, da ga popraviš ali izbrišeš.</p>
+              )}
               <div className="flex flex-wrap gap-2 mb-2">
                 {!urejanje && izbraniUcitelji.length === 0 && (
                   <span className="text-xs text-slate-400">Ni vpisanih učiteljev.</span>
@@ -659,13 +695,16 @@ export default function PrisotnostPage() {
                   <button
                     key={u.id}
                     disabled={!urejanje}
-                    onClick={() => preklopiUcitelja(u.ime)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border ${
-                      izbraniUcitelji.includes(u.ime)
+                    onClick={() => (urediSeznam ? setUrejanUcitelj(u) : preklopiUcitelja(u.ime))}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border ${
+                      urediSeznam
+                        ? "bg-amber-50 text-amber-900 border-amber-300 border-dashed hover:border-amber-500"
+                        : izbraniUcitelji.includes(u.ime)
                         ? "bg-brand-navy text-white border-brand-navy"
                         : "bg-white text-slate-600 border-slate-200 hover:border-brand-navy"
                     }`}
                   >
+                    {urediSeznam && <Pencil size={10} />}
                     {u.ime}
                   </button>
                 ))}
@@ -871,6 +910,14 @@ export default function PrisotnostPage() {
         </div>
       )}
 
+      {urejanUcitelj && (
+        <UrediUciteljaModal
+          ucitelj={urejanUcitelj}
+          onClose={() => setUrejanUcitelj(null)}
+          onKoncano={poUrejanjuUcitelja}
+        />
+      )}
+
       {premik && (
         <Izbirnik
           naslov={`Prestavi ${premik.otrok_ime} ${premik.otrok_priimek}`}
@@ -1014,6 +1061,82 @@ function GostModal({
             </li>
           ))}
         </ul>
+      </div>
+    </div>
+  );
+}
+
+function UrediUciteljaModal({
+  ucitelj,
+  onClose,
+  onKoncano,
+}: {
+  ucitelj: { id: number; ime: string };
+  onClose: () => void;
+  onKoncano: (staro: string, novo: string | null) => void;
+}) {
+  const [ime, setIme] = useState(ucitelj.ime);
+  const [delam, setDelam] = useState(false);
+
+  const shrani = async () => {
+    const novo = ime.trim();
+    if (!novo || novo === ucitelj.ime) return onClose();
+    setDelam(true);
+    const r = await fetch("/api/ucitelji", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: ucitelj.id, ime: novo }),
+    });
+    setDelam(false);
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      return alert(e.error || "Napaka pri shranjevanju.");
+    }
+    onKoncano(ucitelj.ime, novo);
+  };
+
+  const izbrisi = async () => {
+    if (!confirm(`Izbrišem ${ucitelj.ime} s seznama učiteljev? Ure na preteklih vadbah ostanejo.`)) return;
+    setDelam(true);
+    await fetch(`/api/ucitelji?id=${ucitelj.id}`, { method: "DELETE" });
+    setDelam(false);
+    onKoncano(ucitelj.ime, null);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl w-full max-w-sm p-6">
+        <div className="flex items-start justify-between mb-4">
+          <h2 className="text-lg font-extrabold text-brand-navy">Popravi učitelja</h2>
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-700">
+            <X size={18} />
+          </button>
+        </div>
+        <label className="block text-xs font-semibold text-slate-600 mb-1">Ime in priimek</label>
+        <input
+          autoFocus
+          value={ime}
+          onChange={(e) => setIme(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && shrani()}
+          className="w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange mb-2"
+        />
+        <p className="text-[11px] text-slate-500 mb-4">
+          Popravek velja tudi za vse pretekle vadbe in izplačila, zato ure ostanejo skupaj.
+        </p>
+        <button
+          onClick={shrani}
+          disabled={delam}
+          className="w-full bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
+        >
+          {delam ? "Shranjujem..." : "Shrani"}
+        </button>
+        <button
+          onClick={izbrisi}
+          disabled={delam}
+          className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-bold text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50"
+        >
+          <Trash2 size={14} /> Izbriši s seznama
+        </button>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pridobiUcitelje, dodajUcitelja, izbrisiUcitelja } from "@/lib/moduli";
+import { pridobiUcitelje, dodajUcitelja, izbrisiUcitelja, preimenujUcitelja } from "@/lib/moduli";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -29,6 +29,20 @@ export async function DELETE(req: NextRequest) {
     const id = parseInt(req.nextUrl.searchParams.get("id") || "0");
     if (!id) return NextResponse.json({ error: "Manjka id" }, { status: 400 });
     await izbrisiUcitelja(id);
+    return NextResponse.json({ uspeh: true });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+// PUT { id, ime } -> popravi ime (tudi na preteklih vadbah)
+export async function PUT(req: NextRequest) {
+  try {
+    const { id, ime } = await req.json();
+    if (!id || !String(ime || "").trim()) {
+      return NextResponse.json({ error: "Manjka učitelj ali ime" }, { status: 400 });
+    }
+    await preimenujUcitelja(Number(id), String(ime));
     return NextResponse.json({ uspeh: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

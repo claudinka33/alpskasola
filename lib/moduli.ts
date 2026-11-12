@@ -192,6 +192,39 @@ export async function izbrisiUcitelja(id: number) {
   await sql`DELETE FROM ucitelji WHERE id = ${id};`;
 }
 
+// Popravi ime učitelja — tudi na vseh preteklih vadbah in izplačilih, da ure ostanejo skupaj.
+// Če novo ime že obstaja (npr. tipkarska napaka + pravilno ime), se oba združita.
+export async function preimenujUcitelja(id: number, novoIme: string) {
+  await zagotoviModule();
+  const novo = novoIme.trim();
+  if (!novo) throw new Error("Manjka ime");
+  const r = await sql<{ ime: string }>`SELECT ime FROM ucitelji WHERE id = ${id};`;
+  const staro = r.rows[0]?.ime;
+  if (!staro) throw new Error("Učitelj ne obstaja");
+  if (staro === novo) return;
+
+  const obstaja = await sql`SELECT id FROM ucitelji WHERE ime = ${novo} AND id <> ${id};`;
+  if (obstaja.rows.length) {
+    await sql`DELETE FROM ucitelji WHERE id = ${id};`;
+    await sql`UPDATE ucitelji SET aktiven = true WHERE ime = ${novo};`;
+  } else {
+    await sql`UPDATE ucitelji SET ime = ${novo} WHERE id = ${id};`;
+  }
+
+  await sql`
+    UPDATE srecanja
+    SET ucitelji = array_to_string(
+      ARRAY(SELECT DISTINCT x FROM unnest(array_replace(string_to_array(ucitelji, ';'), ${staro}::text, ${novo}::text)) AS x WHERE x <> ''),
+      ';')
+    WHERE ${staro}::text = ANY(string_to_array(ucitelji, ';'));`;
+
+  await sql`
+    UPDATE izplacila_uciteljev i SET ime = ${novo}
+    WHERE i.ime = ${staro}
+      AND NOT EXISTS (SELECT 1 FROM izplacila_uciteljev j WHERE j.ime = ${novo} AND j.mesec = i.mesec);`;
+  await sql`DELETE FROM izplacila_uciteljev WHERE ime = ${staro};`;
+}
+
 // ---------- SREČANJA IN PRISOTNOST ----------
 
 export async function pridobiSrecanja(termin_id: number) {
