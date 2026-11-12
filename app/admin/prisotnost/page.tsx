@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Lock,
 } from "lucide-react";
+import { IskalnikOtrok, StarsVrstica, ustrezaIskanju, PodatkiStarsa } from "@/components/admin/Starsi";
 
 type Program = { id: number; slug: string; naziv: string };
 type Termin = { id: number; program_slug: string; naziv: string; lokacija: string | null; dan: string | null; ura: string | null };
@@ -46,9 +47,10 @@ type Vrstica = {
   prisoten: boolean;
   gost: boolean;
   maticni_termin_id: number | null;
-};
+} & PodatkiStarsa;
 type Ucitelj = { id: number; ime: string };
-type Povzetek = { prijava_id: number; otrok_ime: string; otrok_priimek: string; skupaj: number; prisoten: number };
+type Povzetek = { prijava_id: number; otrok_ime: string; otrok_priimek: string; skupaj: number; prisoten: number } & PodatkiStarsa;
+type NajdenOtrok = { id: number; otrok_ime: string; otrok_priimek: string; termin_id: number | null; termin: string | null; program: string } & PodatkiStarsa;
 
 const danes = () => new Date().toISOString().slice(0, 10);
 const slDatum = (d: string) =>
@@ -86,6 +88,25 @@ export default function PrisotnostPage() {
   const [shranjeno, setShranjeno] = useState(false);
   const [dodajOtroka, setDodajOtroka] = useState(false);
   const [jeAdmin, setJeAdmin] = useState(false);
+  const [iskanje, setIskanje] = useState("");
+  const [iskanjeSkupine, setIskanjeSkupine] = useState("");
+  const [vsiOtroci, setVsiOtroci] = useState<NajdenOtrok[] | null>(null);
+
+  // Iskanje otroka čez vse skupine — seznam prijav se naloži ob prvem iskanju
+  useEffect(() => {
+    if (iskanje.trim().length < 2 || vsiOtroci) return;
+    fetch("/api/prijave")
+      .then((r) => r.json())
+      .then((d) => setVsiOtroci(d.prijave || []));
+  }, [iskanje, vsiOtroci]);
+
+  const najdeni = useMemo(
+    () =>
+      iskanje.trim().length < 2 || !vsiOtroci
+        ? []
+        : vsiOtroci.filter((o) => ustrezaIskanju(o, iskanje)).slice(0, 30),
+    [iskanje, vsiOtroci]
+  );
 
   // Zaklenjeno vadbo (24 ur po vadbi) lahko ureja samo admin, ostali jo le vidijo.
   const zaklenjeno = !!srecanje?.zaklenjeno;
@@ -166,6 +187,7 @@ export default function PrisotnostPage() {
     if (!potrdiOpustitev()) return;
     setIzbrana(null);
     setSrecanje(null);
+    setIskanjeSkupine("");
     naloziPregled();
   };
 
@@ -345,6 +367,53 @@ export default function PrisotnostPage() {
           </p>
         </div>
 
+        <div className="mb-4">
+          <IskalnikOtrok vrednost={iskanje} onChange={setIskanje} />
+        </div>
+
+        {iskanje.trim().length >= 2 && (
+          <div className="bg-white rounded-2xl border border-slate-200/70 mb-5 overflow-hidden">
+            {!vsiOtroci ? (
+              <div className="py-8 text-center">
+                <Loader2 size={24} className="animate-spin text-brand-orange mx-auto" />
+              </div>
+            ) : najdeni.length === 0 ? (
+              <p className="py-8 text-center text-sm text-slate-400">Ni otroka, ki bi ustrezal iskanju.</p>
+            ) : (
+              <ul className="divide-y divide-slate-100">
+                {najdeni.map((o) => {
+                  const sk = skupine.find((s) => s.id === o.termin_id);
+                  return (
+                    <li key={o.id} className="flex items-center gap-3 px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-brand-navy">
+                          {o.otrok_ime} {o.otrok_priimek}
+                        </div>
+                        <div className="text-xs text-slate-600 truncate">
+                          {[programNaziv(o.program), sk?.naziv || o.termin].filter(Boolean).join(" · ") || "Brez skupine"}
+                        </div>
+                        <StarsVrstica o={o} className="mt-0.5" />
+                      </div>
+                      {sk && (
+                        <button
+                          onClick={() => {
+                            setIskanjeSkupine(`${o.otrok_ime} ${o.otrok_priimek}`);
+                            setIskanje("");
+                            odpriSkupino(sk);
+                          }}
+                          className="shrink-0 text-xs font-bold text-brand-orange hover:underline"
+                        >
+                          Odpri skupino →
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-5 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
           <select
             value={filterProgram}
@@ -396,7 +465,10 @@ export default function PrisotnostPage() {
                 {seznam.map((s) => (
                   <button
                     key={s.id}
-                    onClick={() => odpriSkupino(s)}
+                    onClick={() => {
+                      setIskanjeSkupine("");
+                      odpriSkupino(s);
+                    }}
                     className="text-left bg-white rounded-2xl border border-slate-200/70 p-5 hover:border-brand-orange hover:shadow-lg hover:shadow-brand-navy/5 transition-all"
                   >
                     <div className="flex items-start justify-between gap-2 mb-3">
@@ -631,6 +703,9 @@ export default function PrisotnostPage() {
           </div>
 
           <div className="border-t border-slate-100 pt-4">
+            {vrstice.length > 5 && (
+              <IskalnikOtrok vrednost={iskanjeSkupine} onChange={setIskanjeSkupine} className="mb-3" />
+            )}
             {vrstice.length > 0 && urejanje && (
               <div className="flex items-center gap-2 mb-3">
                 <button
@@ -652,7 +727,7 @@ export default function PrisotnostPage() {
               <p className="text-sm text-slate-400 py-6 text-center">Na ta termin ni prijavljenih otrok.</p>
             ) : (
               <ul className="space-y-1">
-                {vrstice.map((v) => (
+                {vrstice.filter((v) => ustrezaIskanju(v, iskanjeSkupine)).map((v) => (
                   <li
                     key={v.prijava_id}
                     onClick={() => kljukica(v)}
@@ -670,13 +745,14 @@ export default function PrisotnostPage() {
                       onChange={() => {}}
                       className="w-6 h-6 accent-green-600 shrink-0 pointer-events-none"
                     />
-                    <span className="flex-1 font-semibold text-brand-navy text-base">
+                    <span className="flex-1 min-w-0 font-semibold text-brand-navy text-base">
                       {v.otrok_ime} {v.otrok_priimek}
                       {v.gost && (
                         <span className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
                           GOST
                         </span>
                       )}
+                      <StarsVrstica o={v} className="mt-0.5" />
                     </span>
                     {!urejanje && (
                       <span
@@ -744,6 +820,11 @@ export default function PrisotnostPage() {
 
       {zavihek === "povzetek" && (
         <div className="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
+          {povzetek.length > 5 && (
+            <div className="p-3 border-b border-slate-100">
+              <IskalnikOtrok vrednost={iskanjeSkupine} onChange={setIskanjeSkupine} />
+            </div>
+          )}
           {povzetek.length === 0 ? (
             <p className="py-12 text-center text-sm text-slate-400">Ni podatkov o prisotnosti.</p>
           ) : (
@@ -757,12 +838,13 @@ export default function PrisotnostPage() {
                 </tr>
               </thead>
               <tbody>
-                {povzetek.map((p) => {
+                {povzetek.filter((p) => ustrezaIskanju(p, iskanjeSkupine)).map((p) => {
                   const odst = p.skupaj > 0 ? Math.round((p.prisoten / p.skupaj) * 100) : 0;
                   return (
                     <tr key={p.prijava_id} className="border-b border-slate-100">
                       <td className="px-4 py-3 font-semibold text-brand-navy">
                         {p.otrok_ime} {p.otrok_priimek}
+                        <StarsVrstica o={p} className="mt-0.5" />
                       </td>
                       <td className="px-4 py-3 text-slate-600">{p.prisoten}</td>
                       <td className="px-4 py-3 text-slate-600">{p.skupaj}</td>

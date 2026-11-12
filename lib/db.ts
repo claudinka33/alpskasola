@@ -53,7 +53,10 @@ export async function ustvariPrijavo(
 export async function pridobiPrijave(filter?: { program?: string; status?: string; iskanje?: string }) {
   if (filter?.iskanje) {
     const q = `%${filter.iskanje}%`;
-    const r = await sql<Prijava>`SELECT * FROM prijave WHERE otrok_ime ILIKE ${q} OR otrok_priimek ILIKE ${q} OR email ILIKE ${q} OR telefon ILIKE ${q} ORDER BY ustvarjeno DESC;`;
+    const r = await sql<Prijava>`SELECT * FROM prijave WHERE otrok_ime ILIKE ${q} OR otrok_priimek ILIKE ${q}
+      OR (otrok_ime || ' ' || otrok_priimek) ILIKE ${q} OR (otrok_priimek || ' ' || otrok_ime) ILIKE ${q}
+      OR starsi_ime ILIKE ${q} OR starsi_priimek ILIKE ${q} OR (starsi_ime || ' ' || starsi_priimek) ILIKE ${q}
+      OR email ILIKE ${q} OR telefon ILIKE ${q} ORDER BY ustvarjeno DESC;`;
     return r.rows;
   }
   if (filter?.program && filter?.status) {

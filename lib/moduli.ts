@@ -102,6 +102,20 @@ export async function zagotoviModule() {
       ustvarjeno TIMESTAMPTZ NOT NULL DEFAULT now()
     );`;
 
+  // Izplačila učiteljem — ena vrstica na učitelja na mesec (npr. '2026-11')
+  await sql`
+    CREATE TABLE IF NOT EXISTS izplacila_uciteljev (
+      id SERIAL PRIMARY KEY,
+      ime TEXT NOT NULL,
+      mesec TEXT NOT NULL,
+      izplacano BOOLEAN NOT NULL DEFAULT false,
+      znesek NUMERIC(10,2),
+      datum DATE,
+      opomba TEXT,
+      posodobljeno TIMESTAMPTZ NOT NULL DEFAULT now(),
+      UNIQUE (ime, mesec)
+    );`;
+
   izvedeno = true;
 }
 
@@ -128,6 +142,10 @@ export type PrisotnostVrstica = {
   gost: boolean;
   opomba: string | null;
   maticni_termin_id: number | null;
+  starsi_ime?: string | null;
+  starsi_priimek?: string | null;
+  email?: string | null;
+  telefon?: string | null;
 };
 
 export type Placilo = {
@@ -210,7 +228,8 @@ export async function pridobiPrisotnost(srecanje_id: number) {
   await zagotoviModule();
   const r = await sql<PrisotnostVrstica>`
     SELECT pr.id, pr.prijava_id, p.otrok_ime, p.otrok_priimek,
-           pr.prisoten, pr.gost, pr.opomba, p.termin_id AS maticni_termin_id
+           pr.prisoten, pr.gost, pr.opomba, p.termin_id AS maticni_termin_id,
+           p.starsi_ime, p.starsi_priimek, p.email, p.telefon
     FROM prisotnost pr
     JOIN prijave p ON p.id = pr.prijava_id
     WHERE pr.srecanje_id = ${srecanje_id}
@@ -556,13 +575,14 @@ export async function povzetekPrisotnosti(termin_id: number) {
     prisoten: number;
   }>`
     SELECT p.id AS prijava_id, p.otrok_ime, p.otrok_priimek,
+           p.starsi_ime, p.starsi_priimek, p.email, p.telefon,
            COUNT(pr.id)::int AS skupaj,
            COUNT(pr.id) FILTER (WHERE pr.prisoten)::int AS prisoten
     FROM prijave p
     LEFT JOIN prisotnost pr ON pr.prijava_id = p.id
     LEFT JOIN srecanja s ON s.id = pr.srecanje_id AND s.termin_id = ${termin_id}
     WHERE p.termin_id = ${termin_id}
-    GROUP BY p.id, p.otrok_ime, p.otrok_priimek
+    GROUP BY p.id, p.otrok_ime, p.otrok_priimek, p.starsi_ime, p.starsi_priimek, p.email, p.telefon
     ORDER BY p.otrok_priimek, p.otrok_ime;`;
   return r.rows;
 }
@@ -625,7 +645,8 @@ export async function pridobiPlacila(program_slug: string, termin_id?: number) {
   await zagotoviModule();
   const r = await sql<Placilo & { otrok_ime: string; otrok_priimek: string; termin_id: number | null }>`
     SELECT p.id AS prijava_id, pl.mesec, pl.placano, pl.znesek, pl.datum, pl.opomba,
-           p.otrok_ime, p.otrok_priimek, p.termin_id
+           p.otrok_ime, p.otrok_priimek, p.termin_id,
+           p.starsi_ime, p.starsi_priimek, p.email, p.telefon
     FROM prijave p
     LEFT JOIN placila pl ON pl.prijava_id = p.id
     WHERE p.program = ${program_slug}
@@ -648,6 +669,66 @@ export async function nastaviPlacilo(d: {
     VALUES (${d.prijava_id}, ${d.mesec}, ${d.placano}, ${d.znesek}, ${d.datum}, ${d.opomba}, now())
     ON CONFLICT (prijava_id, mesec) DO UPDATE SET
       placano = EXCLUDED.placano,
+      znesek = EXCLUDED.znesek,
+      datum = EXCLUDED.datum,
+      opomba = EXCLUDED.opomba,
+      posodobljeno = now();`;
+}
+
+// ---------- IZPLAČILA UČITELJEM ----------
+
+export type IzplaciloUcitelja = {
+  ime: string;
+  mesec: string;
+  izplacano: boolean;
+  znesek: string | null;
+  datum: string | null;
+  opomba: string | null;
+};
+
+// Ure po učiteljih in mesecih v obdobju + kljukice izplačil
+export async function izplacilaUciteljev(mesec_od: string, mesec_do: string) {
+  await zagotoviModule();
+  const od = `${mesec_od}-01`;
+  const [l, m] = mesec_do.split("-").map(Number);
+  const zadnji = new Date(Date.UTC(l, m, 0)).toISOString().slice(0, 10);
+
+  const r = await sql<{ ucitelji: string; mesec: string; trajanje_min: number }>`
+    SELECT ucitelji, to_char(datum, 'YYYY-MM') AS mesec, trajanje_min
+    FROM srecanja
+    WHERE ucitelji <> '' AND datum >= ${od}::date AND datum <= ${zadnji}::date;`;
+
+  const ure: Record<string, Record<string, { srecanj: number; minut: number }>> = {};
+  for (const v of r.rows) {
+    for (const ime of v.ucitelji.split(";").map((x) => x.trim()).filter(Boolean)) {
+      const c = ((ure[ime] ??= {})[v.mesec] ??= { srecanj: 0, minut: 0 });
+      c.srecanj += 1;
+      c.minut += v.trajanje_min || 0;
+    }
+  }
+
+  const iz = await sql<IzplaciloUcitelja>`
+    SELECT ime, mesec, izplacano, znesek, datum::text AS datum, opomba
+    FROM izplacila_uciteljev
+    WHERE mesec >= ${mesec_od} AND mesec <= ${mesec_do};`;
+
+  return { ure, izplacila: iz.rows };
+}
+
+export async function nastaviIzplacilo(d: {
+  ime: string;
+  mesec: string;
+  izplacano: boolean;
+  znesek: number | null;
+  datum: string | null;
+  opomba: string | null;
+}) {
+  await zagotoviModule();
+  await sql`
+    INSERT INTO izplacila_uciteljev (ime, mesec, izplacano, znesek, datum, opomba, posodobljeno)
+    VALUES (${d.ime}, ${d.mesec}, ${d.izplacano}, ${d.znesek}, ${d.datum}, ${d.opomba}, now())
+    ON CONFLICT (ime, mesec) DO UPDATE SET
+      izplacano = EXCLUDED.izplacano,
       znesek = EXCLUDED.znesek,
       datum = EXCLUDED.datum,
       opomba = EXCLUDED.opomba,

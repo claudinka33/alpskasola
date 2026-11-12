@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, Clock, FileSpreadsheet, ChevronDown, ChevronRight } from "lucide-react";
+import Izplacila from "./Izplacila";
 
 type Skupina = { naziv: string; srecanj: number; minut: number; ure: number };
 type PoProgramu = {
@@ -21,6 +22,7 @@ const prviVMesecu = () => {
 const danes = () => new Date().toISOString().slice(0, 10);
 
 export default function UrePage() {
+  const [zavihek, setZavihek] = useState<"ure" | "izplacila">("ure");
   const [ure, setUre] = useState<Ucitelj[]>([]);
   const [programi, setProgrami] = useState<Program[]>([]);
   const [od, setOd] = useState(prviVMesecu());
@@ -126,12 +128,34 @@ export default function UrePage() {
         <button
           onClick={izvozi}
           disabled={ure.length === 0}
+          hidden={zavihek !== "ure"}
           className="inline-flex items-center gap-2 bg-white text-brand-navy px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 hover:border-slate-300 disabled:opacity-50"
         >
           <FileSpreadsheet size={16} /> Izvozi Excel
         </button>
       </div>
 
+      <div className="inline-flex bg-slate-100 rounded-xl p-1 mb-4">
+        {([
+          ["ure", "Pregled ur"],
+          ["izplacila", "Izplačila"],
+        ] as const).map(([v, l]) => (
+          <button
+            key={v}
+            onClick={() => setZavihek(v)}
+            className={`px-4 py-2 rounded-lg text-sm font-bold ${
+              zavihek === v ? "bg-white text-brand-navy shadow-sm" : "text-slate-500 hover:text-brand-navy"
+            }`}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+
+      {zavihek === "izplacila" ? (
+        <Izplacila />
+      ) : (
+      <>
       <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
         <div className="grid grid-cols-2 gap-3 w-full sm:w-auto">
           <div>
@@ -241,6 +265,8 @@ export default function UrePage() {
           </ul>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

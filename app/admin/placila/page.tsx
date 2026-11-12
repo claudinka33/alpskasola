@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, Euro, Settings2, AlertTriangle, Mail, X, Check } from "lucide-react";
+import { IskalnikOtrok, StarsVrstica, ustrezaIskanju, PodatkiStarsa } from "@/components/admin/Starsi";
 
 type Program = { id: number; slug: string; naziv: string };
 type Termin = { id: number; program_slug: string; naziv: string; lokacija: string | null; cena: number | null };
@@ -16,6 +17,9 @@ type Vrstica = {
   datum: string | null;
   opomba: string | null;
   email?: string;
+  telefon?: string | null;
+  starsi_ime?: string | null;
+  starsi_priimek?: string | null;
 };
 type Nastavitve = {
   mesec_od: string;
@@ -59,6 +63,7 @@ export default function PlacilaPage() {
   const [urejamNastavitve, setUrejamNastavitve] = useState(false);
   const [celica, setCelica] = useState<{ prijava_id: number; mesec: string } | null>(null);
   const [samoDolzniki, setSamoDolzniki] = useState(false);
+  const [iskanje, setIskanje] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -104,12 +109,16 @@ export default function PlacilaPage() {
 
   // Otroci z zloženimi plačili po mesecih
   const otroci = useMemo(() => {
-    const m: Record<number, { ime: string; termin_id: number | null; placila: Record<string, Vrstica> }> = {};
+    const m: Record<
+      number,
+      { ime: string; termin_id: number | null; stars: PodatkiStarsa; placila: Record<string, Vrstica> }
+    > = {};
     for (const v of vrstice) {
       if (!m[v.prijava_id]) {
         m[v.prijava_id] = {
           ime: `${v.otrok_ime} ${v.otrok_priimek}`,
           termin_id: v.termin_id,
+          stars: { starsi_ime: v.starsi_ime, starsi_priimek: v.starsi_priimek, email: v.email, telefon: v.telefon },
           placila: {},
         };
       }
@@ -129,7 +138,9 @@ export default function PlacilaPage() {
     });
   }, [vrstice, meseci, nastavitve, termini]);
 
-  const prikazani = samoDolzniki ? otroci.filter((o) => o.dolg > 0) : otroci;
+  const prikazani = otroci
+    .filter((o) => !samoDolzniki || o.dolg > 0)
+    .filter((o) => ustrezaIskanju({ ime: o.ime, ...o.stars }, iskanje));
   const skupajDolg = otroci.reduce((s, o) => s + o.dolg, 0);
   const skupajPlacano = otroci.reduce((s, o) => s + o.placano, 0);
 
@@ -198,6 +209,10 @@ export default function PlacilaPage() {
             ))}
           </select>
         </div>
+        <div className="sm:flex-1 sm:min-w-[220px]">
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Iskanje</label>
+          <IskalnikOtrok vrednost={iskanje} onChange={setIskanje} />
+        </div>
         <label className="flex items-center gap-2 cursor-pointer pb-2.5">
           <input
             type="checkbox"
@@ -225,7 +240,9 @@ export default function PlacilaPage() {
             <Loader2 size={32} className="animate-spin text-brand-orange mx-auto" />
           </div>
         ) : prikazani.length === 0 ? (
-          <p className="py-16 text-center text-sm text-slate-400">Ni otrok za prikaz.</p>
+          <p className="py-16 text-center text-sm text-slate-400">
+            {iskanje ? `Ni otroka, ki bi ustrezal iskanju »${iskanje}«.` : "Ni otrok za prikaz."}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <p className="sm:hidden text-[11px] text-slate-400 px-4 pt-3">Tabelo povleci levo za ostale mesece.</p>
@@ -256,8 +273,9 @@ export default function PlacilaPage() {
               <tbody>
                 {prikazani.map((o) => (
                   <tr key={o.prijava_id} className="border-b border-slate-100 hover:bg-slate-50/60">
-                    <td className="px-4 py-2.5 font-semibold text-brand-navy whitespace-nowrap sticky left-0 bg-white">
-                      {o.ime}
+                    <td className="px-4 py-2.5 sticky left-0 bg-white min-w-[180px] max-w-[280px]">
+                      <div className="font-semibold text-brand-navy whitespace-nowrap">{o.ime}</div>
+                      <StarsVrstica o={o.stars} className="mt-0.5" />
                     </td>
                     {enkratno && (
                       <td className="px-4 py-2.5 text-slate-600 text-xs">
