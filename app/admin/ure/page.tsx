@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, Clock, FileSpreadsheet, ChevronDown, ChevronRight } from "lucide-react";
 import Izplacila from "./Izplacila";
+import { IskalnikOtrok, ustrezaIskanju } from "@/components/admin/Starsi";
 
 type Skupina = { naziv: string; srecanj: number; minut: number; ure: number };
 type PoProgramu = {
@@ -29,6 +30,7 @@ export default function UrePage() {
   const [doDatum, setDoDatum] = useState(danes());
   const [nalagam, setNalagam] = useState(true);
   const [odprt, setOdprt] = useState<string | null>(null);
+  const [iskanje, setIskanje] = useState("");
 
   useEffect(() => {
     fetch("/api/programi")
@@ -182,6 +184,10 @@ export default function UrePage() {
             </button>
           ))}
         </div>
+        <div className="w-full sm:flex-1 sm:min-w-[220px]">
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Iskanje</label>
+          <IskalnikOtrok vrednost={iskanje} onChange={setIskanje} placeholder="Išči učitelja (ime, priimek)…" />
+        </div>
       </div>
 
       {ure.length > 0 && (
@@ -203,7 +209,7 @@ export default function UrePage() {
           </p>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {ure.map((u) => {
+            {ure.filter((u) => ustrezaIskanju({ ime: u.ime }, iskanje)).map((u) => {
               const jeOdprt = odprt === u.ime;
               return (
                 <li key={u.ime}>

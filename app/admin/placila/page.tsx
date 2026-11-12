@@ -172,8 +172,8 @@ export default function PlacilaPage() {
           </h1>
           <p className="text-sm text-slate-600 mt-1">
             {enkratno
-              ? "Enkratno plačilo za tečaj. Obkljukaj otroka, ko je plačilo prispelo."
-              : "Mesečna evidenca plačil po otrocih. Obkljukaj mesec, ko je plačilo prispelo."}
+              ? "Enkratno plačilo za tečaj. Obkljukaj otroka, ko je plačilo prispelo. Klik na zelen kvadratek = popravi."
+              : "Mesečna evidenca plačil po otrocih. Obkljukaj mesec, ko je plačilo prispelo. Klik na zelen kvadratek = popravi."}
           </p>
         </div>
         {program && (
@@ -287,12 +287,16 @@ export default function PlacilaPage() {
                       return (
                         <td key={m} className="px-2 py-2.5 text-center">
                           <button
-                            onClick={() => preklopi(o.prijava_id, m, p, o.termin_id)}
+                            onClick={() =>
+                              p?.placano
+                                ? setCelica({ prijava_id: o.prijava_id, mesec: m })
+                                : preklopi(o.prijava_id, m, p, o.termin_id)
+                            }
                             onContextMenu={(e) => {
                               e.preventDefault();
                               setCelica({ prijava_id: o.prijava_id, mesec: m });
                             }}
-                            title={p?.datum ? `Plačano ${new Date(p.datum).toLocaleDateString("sl-SI")}` : "Klik = plačano, desni klik = podrobnosti"}
+                            title={p?.placano ? `Plačano${p.datum ? " " + new Date(p.datum).toLocaleDateString("sl-SI") : ""} — klik = popravi` : "Klik = plačano"}
                             className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center mx-auto ${
                               p?.placano
                                 ? "bg-green-500 border-green-500 text-white"
@@ -503,6 +507,15 @@ function CelicaModal({
     onShranjeno();
   };
 
+  const odkljukaj = async () => {
+    await fetch("/api/placila", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prijava_id, mesec, ...f, placano: false, datum: null }),
+    });
+    onShranjeno();
+  };
+
   const I = "w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange";
   const L = "block text-xs font-semibold text-slate-600 mb-1";
 
@@ -539,6 +552,14 @@ function CelicaModal({
         <button onClick={shrani} className="w-full bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-bold">
           Shrani
         </button>
+        {podatki?.placano && (
+          <button
+            onClick={odkljukaj}
+            className="w-full mt-2 px-4 py-2.5 rounded-lg text-sm font-bold text-red-600 border border-red-200 hover:bg-red-50"
+          >
+            Odkljukaj (ni plačano)
+          </button>
+        )}
       </div>
     </div>
   );

@@ -46,10 +46,12 @@ export function IskalnikOtrok({
   vrednost,
   onChange,
   className = "",
+  placeholder = "Išči otroka (ime, priimek)…",
 }: {
   vrednost: string;
   onChange: (v: string) => void;
   className?: string;
+  placeholder?: string;
 }) {
   return (
     <div className={`relative ${className}`}>
@@ -58,7 +60,7 @@ export function IskalnikOtrok({
         type="search"
         value={vrednost}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Išči otroka (ime, priimek)…"
+        placeholder={placeholder}
         className="w-full pl-9 pr-9 py-2.5 rounded-lg border border-slate-200 text-sm bg-white outline-none focus:border-brand-orange"
       />
       {vrednost && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, AlertTriangle, Check, X } from "lucide-react";
+import { IskalnikOtrok, ustrezaIskanju } from "@/components/admin/Starsi";
 
 type Celica = { srecanj: number; minut: number };
 type Izplacilo = {
@@ -52,6 +53,7 @@ export default function Izplacila() {
   const [izplacila, setIzplacila] = useState<Izplacilo[]>([]);
   const [nalagam, setNalagam] = useState(true);
   const [samoOdprti, setSamoOdprti] = useState(false);
+  const [iskanje, setIskanje] = useState("");
   const [podrobno, setPodrobno] = useState<{ ime: string; mesec: string } | null>(null);
   const [shranjujem, setShranjujem] = useState<string | null>(null);
 
@@ -99,7 +101,9 @@ export default function Izplacila() {
       .sort((a, b) => a.ime.localeCompare(b.ime, "sl"));
   }, [ure, izp, meseci, danes]);
 
-  const prikazani = samoOdprti ? ucitelji.filter((u) => u.odprtoMin > 0) : ucitelji;
+  const prikazani = ucitelji
+    .filter((u) => !samoOdprti || u.odprtoMin > 0)
+    .filter((u) => ustrezaIskanju({ ime: u.ime }, iskanje));
   const skupajOdprto = ucitelji.reduce((s, u) => s + u.odprtoMin, 0);
   const skupajIzplacano = ucitelji.reduce((s, u) => s + u.izplacanoMin, 0);
 
@@ -148,6 +152,10 @@ export default function Izplacila() {
             ))}
           </select>
         </div>
+        <div className="sm:flex-1 sm:min-w-[220px]">
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Iskanje</label>
+          <IskalnikOtrok vrednost={iskanje} onChange={setIskanje} placeholder="Išči učitelja (ime, priimek)…" />
+        </div>
         <label className="flex items-center gap-2 cursor-pointer pb-2.5">
           <input
             type="checkbox"
@@ -174,12 +182,16 @@ export default function Izplacila() {
           </div>
         ) : prikazani.length === 0 ? (
           <p className="py-16 text-center text-sm text-slate-400">
-            {samoOdprti ? "Vsi učitelji so izplačani." : "V tej sezoni ni vpisanih vadb z učitelji."}
+            {iskanje
+              ? `Ni učitelja, ki bi ustrezal iskanju »${iskanje}«.`
+              : samoOdprti
+              ? "Vsi učitelji so izplačani."
+              : "V tej sezoni ni vpisanih vadb z učitelji."}
           </p>
         ) : (
           <div className="overflow-x-auto">
             <p className="text-[11px] text-slate-400 px-4 pt-3">
-              V kvadratku so ure v tem mesecu. Klik = izplačano. Desni klik = znesek in opomba.
+              V kvadratku so ure v tem mesecu. Klik = izplačano. Klik na zelen kvadratek = popravi ali odkljukaj.
               <span className="sm:hidden"> Tabelo povleci levo za ostale mesece.</span>
             </p>
             <table className="w-full text-sm">
@@ -215,7 +227,9 @@ export default function Izplacila() {
                       return (
                         <td key={m} className="px-1.5 py-2.5 text-center">
                           <button
-                            onClick={() => preklopi(u.ime, m)}
+                            onClick={() =>
+                              p?.izplacano ? setPodrobno({ ime: u.ime, mesec: m }) : preklopi(u.ime, m)
+                            }
                             onContextMenu={(e) => {
                               e.preventDefault();
                               setPodrobno({ ime: u.ime, mesec: m });
@@ -225,7 +239,7 @@ export default function Izplacila() {
                               p?.izplacano
                                 ? `Izplačano${p.datum ? " " + new Date(p.datum).toLocaleDateString("sl-SI") : ""}${
                                     p.znesek ? ` · ${Number(p.znesek).toFixed(0)}€` : ""
-                                  }`
+                                  } — klik = popravi`
                                 : imaUre
                                 ? `${c!.srecanj} vadb · ${fmtUre(c!.minut)} h — klik = izplačano`
                                 : "Ni ur v tem mesecu"
@@ -330,6 +344,17 @@ function PodrobnoModal({
     onShranjeno();
   };
 
+  const odkljukaj = async () => {
+    setShranjujem(true);
+    await fetch("/api/ure/izplacila", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ime, mesec, izplacano: false, znesek: f.znesek, datum: null, opomba: f.opomba }),
+    });
+    setShranjujem(false);
+    onShranjeno();
+  };
+
   const I = "w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange";
   const L = "block text-xs font-semibold text-slate-600 mb-1";
 
@@ -378,6 +403,15 @@ function PodrobnoModal({
         >
           {shranjujem ? "Shranjujem..." : "Shrani"}
         </button>
+        {podatki?.izplacano && (
+          <button
+            onClick={odkljukaj}
+            disabled={shranjujem}
+            className="w-full mt-2 px-4 py-2.5 rounded-lg text-sm font-bold text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50"
+          >
+            Odkljukaj (ni izplačano)
+          </button>
+        )}
       </div>
     </div>
   );
