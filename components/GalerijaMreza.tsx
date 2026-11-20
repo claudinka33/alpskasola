@@ -247,87 +247,75 @@ export function FotoKolaz({ slike }: { slike: Slika[] }) {
   );
 }
 
-// Video predvajalnik: velik video + seznam ostalih ob strani (na telefonu pod njim, vodoravno).
-// Glavni video se ob prihodu v vidno polje sam zažene (utišan), ob odhodu se ustavi.
-export function VideoMreza({ videi }: { videi: Video[] }) {
-  const [izbran, setIzbran] = useState(0);
-  const [nalozen, setNalozen] = useState(false);
+// YouTube kartice — video se naloži in začne predvajati (utišan), ko pride v vidno polje;
+// ko ga odscrollaš, se ustavi. Brskalniki samodejno predvajanje dovolijo le brez zvoka.
+function VideoKartica({ v }: { v: Video }) {
   const okvir = useRef<HTMLDivElement>(null);
   const iframe = useRef<HTMLIFrameElement>(null);
+  const [nalozen, setNalozen] = useState(false);
 
   const ukaz = (func: string) =>
-    iframe.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
+    iframe.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func, args: [] }),
+      "*"
+    );
 
   useEffect(() => {
     const el = okvir.current;
     if (!el) return;
-    const o = new IntersectionObserver(
+    const opazovalec = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {
           setNalozen(true);
           ukaz("playVideo");
-        } else ukaz("pauseVideo");
+        } else {
+          ukaz("pauseVideo");
+        }
       },
-      { threshold: 0.5 }
+      { threshold: 0.6 }
     );
-    o.observe(el);
-    return () => o.disconnect();
+    opazovalec.observe(el);
+    return () => opazovalec.disconnect();
   }, []);
 
-  if (videi.length === 0) return null;
-  const v = videi[izbran];
-
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_340px] gap-4 lg:gap-5">
-      <div>
-        <div ref={okvir} className="aspect-video relative bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
-          {nalozen ? (
-            <iframe
-              key={v.id}
-              ref={iframe}
-              className="absolute inset-0 w-full h-full"
-              src={`https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&mute=1&playsinline=1&rel=0&enablejsapi=1`}
-              title={v.naslov || "Video"}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              style={{ border: "none" }}
-            />
-          ) : (
-            <img src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" />
-          )}
-        </div>
-        {v.naslov && <h3 className="text-white font-bold text-lg mt-3">{v.naslov}</h3>}
+    <div className="bg-white rounded-2xl border border-slate-200/70 overflow-hidden shadow-sm">
+      <div ref={okvir} className="aspect-video relative bg-black">
+        {nalozen ? (
+          <iframe
+            ref={iframe}
+            className="absolute inset-0 w-full h-full"
+            src={`https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&mute=1&playsinline=1&rel=0&enablejsapi=1&loop=1&playlist=${v.id}`}
+            title={v.naslov || "Video"}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            style={{ border: "none" }}
+          />
+        ) : (
+          <img
+            src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
       </div>
-
-      {videi.length > 1 && (
-        <div className="relative">
-        <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto lg:absolute lg:inset-0 pb-2 lg:pb-0 snap-x lg:snap-y lg:pr-1 [scrollbar-width:thin]">
-          {videi.map((x, i) => (
-            <button
-              key={x.id}
-              type="button"
-              onClick={() => {
-                setIzbran(i);
-                setNalozen(true);
-              }}
-              className={`snap-start shrink-0 w-44 lg:w-full flex flex-col lg:flex-row gap-2 lg:gap-3 items-start text-left rounded-xl p-1.5 transition ${
-                i === izbran ? "bg-white/15 ring-2 ring-brand-orange" : "hover:bg-white/10"
-              }`}
-            >
-              <span className="relative w-full lg:w-32 aspect-video shrink-0 rounded-lg overflow-hidden bg-black">
-                <img src={`https://i.ytimg.com/vi/${x.id}/mqdefault.jpg`} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-                {i === izbran && (
-                  <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-[10px] font-bold uppercase tracking-wider">
-                    Predvaja
-                  </span>
-                )}
-              </span>
-              <span className="text-sm font-semibold text-white/90 leading-snug lg:pt-1">{x.naslov || "Video"}</span>
-            </button>
-          ))}
-        </div>
+      {v.naslov && (
+        <div className="p-4">
+          <h3 className="text-sm font-bold text-brand-navy">{v.naslov}</h3>
         </div>
       )}
+    </div>
+  );
+}
+
+export function VideoMreza({ videi }: { videi: Video[] }) {
+  if (videi.length === 0) return null;
+  return (
+    <div className={`grid grid-cols-1 gap-6 ${videi.length === 1 ? "max-w-3xl mx-auto" : videi.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+      {videi.map((v) => (
+        <VideoKartica key={v.id} v={v} />
+      ))}
     </div>
   );
 }

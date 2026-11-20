@@ -8,7 +8,7 @@ import type { Slika } from "./GalerijaMreza";
 // Pokončne in "velike" slike zavzamejo celo višino pasu, ostale ležeče se zložijo po dve ena nad drugo.
 // Pas se pomika ves čas, klik odpre celozaslonski pregled.
 
-type Stolpec = { tip: "cela"; i: number } | { tip: "dve"; i: number; j: number };
+type Stolpec = { tip: "cela"; i: number } | { tip: "vec"; ids: number[] };
 
 export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitrost?: number }) {
   const [odprta, setOdprta] = useState<number | null>(null);
@@ -25,20 +25,33 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
 
   // Razporeditev v stolpce
   const stolpci = useMemo(() => {
+    // Ležeče slike se zlagajo v stolpce po 3, 2, 3 …; pokončne po 2 ena nad drugo.
+    // Tako je pas debel, na zaslonu pa je hkrati veliko fotografij.
     const out: Stolpec[] = [];
-    let cakajoca: number | null = null;
-    slike.forEach((s, i) => {
-      const pokoncna = r(i) < 1;
-      if (pokoncna) {
-        out.push({ tip: "cela", i });
-      } else if (cakajoca === null) {
-        cakajoca = i;
+    const vzorec = [3, 2];
+    let korak = 0;
+    let lezece: number[] = [];
+    let pokoncne: number[] = [];
+    slike.forEach((_, i) => {
+      if (r(i) < 1) {
+        pokoncne.push(i);
+        if (pokoncne.length === 2) {
+          out.push({ tip: "vec", ids: pokoncne });
+          pokoncne = [];
+        }
       } else {
-        out.push({ tip: "dve", i: cakajoca, j: i });
-        cakajoca = null;
+        lezece.push(i);
+        if (lezece.length === vzorec[korak % vzorec.length]) {
+          out.push({ tip: "vec", ids: lezece });
+          lezece = [];
+          korak++;
+        }
       }
     });
-    if (cakajoca !== null) out.push({ tip: "cela", i: cakajoca });
+    [lezece, pokoncne].forEach((g) => {
+      if (g.length === 1) out.push({ tip: "cela", i: g[0] });
+      else if (g.length > 1) out.push({ tip: "vec", ids: g });
+    });
     return out;
   }, [slike, r]);
 
@@ -68,19 +81,18 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
 
   if (slike.length === 0) return null;
 
-  const Fotka = ({ i, polovica }: { i: number; polovica?: boolean }) => {
+  const Fotka = ({ i, deli = 1 }: { i: number; deli?: number }) => {
     const s = slike[i];
-    const razm = polovica ? 1.45 : r(i) * (s.velika && r(i) >= 1 ? 1 : 1);
+    const razm = deli > 1 ? (r(i) < 1 ? 0.8 : 1.33) : r(i);
+    const visina = deli > 1 ? `calc((var(--pas) - var(--rez) * ${deli - 1}) / ${deli})` : "var(--pas)";
     return (
       <button
         type="button"
         onClick={() => setOdprta(i)}
         className="group relative overflow-hidden rounded-lg bg-slate-200 shrink-0"
         style={{
-          height: polovica ? "calc((var(--pas) - var(--rez)) / 2)" : "var(--pas)",
-          width: polovica
-            ? `calc((var(--pas) - var(--rez)) / 2 * ${razm})`
-            : `calc(var(--pas) * ${razm})`,
+          height: visina,
+          width: `calc(${visina} * ${razm})`,
         }}
         aria-label={s.naslov || `Fotografija ${i + 1}`}
       >
@@ -113,8 +125,9 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
           <Fotka key={k} i={c.i} />
         ) : (
           <div key={k} className="flex flex-col gap-[var(--rez)] shrink-0">
-            <Fotka i={c.i} polovica />
-            <Fotka i={c.j} polovica />
+            {c.ids.map((id) => (
+              <Fotka key={id} i={id} deli={c.ids.length} />
+            ))}
           </div>
         )
       )}
@@ -131,7 +144,7 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
         .fototrak { animation: fototrak ${trajanje}s linear infinite; }
         @media (prefers-reduced-motion: reduce) { .fototrak { animation: none; } .fototrak-okvir { overflow-x: auto; } }
       `}</style>
-      <div className="fototrak-okvir relative overflow-hidden [--pas:170px] [--rez:5px] sm:[--pas:175px] sm:[--rez:6px] lg:[--pas:172px]">
+      <div className="fototrak-okvir relative overflow-hidden [--pas:260px] [--rez:5px] sm:[--pas:320px] sm:[--rez:6px] lg:[--pas:340px]">
         <div className="fototrak flex w-max">
           <Trak />
           <Trak skrit />
