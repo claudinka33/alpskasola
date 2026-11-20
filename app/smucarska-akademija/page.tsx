@@ -379,6 +379,8 @@ export default function SmucarskaAkademijaPage() {
           { id: "SpgGP4TOqpg", naslov: "Poletne priprave na Rogli" },
           { id: "m_utrd9Nuio", naslov: "Alpska šola na Debelem rtiču" },
           { id: "qstxy4jmWcQ", naslov: "Trening s tekmovalci Alpske šole" },
+          { id: "ZCpIkWHGCGQ", naslov: "Alpska šola na morju" },
+          { id: "8SNSmInIBfQ", naslov: "Alpska šola v Gardalandu" },
         ]}
       />
 
