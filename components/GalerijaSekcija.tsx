@@ -13,6 +13,7 @@ type Props = {
   fotoPodnaslov?: string;
   videoNaslov?: string;
   videoPodnaslov?: string;
+  samo?: "slike" | "videi";
 };
 
 const YT_KANAL = "https://www.youtube.com/@alpskasola4739";
@@ -25,6 +26,7 @@ export default async function GalerijaSekcija({
   fotoPodnaslov,
   videoNaslov = "Poglejte nas v akciji",
   videoPodnaslov,
+  samo,
 }: Props) {
   let slike: Slika[] = [];
   let videi: Video[] = [];
@@ -37,6 +39,8 @@ export default async function GalerijaSekcija({
   }
   if (slike.length === 0) slike = privzeteSlike;
   if (videi.length === 0) videi = privzetiVidei;
+  if (samo === "slike") videi = [];
+  if (samo === "videi") slike = [];
 
   if (slike.length === 0 && videi.length === 0) return null;
 

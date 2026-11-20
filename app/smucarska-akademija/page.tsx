@@ -203,6 +203,56 @@ export default function SmucarskaAkademijaPage() {
         </div>
       </section>
 
+      {/* Galerija fotografij — ureja se v CMS: /admin/galerija */}
+      <GalerijaSekcija
+        programSlug="smucarska-akademija"
+        samo="slike"
+        fotoNaslov="Utrinki z akademije"
+        fotoPodnaslov="Sneg, morje, kolo, rolanje, plezanje in prijatelji — tako je videti leto v akademiji."
+        videoNaslov="Poglejte nas v akciji"
+        videoPodnaslov="Priprave na Rogli, ledenik, morje in treningi — poglejte, kako je videti leto z nami."
+        privzeteSlike={[
+          { url: "/akademija-galerija/morje-pomol-skoki.jpg", naslov: "Skoki s pomola v Baški", w: 1360, h: 955, velika: true },
+          { url: "/akademija-galerija/kolo-pumptrack.jpg", naslov: "Kolesarjenje po pumptracku na Rogli", w: 788, h: 1400 },
+          { url: "/akademija-galerija/snezni-hrib.jpg", naslov: "Vsi skupaj na snežnem hribu", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/plezanje-1.jpg", naslov: "Plezanje", w: 1400, h: 1049 },
+          { url: "/akademija-galerija/kosilo-spageti.jpg", naslov: "Zaslužena malica po smučanju", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/baska-soncni-zahod.jpg", naslov: "Sončni zahod v Baški", w: 1400, h: 1050, velika: true },
+          { url: "/akademija-galerija/tekmovalci-smuci.jpg", naslov: "Zabava na snegu", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/kondicija-ovire.jpg", naslov: "Suhi trening na Rogli", w: 933, h: 1400 },
+          { url: "/akademija-galerija/sedeznica.jpg", naslov: "Na sedežnici", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/rolanje-kolicki.jpg", naslov: "Rolanje med količki", w: 933, h: 1400 },
+          { url: "/akademija-galerija/kolesarjenje-razgled.jpg", naslov: "Kolesarjenje z razgledom", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/skupinska-zakljucek.jpg", naslov: "Zaključek sezone", w: 1400, h: 934, velika: true },
+          { url: "/akademija-galerija/baska-potapljanje.jpg", naslov: "Potapljanje v Baški", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/nasmeh-na-snegu.jpg", naslov: "Nasmeh po progi", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/kondicija-zoga.jpg", naslov: "Ravnotežje na žogi", w: 1400, h: 933 },
+          { url: "/akademija-galerija/mali-smucar.jpg", naslov: "Prvi zavoji na Rogli", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/plezanje-2.jpg", naslov: "Plezalna stena", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/kolesarji-skupina.jpg", naslov: "Kolesarska ekipa", w: 1400, h: 1050, velika: true },
+          { url: "/akademija-galerija/veleslalom.jpg", naslov: "Vožnja med količki", w: 1400, h: 934 },
+          { url: "/akademija-galerija/rogla-skupina.jpg", naslov: "Skupina na Rogli", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/kino.jpg", naslov: "Izlet v kino", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/rolanje-pocitek.jpg", naslov: "Odmor med rolanjem", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/ucenje-s-trenerko.jpg", naslov: "Učenje s trenerko", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/kondicija-poligon.jpg", naslov: "Poligon na igrišču", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/najmlajsi-med-kolicki.jpg", naslov: "Najmlajši med količki", w: 1400, h: 934 },
+          { url: "/akademija-galerija/kondicija-skok.jpg", naslov: "Skoki čez ovire", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/skupina-igrisce.jpg", naslov: "Poletne priprave na Rogli", w: 1400, h: 1050, velika: true },
+        ]}
+        privzetiVidei={[
+          { id: "AFu2TUn5rMQ", naslov: "Alpska šola na morju" },
+          { id: "jOtYv0mTmSc", naslov: "Priprave na Rogli" },
+          { id: "SPlLGMQISgo", naslov: "Alpska šola na ledeniku" },
+          { id: "JC6rVktcdFg", naslov: "Poletje na morju" },
+          { id: "SpgGP4TOqpg", naslov: "Poletne priprave na Rogli" },
+          { id: "m_utrd9Nuio", naslov: "Alpska šola na Debelem rtiču" },
+          { id: "qstxy4jmWcQ", naslov: "Trening s tekmovalci Alpske šole" },
+          { id: "ZCpIkWHGCGQ", naslov: "Alpska šola na morju" },
+          { id: "8SNSmInIBfQ", naslov: "Alpska šola v Gardalandu" },
+        ]}
+      />
+
       {/* Zakaj akademija */}
       <section className="bg-white py-16 lg:py-20">
         <div className="max-w-6xl mx-auto px-4 lg:px-8">
@@ -357,9 +407,10 @@ export default function SmucarskaAkademijaPage() {
         </div>
       </section>
 
-      {/* Galerija + videi — ureja se v CMS: /admin/galerija */}
+      {/* Videi — urejajo se v CMS: /admin/galerija */}
       <GalerijaSekcija
         programSlug="smucarska-akademija"
+        samo="videi"
         fotoNaslov="Utrinki z akademije"
         fotoPodnaslov="Sneg, morje, kolo, rolanje, plezanje in prijatelji — tako je videti leto v akademiji."
         videoNaslov="Poglejte nas v akciji"
