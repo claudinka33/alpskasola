@@ -23,6 +23,7 @@ import {
   Menu,
   X,
   Mountain,
+  Images,
 } from "lucide-react";
 
 const IKONE: Record<string, any> = {
@@ -39,6 +40,7 @@ const IKONE: Record<string, any> = {
   datoteke: HardDrive,
   termini: CalendarDays,
   cenik: Tag,
+  galerija: Images,
   programi: Settings,
   admini: Users,
 };

@@ -5,7 +5,19 @@ import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
-import { Mountain, Sun, Snowflake, TreeDeciduous, Camera } from "lucide-react";
+import GalerijaSekcija from "@/components/GalerijaSekcija";
+import {
+  Mountain,
+  Sun,
+  Snowflake,
+  TreeDeciduous,
+  Activity,
+  GraduationCap,
+  Users,
+  Trophy,
+  Heart,
+  Sparkles,
+} from "lucide-react";
 
 // Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
 export const dynamic = "force-dynamic";
@@ -89,6 +101,52 @@ const zimskeAktivnosti = [
   "Pomoč pri učenju mlajših otrok",
 ];
 
+const stevilke = [
+  { stevilka: "25+", opis: "smučarskih dni v sezoni" },
+  { stevilka: "2–3×", opis: "tedensko treningi skozi leto" },
+  { stevilka: "2", opis: "poletna tabora — Rogla in Baška" },
+  { stevilka: "12", opis: "mesecev gibanja, ne le zima" },
+];
+
+const zakaj = [
+  {
+    icon: Activity,
+    naslov: "Gibanje celo leto, ne samo pozimi",
+    opis:
+      "Ko sneg skopni, se ne ustavimo. Plezanje, rolanje, akrobatika, plavanje in igre z žogo zgradijo vsestransko gibalno podlago — tisto, ki otroku koristi pri smučanju in pri vsakem drugem športu.",
+  },
+  {
+    icon: Snowflake,
+    naslov: "Več kot 25 dni na snegu",
+    opis:
+      "Toliko smučanja, da napredek vidiš iz tedna v teden. Od čistega vijuganja do celca, grbin in količkov — otrok postane samozavesten smučar na vsakem terenu.",
+  },
+  {
+    icon: Heart,
+    naslov: "Smučanje brez pritiska",
+    opis:
+      "Akademija je za otroke, ki imajo smučanje radi, a ne želijo (ali ne želijo več) živeti tekmovalnega ritma. Tekme so priložnost za izziv in veselje, ne obveznost.",
+  },
+  {
+    icon: GraduationCap,
+    naslov: "Prvi koraki do učitelja smučanja",
+    opis:
+      "Otroci spoznajo metodiko učenja in pomagajo pri učenju mlajših. Tako svoje znanje razumejo globlje — in marsikdo odkrije, da bi nekoč rad učil tudi sam.",
+  },
+  {
+    icon: Users,
+    naslov: "Prijateljstva, ki trajajo",
+    opis:
+      "Ista skupina skozi vse leto, skupni treningi, tabori in izleti. Otroci se ne družijo le na smučišču — postanejo ekipa.",
+  },
+  {
+    icon: Sparkles,
+    naslov: "Doživetja, ki si jih zapomnijo",
+    opis:
+      "Teden priprav na Rogli, poletje v Baški, pustolovski park in Gardaland. Šport, ki je zabaven, je šport, ki ga otrok ne bo opustil.",
+  },
+];
+
 const tekme = [
   "Mini pokal Vitranc",
   "Koroški pokal",
@@ -129,6 +187,76 @@ export default function SmucarskaAkademijaPage() {
               na prostem in v telovadnici. V mesecu juniju so organizirane
               enotedenske športne priprave na Rogli, v avgustu pa v Baški.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Številke */}
+      <section className="bg-brand-navy">
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 py-10 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+          {stevilke.map((s, i) => (
+            <div key={i}>
+              <div className="text-3xl lg:text-4xl font-extrabold text-brand-orange">{s.stevilka}</div>
+              <div className="text-sm text-white/80 mt-1">{s.opis}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Zakaj akademija */}
+      <section className="bg-white py-16 lg:py-20">
+        <div className="max-w-6xl mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
+              <span className="w-6 h-px bg-brand-orange" />
+              Zakaj akademija
+              <span className="w-6 h-px bg-brand-orange" />
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4">
+              Več kot smučanje — celo leto športa in prijateljstva
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Tečaj traja teden dni, akademija traja celo leto. Prav zato otroci v
+              njej napredujejo hitreje, ostanejo motivirani in šport vzamejo za
+              svojega.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {zakaj.map((z, i) => {
+              const Icon = z.icon;
+              return (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-slate-200 bg-slate-50/60 p-6 hover:border-brand-orange/40 hover:shadow-lg hover:shadow-brand-navy/5 transition"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-orange-100 text-brand-orange flex items-center justify-center mb-4">
+                    <Icon size={22} />
+                  </div>
+                  <h3 className="text-lg font-extrabold text-brand-navy mb-2">{z.naslov}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{z.opis}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 rounded-2xl bg-gradient-to-r from-brand-orange to-orange-500 text-white p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-center gap-4">
+            <Trophy size={36} className="shrink-0" />
+            <div className="flex-1">
+              <strong className="block text-lg font-extrabold mb-1">Za starše: kaj otrok odnese?</strong>
+              <p className="text-sm text-white/90 leading-relaxed">
+                Boljšo tehniko in varnejše smučanje, močnejše telo, redno gibanje
+                namesto zaslonov, samozavest in občutek pripadnosti ekipi. Vi pa
+                vse leto veste, kje je vaš otrok — v gibanju, med prijatelji in v
+                rokah izkušenih trenerjev.
+              </p>
+            </div>
+            <a
+              href="/prijava?program=smucarska-akademija"
+              className="shrink-0 bg-white text-brand-orange font-bold px-5 py-3 rounded-xl text-sm hover:bg-orange-50 transition"
+            >
+              Prijavi otroka
+            </a>
           </div>
         </div>
       </section>
@@ -228,6 +356,26 @@ export default function SmucarskaAkademijaPage() {
           </div>
         </div>
       </section>
+
+      {/* Galerija + videi — ureja se v CMS: /admin/galerija */}
+      <GalerijaSekcija
+        programSlug="smucarska-akademija"
+        fotoNaslov="Utrinki z akademije"
+        fotoPodnaslov="Treningi, tabori in smučarski dnevi — tako je videti leto v akademiji."
+        videoNaslov="Poglejte nas v akciji"
+        videoPodnaslov="Nekaj video utrinkov s priprav na Rogli in poletja v Baški."
+        privzeteSlike={[
+          { url: "/akademija.jpeg", naslov: "Poletni tabor v Baški" },
+          { url: "/zimskeaktivnosti.jpeg", naslov: "Zimski treningi na Rogli" },
+          { url: "/skupinska.jpg", naslov: "Skupaj na snegu" },
+          { url: "/smucanje.jpg", naslov: "Smučanje na Rogli" },
+          { url: "/tekmovalna_1.JPG", naslov: "Treningi med količki" },
+        ]}
+        privzetiVidei={[
+          { id: "atf-TQXUdSQ", naslov: "Poletje v Baški" },
+          { id: "jOtYv0mTmSc", naslov: "Poletne priprave na Rogli" },
+        ]}
+      />
 
       {/* Termini — ureja se v CMS: /admin/termini */}
       <TerminiSekcija

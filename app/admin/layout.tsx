@@ -51,6 +51,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       postavke: [
         { kljuc: "termini", href: "/admin/termini", label: "Termini" },
         { kljuc: "cenik", href: "/admin/cenik", label: "Cenik" },
+        { kljuc: "galerija", href: "/admin/galerija", label: "Galerija in videi" },
       ].filter((p) => vidi(p.kljuc)),
     },
     {

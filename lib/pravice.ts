@@ -27,6 +27,7 @@ export const RAZDELKI: Razdelek[] = [
 
   { kljuc: "termini", pot: "/admin/termini", naziv: "Termini", skupina: "Vsebina strani", opis: "Skupine, datumi, oznake" },
   { kljuc: "cenik", pot: "/admin/cenik", naziv: "Cenik", skupina: "Vsebina strani", opis: "Cene na javni strani" },
+  { kljuc: "galerija", pot: "/admin/galerija", naziv: "Galerija in videi", skupina: "Vsebina strani", opis: "Fotografije in YouTube videi na straneh programov" },
   { kljuc: "rojstni-dan", pot: "/admin/rojstni-dan", naziv: "Rojstni dan", skupina: "Vsebina strani", opis: "Paketi praznovanj" },
 
   { kljuc: "programi", pot: "/admin/programi", naziv: "Programi", skupina: "Nastavitve", opis: "Seznam programov šole" },
