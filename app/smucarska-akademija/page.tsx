@@ -361,15 +361,37 @@ export default function SmucarskaAkademijaPage() {
       <GalerijaSekcija
         programSlug="smucarska-akademija"
         fotoNaslov="Utrinki z akademije"
-        fotoPodnaslov="Treningi, tabori in smučarski dnevi — tako je videti leto v akademiji."
+        fotoPodnaslov="Sneg, morje, kolo, rolanje, plezanje in prijatelji — tako je videti leto v akademiji. Klikni na fotografijo za večji prikaz."
         videoNaslov="Poglejte nas v akciji"
         videoPodnaslov="Priprave na Rogli, ledenik, morje in treningi — poglejte, kako je videti leto z nami."
         privzeteSlike={[
-          { url: "/akademija.jpeg", naslov: "Poletni tabor v Baški" },
-          { url: "/zimskeaktivnosti.jpeg", naslov: "Zimski treningi na Rogli" },
-          { url: "/skupinska.jpg", naslov: "Skupaj na snegu" },
-          { url: "/smucanje.jpg", naslov: "Smučanje na Rogli" },
-          { url: "/tekmovalna_1.JPG", naslov: "Treningi med količki" },
+          { url: "/akademija-galerija/morje-pomol-skoki.jpg", naslov: "Skoki s pomola v Baški", w: 1360, h: 955, velika: true },
+          { url: "/akademija-galerija/kolo-pumptrack.jpg", naslov: "Kolesarjenje po pumptracku na Rogli", w: 788, h: 1400 },
+          { url: "/akademija-galerija/snezni-hrib.jpg", naslov: "Vsi skupaj na snežnem hribu", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/plezanje-1.jpg", naslov: "Plezanje", w: 1400, h: 1049 },
+          { url: "/akademija-galerija/kosilo-spageti.jpg", naslov: "Zaslužena malica po smučanju", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/baska-soncni-zahod.jpg", naslov: "Sončni zahod v Baški", w: 1400, h: 1050, velika: true },
+          { url: "/akademija-galerija/tekmovalci-smuci.jpg", naslov: "Zabava na snegu", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/kondicija-ovire.jpg", naslov: "Suhi trening na Rogli", w: 933, h: 1400 },
+          { url: "/akademija-galerija/sedeznica.jpg", naslov: "Na sedežnici", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/rolanje-kolicki.jpg", naslov: "Rolanje med količki", w: 933, h: 1400 },
+          { url: "/akademija-galerija/kolesarjenje-razgled.jpg", naslov: "Kolesarjenje z razgledom", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/skupinska-zakljucek.jpg", naslov: "Zaključek sezone", w: 1400, h: 934, velika: true },
+          { url: "/akademija-galerija/baska-potapljanje.jpg", naslov: "Potapljanje v Baški", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/nasmeh-na-snegu.jpg", naslov: "Nasmeh po progi", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/kondicija-zoga.jpg", naslov: "Ravnotežje na žogi", w: 1400, h: 933 },
+          { url: "/akademija-galerija/mali-smucar.jpg", naslov: "Prvi zavoji na Rogli", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/plezanje-2.jpg", naslov: "Plezalna stena", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/kolesarji-skupina.jpg", naslov: "Kolesarska ekipa", w: 1400, h: 1050, velika: true },
+          { url: "/akademija-galerija/veleslalom.jpg", naslov: "Vožnja med količki", w: 1400, h: 934 },
+          { url: "/akademija-galerija/rogla-skupina.jpg", naslov: "Skupina na Rogli", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/kino.jpg", naslov: "Izlet v kino", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/rolanje-pocitek.jpg", naslov: "Odmor med rolanjem", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/ucenje-s-trenerko.jpg", naslov: "Učenje s trenerko", w: 1050, h: 1400 },
+          { url: "/akademija-galerija/kondicija-poligon.jpg", naslov: "Poligon na igrišču", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/najmlajsi-med-kolicki.jpg", naslov: "Najmlajši med količki", w: 1400, h: 934 },
+          { url: "/akademija-galerija/kondicija-skok.jpg", naslov: "Skoki čez ovire", w: 1400, h: 1050 },
+          { url: "/akademija-galerija/skupina-igrisce.jpg", naslov: "Poletne priprave na Rogli", w: 1400, h: 1050, velika: true },
         ]}
         privzetiVidei={[
           { id: "AFu2TUn5rMQ", naslov: "Alpska šola na morju" },
