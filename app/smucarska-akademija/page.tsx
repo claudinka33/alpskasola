@@ -254,7 +254,7 @@ export default function SmucarskaAkademijaPage() {
       />
 
       {/* Zakaj akademija */}
-      <section className="bg-white py-16 lg:py-20">
+      <section className="bg-white pt-6 lg:pt-8 pb-16 lg:pb-20">
         <div className="max-w-6xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">

@@ -47,7 +47,7 @@ export default async function GalerijaSekcija({
   return (
     <>
       {slike.length > 0 && (
-        <section className="bg-white py-16 lg:py-20">
+        <section className="bg-white pt-16 lg:pt-20 pb-6 lg:pb-8">
           <div className="max-w-7xl mx-auto px-4 lg:px-8">
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
