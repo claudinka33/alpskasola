@@ -6,11 +6,11 @@ import type { Slika } from "./GalerijaMreza";
 
 // Neprekinjen pas fotografij, ki se pomika od desne proti levi (kot tekoči trak).
 // Pokončne in "velike" slike zavzamejo celo višino pasu, ostale ležeče se zložijo po dve ena nad drugo.
-// Ob prehodu z miško se pas ustavi, klik odpre celozaslonski pregled.
+// Pas se pomika ves čas, klik odpre celozaslonski pregled.
 
 type Stolpec = { tip: "cela"; i: number } | { tip: "dve"; i: number; j: number };
 
-export default function FotoTrak({ slike, hitrost = 26 }: { slike: Slika[]; hitrost?: number }) {
+export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitrost?: number }) {
   const [odprta, setOdprta] = useState<number | null>(null);
   const [zacetekX, setZacetekX] = useState<number | null>(null);
   const [razmerja, setRazmerja] = useState<Record<number, number>>({});
@@ -29,7 +29,7 @@ export default function FotoTrak({ slike, hitrost = 26 }: { slike: Slika[]; hitr
     let cakajoca: number | null = null;
     slike.forEach((s, i) => {
       const pokoncna = r(i) < 1;
-      if (pokoncna || s.velika) {
+      if (pokoncna) {
         out.push({ tip: "cela", i });
       } else if (cakajoca === null) {
         cakajoca = i;
@@ -75,7 +75,7 @@ export default function FotoTrak({ slike, hitrost = 26 }: { slike: Slika[]; hitr
       <button
         type="button"
         onClick={() => setOdprta(i)}
-        className="group relative overflow-hidden rounded-xl bg-slate-200 shrink-0"
+        className="group relative overflow-hidden rounded-lg bg-slate-200 shrink-0"
         style={{
           height: polovica ? "calc((var(--pas) - var(--rez)) / 2)" : "var(--pas)",
           width: polovica
@@ -122,17 +122,16 @@ export default function FotoTrak({ slike, hitrost = 26 }: { slike: Slika[]; hitr
   );
 
   // Trajanje enega kroga: približno sorazmerno s številom slik
-  const trajanje = Math.max(40, Math.round((slike.length * 260) / hitrost));
+  const trajanje = Math.max(40, Math.round((slike.length * 120) / hitrost));
 
   return (
     <>
       <style>{`
         @keyframes fototrak { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .fototrak { animation: fototrak ${trajanje}s linear infinite; }
-        .fototrak-okvir:hover .fototrak { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) { .fototrak { animation: none; } .fototrak-okvir { overflow-x: auto; } }
       `}</style>
-      <div className="fototrak-okvir relative overflow-hidden [--pas:300px] [--rez:6px] sm:[--pas:420px] sm:[--rez:8px] lg:[--pas:520px]">
+      <div className="fototrak-okvir relative overflow-hidden [--pas:170px] [--rez:5px] sm:[--pas:175px] sm:[--rez:6px] lg:[--pas:172px]">
         <div className="fototrak flex w-max">
           <Trak />
           <Trak skrit />
