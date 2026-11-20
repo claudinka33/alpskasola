@@ -363,7 +363,7 @@ export default function SmucarskaAkademijaPage() {
         fotoNaslov="Utrinki z akademije"
         fotoPodnaslov="Treningi, tabori in smučarski dnevi — tako je videti leto v akademiji."
         videoNaslov="Poglejte nas v akciji"
-        videoPodnaslov="Nekaj video utrinkov s priprav na Rogli in poletja v Baški."
+        videoPodnaslov="Priprave na Rogli, ledenik, morje in treningi — poglejte, kako je videti leto z nami."
         privzeteSlike={[
           { url: "/akademija.jpeg", naslov: "Poletni tabor v Baški" },
           { url: "/zimskeaktivnosti.jpeg", naslov: "Zimski treningi na Rogli" },
@@ -372,8 +372,13 @@ export default function SmucarskaAkademijaPage() {
           { url: "/tekmovalna_1.JPG", naslov: "Treningi med količki" },
         ]}
         privzetiVidei={[
-          { id: "atf-TQXUdSQ", naslov: "Poletje v Baški" },
-          { id: "jOtYv0mTmSc", naslov: "Poletne priprave na Rogli" },
+          { id: "AFu2TUn5rMQ", naslov: "Alpska šola na morju" },
+          { id: "jOtYv0mTmSc", naslov: "Priprave na Rogli" },
+          { id: "SPlLGMQISgo", naslov: "Alpska šola na ledeniku" },
+          { id: "JC6rVktcdFg", naslov: "Poletje na morju" },
+          { id: "SpgGP4TOqpg", naslov: "Poletne priprave na Rogli" },
+          { id: "m_utrd9Nuio", naslov: "Alpska šola na Debelem rtiču" },
+          { id: "qstxy4jmWcQ", naslov: "Trening s tekmovalci Alpske šole" },
         ]}
       />
 
