@@ -361,7 +361,7 @@ export default function SmucarskaAkademijaPage() {
       <GalerijaSekcija
         programSlug="smucarska-akademija"
         fotoNaslov="Utrinki z akademije"
-        fotoPodnaslov="Sneg, morje, kolo, rolanje, plezanje in prijatelji — tako je videti leto v akademiji. Klikni na fotografijo za večji prikaz."
+        fotoPodnaslov="Sneg, morje, kolo, rolanje, plezanje in prijatelji — tako je videti leto v akademiji."
         videoNaslov="Poglejte nas v akciji"
         videoPodnaslov="Priprave na Rogli, ledenik, morje in treningi — poglejte, kako je videti leto z nami."
         privzeteSlike={[

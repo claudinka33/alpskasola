@@ -1,7 +1,8 @@
 // Galerija + YouTube videi programa — vsebina se ureja v CMS: /admin/galerija
 // Če za program v CMS-u še ni ničesar, se pokažejo privzete fotografije/videi (če so podani).
 import { pridobiGalerijo } from "@/lib/galerija";
-import { FotoKolaz, VideoMreza, type Slika, type Video } from "./GalerijaMreza";
+import { VideoMreza, type Slika, type Video } from "./GalerijaMreza";
+import FotoTrak from "./FotoTrak";
 import { Youtube } from "lucide-react";
 
 type Props = {
@@ -43,7 +44,7 @@ export default async function GalerijaSekcija({
     <>
       {slike.length > 0 && (
         <section className="bg-white py-16 lg:py-20">
-          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 lg:px-8">
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
                 <span className="w-6 h-px bg-brand-orange" />
@@ -55,8 +56,8 @@ export default async function GalerijaSekcija({
                 <p className="text-slate-600 max-w-2xl mx-auto mt-3 leading-relaxed">{fotoPodnaslov}</p>
               )}
             </div>
-            <FotoKolaz slike={slike} />
           </div>
+          <FotoTrak slike={slike} />
         </section>
       )}
 

@@ -1,0 +1,186 @@
+"use client";
+
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import type { Slika } from "./GalerijaMreza";
+
+// Neprekinjen pas fotografij, ki se pomika od desne proti levi (kot tekoči trak).
+// Pokončne in "velike" slike zavzamejo celo višino pasu, ostale ležeče se zložijo po dve ena nad drugo.
+// Ob prehodu z miško se pas ustavi, klik odpre celozaslonski pregled.
+
+type Stolpec = { tip: "cela"; i: number } | { tip: "dve"; i: number; j: number };
+
+export default function FotoTrak({ slike, hitrost = 26 }: { slike: Slika[]; hitrost?: number }) {
+  const [odprta, setOdprta] = useState<number | null>(null);
+  const [zacetekX, setZacetekX] = useState<number | null>(null);
+  const [razmerja, setRazmerja] = useState<Record<number, number>>({});
+
+  const r = useCallback(
+    (i: number) => {
+      const s = slike[i];
+      return s.w && s.h ? s.w / s.h : razmerja[i] || 4 / 3;
+    },
+    [slike, razmerja]
+  );
+
+  // Razporeditev v stolpce
+  const stolpci = useMemo(() => {
+    const out: Stolpec[] = [];
+    let cakajoca: number | null = null;
+    slike.forEach((s, i) => {
+      const pokoncna = r(i) < 1;
+      if (pokoncna || s.velika) {
+        out.push({ tip: "cela", i });
+      } else if (cakajoca === null) {
+        cakajoca = i;
+      } else {
+        out.push({ tip: "dve", i: cakajoca, j: i });
+        cakajoca = null;
+      }
+    });
+    if (cakajoca !== null) out.push({ tip: "cela", i: cakajoca });
+    return out;
+  }, [slike, r]);
+
+  const naprej = useCallback(
+    () => setOdprta((i) => (i === null ? i : (i + 1) % slike.length)),
+    [slike.length]
+  );
+  const nazaj = useCallback(
+    () => setOdprta((i) => (i === null ? i : (i - 1 + slike.length) % slike.length)),
+    [slike.length]
+  );
+
+  useEffect(() => {
+    if (odprta === null) return;
+    const tipka = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOdprta(null);
+      if (e.key === "ArrowRight") naprej();
+      if (e.key === "ArrowLeft") nazaj();
+    };
+    window.addEventListener("keydown", tipka);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", tipka);
+      document.body.style.overflow = "";
+    };
+  }, [odprta, naprej, nazaj]);
+
+  if (slike.length === 0) return null;
+
+  const Fotka = ({ i, polovica }: { i: number; polovica?: boolean }) => {
+    const s = slike[i];
+    const razm = polovica ? 1.45 : r(i) * (s.velika && r(i) >= 1 ? 1 : 1);
+    return (
+      <button
+        type="button"
+        onClick={() => setOdprta(i)}
+        className="group relative overflow-hidden rounded-xl bg-slate-200 shrink-0"
+        style={{
+          height: polovica ? "calc((var(--pas) - var(--rez)) / 2)" : "var(--pas)",
+          width: polovica
+            ? `calc((var(--pas) - var(--rez)) / 2 * ${razm})`
+            : `calc(var(--pas) * ${razm})`,
+        }}
+        aria-label={s.naslov || `Fotografija ${i + 1}`}
+      >
+        <img
+          src={s.url}
+          alt={s.naslov || "Smučarska akademija"}
+          loading="lazy"
+          draggable={false}
+          onLoad={(e) => {
+            if (s.w && s.h) return;
+            const im = e.currentTarget;
+            if (im.naturalWidth && im.naturalHeight)
+              setRazmerja((x) => (x[i] ? x : { ...x, [i]: im.naturalWidth / im.naturalHeight }));
+          }}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        {s.naslov && (
+          <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white text-xs sm:text-sm font-semibold text-left px-3 pt-6 pb-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            {s.naslov}
+          </span>
+        )}
+      </button>
+    );
+  };
+
+  const Trak = ({ skrit }: { skrit?: boolean }) => (
+    <div className="flex gap-[var(--rez)] pr-[var(--rez)] shrink-0" aria-hidden={skrit || undefined}>
+      {stolpci.map((c, k) =>
+        c.tip === "cela" ? (
+          <Fotka key={k} i={c.i} />
+        ) : (
+          <div key={k} className="flex flex-col gap-[var(--rez)] shrink-0">
+            <Fotka i={c.i} polovica />
+            <Fotka i={c.j} polovica />
+          </div>
+        )
+      )}
+    </div>
+  );
+
+  // Trajanje enega kroga: približno sorazmerno s številom slik
+  const trajanje = Math.max(40, Math.round((slike.length * 260) / hitrost));
+
+  return (
+    <>
+      <style>{`
+        @keyframes fototrak { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .fototrak { animation: fototrak ${trajanje}s linear infinite; }
+        .fototrak-okvir:hover .fototrak { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) { .fototrak { animation: none; } .fototrak-okvir { overflow-x: auto; } }
+      `}</style>
+      <div className="fototrak-okvir relative overflow-hidden [--pas:300px] [--rez:6px] sm:[--pas:420px] sm:[--rez:8px] lg:[--pas:520px]">
+        <div className="fototrak flex w-max">
+          <Trak />
+          <Trak skrit />
+        </div>
+        {/* mehka robova */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-white to-transparent" />
+      </div>
+
+      {odprta !== null && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          onClick={() => setOdprta(null)}
+          onTouchStart={(e) => setZacetekX(e.touches[0].clientX)}
+          onTouchEnd={(e) => {
+            if (zacetekX === null) return;
+            const dx = e.changedTouches[0].clientX - zacetekX;
+            if (dx > 50) nazaj();
+            if (dx < -50) naprej();
+            setZacetekX(null);
+          }}
+        >
+          <button className="absolute top-4 right-4 p-2 text-white/80 hover:text-white" onClick={() => setOdprta(null)} aria-label="Zapri">
+            <X size={28} />
+          </button>
+          <button
+            className="absolute left-2 sm:left-6 p-2 text-white/80 hover:text-white"
+            onClick={(e) => { e.stopPropagation(); nazaj(); }}
+            aria-label="Prejšnja"
+          >
+            <ChevronLeft size={36} />
+          </button>
+          <button
+            className="absolute right-2 sm:right-6 p-2 text-white/80 hover:text-white"
+            onClick={(e) => { e.stopPropagation(); naprej(); }}
+            aria-label="Naslednja"
+          >
+            <ChevronRight size={36} />
+          </button>
+          <figure className="max-w-[92vw] max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+            <img src={slike[odprta].url} alt={slike[odprta].naslov || ""} className="max-w-[92vw] max-h-[80vh] object-contain rounded-lg" />
+            <figcaption className="text-center text-white/80 text-sm mt-3">
+              {slike[odprta].naslov && <span className="font-semibold text-white">{slike[odprta].naslov} · </span>}
+              {odprta + 1} / {slike.length}
+            </figcaption>
+          </figure>
+        </div>
+      )}
+    </>
+  );
+}
