@@ -249,6 +249,10 @@ export default function KontaktiPage() {
   const [uvoz, setUvoz] = useState<{ skupaj: number; narejeno: number; preskoceni: number } | null>(null);
   const [novEmail, setNovEmail] = useState("");
   const [novoIme, setNovoIme] = useState("");
+  const [novPriimek, setNovPriimek] = useState("");
+  const [novTelefon, setNovTelefon] = useState("");
+  const [otrokIme, setOtrokIme] = useState("");
+  const [otrokPriimek, setOtrokPriimek] = useState("");
   const [noveOznake, setNoveOznake] = useState("");
   const [dodajam, setDodajam] = useState(false);
   const [dodajSporocilo, setDodajSporocilo] = useState<{ ok: boolean; txt: string } | null>(null);
@@ -344,7 +348,7 @@ export default function KontaktiPage() {
       setDodajSporocilo({ ok: false, txt: "Email ni veljaven." });
       return;
     }
-    const deli = novoIme.trim().split(/\s+/).filter(Boolean);
+    const otrok = [otrokIme.trim(), otrokPriimek.trim()].filter(Boolean).join(" ");
     setDodajam(true);
     setDodajSporocilo(null);
     try {
@@ -353,8 +357,10 @@ export default function KontaktiPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          ime: deli[0] || null,
-          priimek: deli.slice(1).join(" ") || null,
+          ime: novoIme.trim() || null,
+          priimek: novPriimek.trim() || null,
+          telefon: novTelefon.trim() || null,
+          otrok: otrok || null,
           oznake: noveOznake,
         }),
       });
@@ -370,6 +376,10 @@ export default function KontaktiPage() {
       });
       setNovEmail("");
       setNovoIme("");
+      setNovPriimek("");
+      setNovTelefon("");
+      setOtrokIme("");
+      setOtrokPriimek("");
       setNoveOznake("");
       // počisti filtre, da je nov kontakt takoj viden
       setIskanje("");
@@ -621,21 +631,69 @@ export default function KontaktiPage() {
           dodajOdprt ? "flex" : "hidden sm:flex"
         }`}
       >
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mr-2">Dodaj kontakt:</span>
-          <input
-            value={novoIme}
-            onChange={(e) => setNovoIme(e.target.value)}
-            placeholder="Ime in priimek"
-            className="flex-1 min-w-[150px] px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-          />
-          <input
-            value={novEmail}
-            onChange={(e) => setNovEmail(e.target.value)}
-            placeholder="email@primer.si"
-            type="email"
-            className="flex-1 min-w-[180px] px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-          />
+        <div className="text-sm font-bold text-brand-navy">Dodaj kontakt</div>
+        <div>
+          <div className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Starš</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            <input
+              value={novoIme}
+              onChange={(e) => setNovoIme(e.target.value)}
+              placeholder="Ime starša"
+              autoComplete="off"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange"
+            />
+            <input
+              value={novPriimek}
+              onChange={(e) => setNovPriimek(e.target.value)}
+              placeholder="Priimek starša"
+              autoComplete="off"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange"
+            />
+            <input
+              value={novEmail}
+              onChange={(e) => setNovEmail(e.target.value)}
+              placeholder="Email *"
+              type="email"
+              autoComplete="off"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange"
+            />
+            <input
+              value={novTelefon}
+              onChange={(e) => setNovTelefon(e.target.value)}
+              placeholder="Telefon"
+              type="tel"
+              autoComplete="off"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange"
+            />
+          </div>
+          {predlogEmaila(novEmail.trim()) && (
+            <button
+              type="button"
+              onClick={() => setNovEmail(predlogEmaila(novEmail.trim()) || novEmail)}
+              className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700"
+            >
+              <Wand2 size={11} /> Ali si mislila: {predlogEmaila(novEmail.trim())}
+            </button>
+          )}
+        </div>
+        <div>
+          <div className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Otrok</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            <input
+              value={otrokIme}
+              onChange={(e) => setOtrokIme(e.target.value)}
+              placeholder="Ime otroka"
+              autoComplete="off"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange"
+            />
+            <input
+              value={otrokPriimek}
+              onChange={(e) => setOtrokPriimek(e.target.value)}
+              placeholder="Priimek otroka"
+              autoComplete="off"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-brand-orange"
+            />
+          </div>
         </div>
         <div>
           <div className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
