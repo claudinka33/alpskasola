@@ -160,6 +160,83 @@ function vrsticaVKontakt(glava: string[], r: string[]) {
 }
 
 // ---------------------------------------------------------------------------
+// Izbirnik skupin (oznak): klik na obstoječo skupino ali vpis nove.
+// Vrednost je niz "oznaka1;oznaka2" — enako kot v bazi.
+function razbijOznake(v: string | null | undefined) {
+  return String(v || "").split(";").map((o) => o.trim()).filter(Boolean);
+}
+
+function IzbirnikOznak({
+  vrednost,
+  onChange,
+  moznosti,
+}: {
+  vrednost: string;
+  onChange: (v: string) => void;
+  moznosti: string[];
+}) {
+  const [nova, setNova] = useState("");
+  const izbrane = razbijOznake(vrednost);
+  const jeIzbrana = (o: string) => izbrane.some((x) => x.toLowerCase() === o.toLowerCase());
+  const nastavi = (seznam: string[]) => onChange(Array.from(new Set(seznam)).join(";"));
+  const preklopi = (o: string) =>
+    nastavi(jeIzbrana(o) ? izbrane.filter((x) => x.toLowerCase() !== o.toLowerCase()) : [...izbrane, o]);
+  const dodajNovo = () => {
+    const o = nova.trim().replace(/;/g, "");
+    if (!o) return;
+    // če obstaja skupina z enakim imenom (ne glede na velike črke), uporabi obstoječo
+    const obstojeca = moznosti.find((m) => m.toLowerCase() === o.toLowerCase());
+    if (!jeIzbrana(obstojeca || o)) nastavi([...izbrane, obstojeca || o]);
+    setNova("");
+  };
+  const vse = Array.from(new Set([...moznosti, ...izbrane])).sort((a, b) => a.localeCompare(b, "sl"));
+
+  return (
+    <div className="w-full">
+      <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+        {vse.map((o) => (
+          <button
+            key={o}
+            type="button"
+            onClick={() => preklopi(o)}
+            className={`text-[11px] font-semibold px-2 py-1 rounded-full border transition-colors ${
+              jeIzbrana(o)
+                ? "bg-brand-orange text-white border-brand-orange"
+                : "bg-white text-slate-600 border-slate-200 hover:border-brand-orange"
+            }`}
+          >
+            {jeIzbrana(o) && <Check size={10} className="inline -mt-0.5 mr-0.5" />}
+            {o}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-1.5 mt-2">
+        <input
+          value={nova}
+          onChange={(e) => setNova(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              dodajNovo();
+            }
+          }}
+          placeholder="Nova skupina…"
+          className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs outline-none focus:border-brand-orange"
+        />
+        <button
+          type="button"
+          onClick={dodajNovo}
+          disabled={!nova.trim()}
+          className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-brand-navy disabled:opacity-40"
+        >
+          <Plus size={12} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 export default function KontaktiPage() {
   const [kontakti, setKontakti] = useState<Kontakt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,6 +249,11 @@ export default function KontaktiPage() {
   const [uvoz, setUvoz] = useState<{ skupaj: number; narejeno: number; preskoceni: number } | null>(null);
   const [novEmail, setNovEmail] = useState("");
   const [novoIme, setNovoIme] = useState("");
+  const [noveOznake, setNoveOznake] = useState("");
+  const [dodajam, setDodajam] = useState(false);
+  const [dodajSporocilo, setDodajSporocilo] = useState<{ ok: boolean; txt: string } | null>(null);
+  // Vse skupine (oznake) — iz vseh kontaktov in iz terminov, neodvisno od filtra
+  const [bazaOznak, setBazaOznak] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // urejanje
@@ -194,7 +276,25 @@ export default function KontaktiPage() {
     }
   };
 
-  useEffect(() => { nalozi(); }, []);
+  const naloziBazoOznak = async () => {
+    try {
+      const [k, t] = await Promise.all([
+        fetch("/api/admin/kontakti", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
+        fetch("/api/termini", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
+      ]);
+      const set = new Set<string>();
+      for (const x of (k.kontakti || []) as Kontakt[]) razbijOznake(x.oznake).forEach((o) => set.add(o));
+      for (const x of (t.termini || []) as any[]) {
+        const o = String(x.oznaka || "").trim();
+        if (o) set.add(o);
+      }
+      setBazaOznak(Array.from(set).sort((a, b) => a.localeCompare(b, "sl")));
+    } catch {
+      /* ni kritično */
+    }
+  };
+
+  useEffect(() => { nalozi(); naloziBazoOznak(); }, []);
   useEffect(() => {
     const t = setTimeout(nalozi, 300);
     return () => clearTimeout(t);
@@ -202,8 +302,8 @@ export default function KontaktiPage() {
   }, [iskanje, oznaka, narocen]);
 
   const vseOznake = Array.from(
-    new Set(kontakti.flatMap((k) => k.oznake.split(";").map((o) => o.trim()).filter(Boolean)))
-  ).sort();
+    new Set([...bazaOznak, ...kontakti.flatMap((k) => razbijOznake(k.oznake))])
+  ).sort((a, b) => a.localeCompare(b, "sl"));
 
   const jeSumljiv = (k: Kontakt) => !veljavenEmail(k.email) || predlogEmaila(k.email) !== null;
   const steviloSumljivih = kontakti.filter(jeSumljiv).length;
@@ -239,19 +339,49 @@ export default function KontaktiPage() {
 
   const dodajRocno = async () => {
     if (!novEmail.trim()) return;
-    const deli = novoIme.trim().split(/\s+/);
-    await fetch("/api/admin/kontakti", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: novEmail.trim(),
-        ime: deli[0] || null,
-        priimek: deli.slice(1).join(" ") || null,
-      }),
-    });
-    setNovEmail("");
-    setNovoIme("");
-    nalozi();
+    const email = novEmail.trim().toLowerCase();
+    if (!veljavenEmail(email)) {
+      setDodajSporocilo({ ok: false, txt: "Email ni veljaven." });
+      return;
+    }
+    const deli = novoIme.trim().split(/\s+/).filter(Boolean);
+    setDodajam(true);
+    setDodajSporocilo(null);
+    try {
+      const res = await fetch("/api/admin/kontakti", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          ime: deli[0] || null,
+          priimek: deli.slice(1).join(" ") || null,
+          oznake: noveOznake,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDodajSporocilo({ ok: false, txt: d.error || "Napaka pri shranjevanju." });
+        return;
+      }
+      const skupine = razbijOznake(d.kontakt?.oznake);
+      setDodajSporocilo({
+        ok: true,
+        txt: `Shranjeno: ${email}${skupine.length ? " → " + skupine.join(", ") : " (brez skupine)"}`,
+      });
+      setNovEmail("");
+      setNovoIme("");
+      setNoveOznake("");
+      // počisti filtre, da je nov kontakt takoj viden
+      setIskanje("");
+      setOznaka("");
+      setNarocen("");
+      setSamoSumljivi(false);
+      await Promise.all([nalozi(), naloziBazoOznak()]);
+    } catch {
+      setDodajSporocilo({ ok: false, txt: "Napaka pri povezavi." });
+    } finally {
+      setDodajam(false);
+    }
   };
 
   const izbrisi = async (k: Kontakt) => {
@@ -324,6 +454,7 @@ export default function KontaktiPage() {
       );
       setUrejam(null);
       setOsnutek({});
+      naloziBazoOznak();
     } catch {
       setNapaka("Napaka pri povezavi.");
     } finally {
@@ -486,31 +617,48 @@ export default function KontaktiPage() {
 
       {/* Ročni vnos */}
       <div
-        className={`bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex-wrap gap-2 items-center sm:flex ${
+        className={`bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex-col gap-3 sm:flex ${
           dodajOdprt ? "flex" : "hidden sm:flex"
         }`}
       >
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mr-2">Dodaj kontakt:</span>
-        <input
-          value={novoIme}
-          onChange={(e) => setNovoIme(e.target.value)}
-          placeholder="Ime in priimek"
-          className="flex-1 min-w-[150px] px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-        />
-        <input
-          value={novEmail}
-          onChange={(e) => setNovEmail(e.target.value)}
-          placeholder="email@primer.si"
-          type="email"
-          className="flex-1 min-w-[180px] px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-        />
-        <button
-          onClick={dodajRocno}
-          disabled={!novEmail.trim()}
-          className="inline-flex items-center gap-1.5 bg-brand-navy text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-        >
-          <Plus size={14} /> Dodaj
-        </button>
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mr-2">Dodaj kontakt:</span>
+          <input
+            value={novoIme}
+            onChange={(e) => setNovoIme(e.target.value)}
+            placeholder="Ime in priimek"
+            className="flex-1 min-w-[150px] px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+          />
+          <input
+            value={novEmail}
+            onChange={(e) => setNovEmail(e.target.value)}
+            placeholder="email@primer.si"
+            type="email"
+            className="flex-1 min-w-[180px] px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+          />
+        </div>
+        <div>
+          <div className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+            Skupine {razbijOznake(noveOznake).length > 0 && (
+              <span className="text-brand-orange normal-case">({razbijOznake(noveOznake).length} izbranih)</span>
+            )}
+          </div>
+          <IzbirnikOznak vrednost={noveOznake} onChange={setNoveOznake} moznosti={vseOznake} />
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={dodajRocno}
+            disabled={!novEmail.trim() || dodajam}
+            className="inline-flex items-center gap-1.5 bg-brand-navy text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+          >
+            {dodajam ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Dodaj
+          </button>
+          {dodajSporocilo && (
+            <span className={`text-xs font-semibold ${dodajSporocilo.ok ? "text-green-700" : "text-red-600"}`}>
+              {dodajSporocilo.txt}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Tabela */}
@@ -530,6 +678,75 @@ export default function KontaktiPage() {
               const neveljaven = !veljavenEmail(k.email);
               const oznakeSeznam = k.oznake.split(";").map((o) => o.trim()).filter(Boolean);
               return (
+                urejam === k.id ? (
+                <li key={k.id} className="p-4 bg-orange-50/50 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      value={osnutek.ime ?? ""}
+                      onChange={(e) => setOsnutek((o) => ({ ...o, ime: e.target.value }))}
+                      placeholder="Ime"
+                      className={vnos}
+                    />
+                    <input
+                      value={osnutek.priimek ?? ""}
+                      onChange={(e) => setOsnutek((o) => ({ ...o, priimek: e.target.value }))}
+                      placeholder="Priimek"
+                      className={vnos}
+                    />
+                  </div>
+                  <input
+                    value={osnutek.email ?? ""}
+                    onChange={(e) => setOsnutek((o) => ({ ...o, email: e.target.value }))}
+                    placeholder="email@primer.si"
+                    type="email"
+                    className={vnos}
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      value={osnutek.telefon ?? ""}
+                      onChange={(e) => setOsnutek((o) => ({ ...o, telefon: e.target.value }))}
+                      placeholder="Telefon"
+                      className={vnos}
+                    />
+                    <input
+                      value={osnutek.otrok ?? ""}
+                      onChange={(e) => setOsnutek((o) => ({ ...o, otrok: e.target.value }))}
+                      placeholder="Ime otroka"
+                      className={vnos}
+                    />
+                  </div>
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wide pt-1">Skupine</div>
+                  <IzbirnikOznak
+                    vrednost={String(osnutek.oznake ?? "")}
+                    onChange={(v) => setOsnutek((o) => ({ ...o, oznake: v }))}
+                    moznosti={vseOznake}
+                  />
+                  <button
+                    onClick={() => setOsnutek((o) => ({ ...o, narocen: !o.narocen }))}
+                    className={`text-[10px] font-bold px-2 py-1 rounded-full ${
+                      osnutek.narocen ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {osnutek.narocen ? "NAROČEN" : "ODJAVLJEN"}
+                  </button>
+                  {napaka && <div className="text-xs font-semibold text-red-600">{napaka}</div>}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={shrani}
+                      disabled={shranjujem}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 bg-brand-orange text-white px-4 py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
+                    >
+                      {shranjujem ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Shrani
+                    </button>
+                    <button
+                      onClick={preklici}
+                      className="px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600"
+                    >
+                      Prekliči
+                    </button>
+                  </div>
+                </li>
+                ) : (
                 <li key={k.id} className={`p-4 ${neveljaven || predlog ? "bg-amber-50/40" : ""}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -608,6 +825,7 @@ export default function KontaktiPage() {
                     </button>
                   </div>
                 </li>
+                )
               );
             })}
           </ul>
@@ -694,13 +912,13 @@ export default function KontaktiPage() {
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <input
-                            value={osnutek.oznake ?? ""}
-                            onChange={(e) => setOsnutek((o) => ({ ...o, oznake: e.target.value }))}
-                            placeholder="oznaka1;oznaka2"
-                            className={vnos}
-                          />
-                          <div className="text-[10px] text-slate-400 mt-1">Ločuj s podpičjem ;</div>
+                          <div className="min-w-[220px]">
+                            <IzbirnikOznak
+                              vrednost={String(osnutek.oznake ?? "")}
+                              onChange={(v) => setOsnutek((o) => ({ ...o, oznake: v }))}
+                              moznosti={vseOznake}
+                            />
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           <button

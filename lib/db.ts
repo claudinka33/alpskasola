@@ -341,12 +341,21 @@ export async function upsertKontakt(d: Partial<Kontakt>) {
       priimek = COALESCE(NULLIF(EXCLUDED.priimek, ''), kontakti.priimek),
       telefon = COALESCE(NULLIF(EXCLUDED.telefon, ''), kontakti.telefon),
       otrok = COALESCE(NULLIF(EXCLUDED.otrok, ''), kontakti.otrok),
-      oznake = CASE
-        WHEN kontakti.oznake = '' THEN EXCLUDED.oznake
-        WHEN EXCLUDED.oznake = '' THEN kontakti.oznake
-        WHEN position(EXCLUDED.oznake in kontakti.oznake) > 0 THEN kontakti.oznake
-        ELSE kontakti.oznake || ';' || EXCLUDED.oznake
-      END
+      -- Spoji oznake po posameznih oznakah (ločene s podpičjem), brez podvajanja
+      -- NULL-varno: če je obstoječa vrednost NULL, se vzame nova.
+      oznake = (
+        SELECT COALESCE(string_agg(o, ';' ORDER BY prvi), '')
+        FROM (
+          SELECT o, MIN(n) AS prvi
+          FROM (
+            SELECT trim(x) AS o, n
+            FROM unnest(string_to_array(COALESCE(kontakti.oznake, '') || ';' || COALESCE(EXCLUDED.oznake, ''), ';'))
+                 WITH ORDINALITY AS t(x, n)
+          ) a
+          WHERE o <> ''
+          GROUP BY o
+        ) b
+      )
     RETURNING *;`;
   return r.rows[0];
 }
