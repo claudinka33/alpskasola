@@ -6,8 +6,12 @@ import VpisKoraki from "@/components/VpisKoraki";
 import About from "@/components/About";
 import FotoPas from "@/components/FotoPas";
 import Utrinki from "@/components/Utrinki";
+import InstagramObjave from "@/components/InstagramObjave";
 import CtaBand from "@/components/CtaBand";
 import Footer from "@/components/Footer";
+
+// Instagram objave se osvežijo najkasneje vsakih 30 min
+export const revalidate = 1800;
 
 export default function HomePage() {
   return (
@@ -20,6 +24,7 @@ export default function HomePage() {
       <About />
       <FotoPas />
       <Utrinki />
+      <InstagramObjave />
       <CtaBand />
       <Footer />
     </main>
