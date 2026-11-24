@@ -84,8 +84,8 @@ export default function SolaSmucanjaPage() {
 
       {/* Fakti */}
       <section className="bg-blue-50/40 py-14 border-y border-blue-100">
-        <div className="max-w-6xl mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {fakti.map((f, i) => {
               const Icon = f.icon;
               return (
@@ -118,10 +118,10 @@ export default function SolaSmucanjaPage() {
       <CenikSekcija programSlug="sola-smucanja" />
 
       {/* FAQ */}
-      <section className="bg-blue-50/40 py-16 lg:py-20 border-t border-blue-100">
+      <section className="bg-blue-50/40 py-12 lg:py-16 border-t border-blue-100">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-2">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-2">
               Pogosta vprašanja
             </h2>
             <p className="text-sm text-slate-600">

@@ -39,20 +39,20 @@ export default function IzposojaPage() {
       />
 
       {/* Uvod */}
-      <section className="bg-white py-14 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
-          <div className="h-72 lg:h-96 rounded-2xl overflow-hidden border border-slate-200/70 order-2 lg:order-1">
+      <section className="bg-white py-10 lg:py-16">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
+          <div className="h-64 md:h-full md:min-h-[22rem] rounded-2xl overflow-hidden border border-slate-200/70 order-2 md:order-1">
             <img
               src="/Izposoja.JPG"
               alt="Izposoja smučarske opreme – Alpska šola"
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="order-1 lg:order-2">
+          <div className="order-1 md:order-2">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
               <Package size={14} /> KAKOVOSTNA OPREMA
             </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4 leading-tight">
               Brezskrbno smučanje brez stroškov nakupa
             </h2>
             <p className="text-slate-600 leading-relaxed mb-4">
@@ -69,8 +69,8 @@ export default function IzposojaPage() {
       </section>
 
       {/* Oprema */}
-      <section className="bg-blue-50/40 py-16 lg:py-20 border-y border-blue-100">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8">
+      <section className="bg-blue-50/40 py-12 lg:py-16 border-y border-blue-100">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
               <span className="w-6 h-px bg-brand-orange" />
@@ -104,9 +104,9 @@ export default function IzposojaPage() {
       </section>
 
       {/* Zakaj izposoja */}
-      <section className="bg-white py-16 lg:py-20">
+      <section className="bg-white py-12 lg:py-16">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
-          <h2 className="text-3xl font-extrabold text-brand-navy mb-6 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-6 text-center">
             Zakaj izposoja pri nas?
           </h2>
           <div className="bg-white border border-slate-200/70 rounded-2xl p-6 lg:p-8">

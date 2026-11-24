@@ -60,13 +60,13 @@ export default function SkiRacingTeamPage() {
       />
 
       {/* Uvod */}
-      <section className="bg-white py-14 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
+      <section className="bg-white py-10 lg:py-16">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
           <div>
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
               <Trophy size={14} /> TEKMOVALNI PROGRAM
             </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4 leading-tight">
               Pot do tekmovalnega smučanja
             </h2>
             <p className="text-slate-600 leading-relaxed mb-4">
@@ -88,7 +88,7 @@ export default function SkiRacingTeamPage() {
 
       {/* Lastnosti */}
       <section className="bg-blue-50/40 py-14 border-y border-blue-100">
-        <div className="max-w-6xl mx-auto px-4 lg:px-8">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {lastnosti.map((l, i) => {
               const Icon = l.icon;
@@ -114,10 +114,10 @@ export default function SkiRacingTeamPage() {
       </section>
 
       {/* Tekme */}
-      <section className="bg-white py-16 lg:py-20">
+      <section className="bg-white py-12 lg:py-16">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-3">
               Kje tekmujemo
             </h2>
             <p className="text-sm text-slate-600 max-w-xl mx-auto">

@@ -48,13 +48,13 @@ export default function SolaRolanjaPage() {
       />
 
       {/* Uvod */}
-      <section className="bg-white py-14 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
+      <section className="bg-white py-10 lg:py-16">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
           <div>
             <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
               <Bike size={14} /> ZA OSTANE V GIBANJU CELO LETO
             </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4 leading-tight">
               Rolanje — naravno nadaljevanje smučanja
             </h2>
             <p className="text-slate-600 leading-relaxed mb-4">
@@ -68,7 +68,7 @@ export default function SolaRolanjaPage() {
               ko vreme dovoli. Učenje poteka na varnih asfaltnih površinah.
             </p>
           </div>
-          <div className="h-72 lg:h-96 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy">
+          <div className="h-64 md:h-full md:min-h-[22rem] rounded-2xl bg-gradient-to-br from-green-100 to-emerald-200 border-2 border-dashed border-brand-navy/20 flex flex-col items-center justify-center gap-2 text-brand-navy">
             <Camera size={42} className="text-brand-orange" />
             <strong className="text-sm">Prostor za fotografijo</strong>
             <span className="text-xs text-slate-500">otroci na rolerjih</span>
@@ -78,7 +78,7 @@ export default function SolaRolanjaPage() {
 
       {/* Fakti */}
       <section className="bg-blue-50/40 py-14 border-y border-blue-100">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-3 gap-4">
             {fakti.map((f, i) => {
               const Icon = f.icon;
@@ -102,7 +102,7 @@ export default function SolaRolanjaPage() {
       </section>
 
       {/* Kaj potrebujejo */}
-      <section className="bg-white py-16 lg:py-20">
+      <section className="bg-white py-12 lg:py-16">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
           <h2 className="text-2xl font-extrabold text-brand-navy mb-6 text-center">
             Kaj potrebujejo otroci?

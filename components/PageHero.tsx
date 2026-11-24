@@ -15,7 +15,7 @@ export default function PageHero({
   bgGradient = "from-blue-50 via-blue-100/40 to-white",
 }: PageHeroProps) {
   return (
-    <section className={`relative bg-gradient-to-b ${bgGradient} pt-12 pb-16 lg:pt-16 lg:pb-20 overflow-hidden border-b border-blue-100`}>
+    <section className={`relative bg-gradient-to-b ${bgGradient} pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 overflow-hidden border-b border-blue-100`}>
       {/* Decorative mountains */}
       <svg
         className="absolute bottom-0 left-0 right-0 w-full opacity-30 pointer-events-none"
@@ -34,9 +34,9 @@ export default function PageHero({
         />
       </svg>
 
-      <div className="relative max-w-5xl mx-auto px-4 lg:px-8 text-center">
+      <div className="relative max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
         {/* Breadcrumb */}
-        <nav className="flex items-center justify-center gap-2 text-xs text-slate-500 mb-6">
+        <nav className="flex items-center justify-center gap-2 text-xs text-slate-500 mb-4 lg:mb-5">
           <Link href="/" className="hover:text-brand-orange transition-colors">
             Domov
           </Link>
@@ -52,7 +52,7 @@ export default function PageHero({
           </div>
         )}
 
-        <h1 className="text-4xl lg:text-6xl font-extrabold text-brand-navy tracking-tight leading-[1.05] mb-4">
+        <h1 className="text-[2.1rem] sm:text-5xl lg:text-6xl font-extrabold break-words text-brand-navy tracking-tight leading-[1.05] mb-4">
           {title}
         </h1>
 

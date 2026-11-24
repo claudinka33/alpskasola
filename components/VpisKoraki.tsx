@@ -21,9 +21,9 @@ const koraki = [
 
 export default function VpisKoraki() {
   return (
-    <section className="bg-blue-50/40 py-16 lg:py-20 border-y border-blue-100">
-      <div className="max-w-6xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-12">
+    <section className="bg-blue-50/40 py-12 lg:py-16 border-y border-blue-100">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 lg:mb-10">
           <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
             <span className="w-6 h-px bg-brand-orange" />
             Enostavno do vpisa

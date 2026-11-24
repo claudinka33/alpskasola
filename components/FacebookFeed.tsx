@@ -9,9 +9,9 @@ export default function FacebookFeed() {
     "&tabs=timeline&width=500&height=640&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false";
 
   return (
-    <section className="bg-blue-50/40 py-16 lg:py-24 border-y border-blue-100">
-      <div className="max-w-6xl mx-auto px-4 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+    <section className="bg-blue-50/40 py-12 lg:py-20 border-y border-blue-100">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
           {/* Levo: besedilo */}
           <div className="text-center lg:text-left">
             <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">

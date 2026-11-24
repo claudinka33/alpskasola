@@ -15,7 +15,7 @@ export default function OdjavaPage({ searchParams }: { searchParams: { napaka?: 
           <div className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-6 ${napaka ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"}`}>
             {napaka ? <AlertCircle size={40} /> : <MailX size={40} />}
           </div>
-          <h1 className="text-3xl font-extrabold text-brand-navy mb-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-3">
             {napaka ? "Povezava ni veljavna" : "Odjavljeni ste"}
           </h1>
           <p className="text-slate-600 mb-8">

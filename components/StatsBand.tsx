@@ -8,8 +8,8 @@ export default function StatsBand() {
 
   return (
     <section className="relative bg-brand-navy text-white border-t-[3px] border-brand-orange">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-10 lg:py-12">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+      <div className="max-w-7xl 2xl:max-w-[88rem] mx-auto px-5 sm:px-6 lg:px-8 py-10 lg:py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
           {stats.map((stat, i) => (
             <div
               key={i}

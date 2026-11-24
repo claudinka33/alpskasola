@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 html { scroll-behavior: smooth; }
+
+/* ============================================
+   Odzivna velikost celotne strani
+   Vse mere (pisava, razmiki, širine) so v rem, zato
+   povečanje osnovne pisave na večjih zaslonih sorazmerno
+   napolni 14" in 16" prenosnike ter velike monitorje.
+   CMS (/admin) ostane pri 16px.
+   ============================================ */
+@media (min-width: 1440px) { html { font-size: 17px; } }   /* 14" prenosnik */
+@media (min-width: 1680px) { html { font-size: 18px; } }   /* 16" prenosnik */
+@media (min-width: 2200px) { html { font-size: 20px; } }   /* veliki monitorji */
+html:has([data-admin]) { font-size: 16px; }
+
+/* Brez vodoravnega drsenja na telefonih */
+body { overflow-x: clip; }
 body {
   background: #ffffff;
   color: #0C2340;

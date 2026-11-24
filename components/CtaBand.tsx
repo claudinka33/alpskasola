@@ -3,7 +3,7 @@ import { ArrowRight, Phone } from "lucide-react";
 
 export default function CtaBand() {
   return (
-    <section className="relative bg-brand-navy text-white py-16 lg:py-20 overflow-hidden">
+    <section className="relative bg-brand-navy text-white py-12 lg:py-16 overflow-hidden">
       {/* Mountain decoration */}
       <svg
         className="absolute inset-0 w-full h-full opacity-10 pointer-events-none"

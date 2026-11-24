@@ -98,9 +98,9 @@ const programs = [
 
 export default function Programs() {
   return (
-    <section className="bg-white py-16 lg:py-24">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-12 lg:mb-16">
+    <section className="bg-white py-12 lg:py-20">
+      <div className="max-w-7xl 2xl:max-w-[88rem] mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 lg:mb-12">
           <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
             <span className="w-6 h-px bg-brand-orange" />
             Naši programi

@@ -77,8 +77,8 @@ export default function SmucanjeTabs() {
   const t = tecaji[aktiven];
 
   return (
-    <section className="bg-white py-14 lg:py-20">
-      <div className="max-w-5xl mx-auto px-4 lg:px-8">
+    <section className="bg-white py-10 lg:py-16">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Zavihki */}
         <div
           role="tablist"
@@ -103,12 +103,12 @@ export default function SmucanjeTabs() {
         </div>
 
         {/* Vsebina zavihka */}
-        <div className="grid lg:grid-cols-2 gap-10 items-center">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
           <div>
             <div className="inline-block bg-orange-100 text-brand-orange text-xs font-bold px-3 py-1 rounded-full mb-3">
               🎿 {t.starost}
             </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4 leading-tight">
               {t.naslov}
             </h2>
             {t.opis.map((p, i) => (
