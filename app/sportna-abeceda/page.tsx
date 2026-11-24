@@ -44,13 +44,13 @@ export default function SportnaAbecedaPage() {
       />
 
       {/* Uvod */}
-      <section className="bg-white py-14 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
+      <section className="bg-white py-10 lg:py-16">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
           <div>
             <div className="inline-flex items-center gap-2 bg-pink-100 text-pink-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
               <Activity size={14} /> OD 3 LETA NAPREJ
             </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4 leading-tight">
               Šport skozi igro — 1× tedensko
             </h2>
             <p className="text-slate-600 leading-relaxed mb-4">
@@ -70,9 +70,9 @@ export default function SportnaAbecedaPage() {
 
       {/* Kaj delamo */}
       <section className="bg-orange-50/40 py-14 border-y border-orange-100">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-2">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-2">
               Kaj počnemo na vadbi?
             </h2>
             <p className="text-sm text-slate-600 max-w-2xl mx-auto">

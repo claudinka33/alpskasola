@@ -11,9 +11,9 @@ const IG = "https://www.instagram.com/alpskasola/";
 
 export default function Utrinki() {
   return (
-    <section className="bg-blue-50/40 py-16 lg:py-24 border-y border-blue-100">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="text-center mb-10 lg:mb-14">
+    <section className="bg-blue-50/40 py-12 lg:py-20 border-y border-blue-100">
+      <div className="max-w-7xl 2xl:max-w-[88rem] mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 lg:mb-10">
           <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
             <span className="w-6 h-px bg-brand-orange" />
             Spremljajte nas

@@ -99,7 +99,7 @@ export default function RojstniDanPage() {
 
       {/* SLIKA POD PAKETI (16:9) */}
       <section className="bg-white py-12 lg:py-16">
-        <div className="max-w-6xl mx-auto px-4 lg:px-8">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10">
             <img
               src="/rojsnidan.png"
@@ -111,13 +111,13 @@ export default function RojstniDanPage() {
       </section>
 
       {/* Športna aktivnosti */}
-      <section className="bg-blue-50/40 py-16 lg:py-20 border-y border-blue-100">
+      <section className="bg-blue-50/40 py-12 lg:py-16 border-y border-blue-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
               <Activity size={14} /> Športna norišnica
             </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-3">
               Slavljenec izbere 3 aktivnosti 🎯
             </h2>
             <p className="text-sm text-slate-600 max-w-xl mx-auto">
@@ -140,7 +140,7 @@ export default function RojstniDanPage() {
       </section>
 
       {/* Kontakt Zoja */}
-      <section className="bg-white py-16 lg:py-20">
+      <section className="bg-white py-12 lg:py-16">
         <div className="max-w-2xl mx-auto px-4 lg:px-8 text-center">
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-3xl p-8">
             <div className="w-16 h-16 bg-purple-200 text-purple-800 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">

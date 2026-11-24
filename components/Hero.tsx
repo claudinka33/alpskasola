@@ -15,14 +15,14 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-transparent to-transparent" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 lg:px-8 pt-20 pb-32 lg:pt-28 lg:pb-44">
+      <div className="relative max-w-7xl 2xl:max-w-[88rem] mx-auto px-5 sm:px-6 lg:px-8 pt-14 pb-24 md:pt-20 md:pb-32 lg:pt-24 lg:pb-40">
         <div className="max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-xs font-semibold text-white mb-6 border border-white/20">
             <span className="w-2 h-2 bg-brand-orange rounded-full animate-pulse-orange" />
             ★ POLETNI HIT — Plavalni tečaj 2026
           </div>
 
-          <h1 className="text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.02] tracking-tight mb-5">
+          <h1 className="text-[2.6rem] sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.02] tracking-tight mb-5">
             Migaj z nami,
             <br />
             <span className="text-brand-orange">zmaguj zase.</span>

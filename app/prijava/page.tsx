@@ -265,7 +265,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
   return (
     <>
       <Navbar />
-      <section className="mountain-bg py-16 lg:py-20 border-b border-blue-100">
+      <section className="mountain-bg py-12 lg:py-16 border-b border-blue-100">
         <div className="max-w-3xl mx-auto px-4 lg:px-8 text-center">
           <h1 className="text-4xl lg:text-5xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-3">Prijavnica</h1>
           <p className="text-base text-slate-600 max-w-xl mx-auto">Izpolnite obrazec. Polja z * so obvezna.</p>

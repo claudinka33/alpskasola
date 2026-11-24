@@ -57,7 +57,7 @@ export default function ONasPage() {
       />
 
       {/* Glavna vsebina */}
-      <section className="bg-white py-16 lg:py-20">
+      <section className="bg-white py-12 lg:py-16">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
           <div className="prose-content space-y-5 text-base text-slate-700 leading-relaxed">
             <p>
@@ -110,9 +110,9 @@ export default function ONasPage() {
       </section>
 
       {/* Ekipa */}
-      <section className="bg-blue-50/40 py-16 lg:py-20 border-y border-blue-100">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
+      <section className="bg-blue-50/40 py-12 lg:py-16 border-y border-blue-100">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 lg:mb-10">
             <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
               <span className="w-6 h-px bg-brand-orange" />
               Naša ekipa
@@ -162,8 +162,8 @@ export default function ONasPage() {
       </section>
 
       {/* Lokacija + delovni čas */}
-      <section className="bg-white py-16 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10">
+      <section className="bg-white py-12 lg:py-16">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 lg:gap-14">
           <div>
             <h2 className="text-2xl font-extrabold text-brand-navy mb-4 flex items-center gap-2">
               <MapPin className="text-brand-orange" size={24} /> Kje se nahajamo

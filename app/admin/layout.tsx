@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const vidi = (k: string) => imaPravico(admin, k);
 
   if (!admin) {
-    return <div className="min-h-screen bg-slate-50">{children}</div>;
+    return <div data-admin className="min-h-screen bg-slate-50">{children}</div>;
   }
 
   const skupine: Skupina[] = [
@@ -64,7 +64,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 lg:flex overflow-x-hidden">
+    <div data-admin className="min-h-screen bg-slate-50 lg:flex overflow-x-hidden">
       <Meni skupine={skupine} ime={admin.ime} vloga={admin.vloga} />
 
       <main className="flex-1 min-w-0 max-w-full p-4 sm:p-6 lg:p-8">

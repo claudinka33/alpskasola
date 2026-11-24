@@ -64,16 +64,16 @@ export default function PlavalniTecajPage() {
       />
 
       {/* Uvod */}
-      <section className="bg-white py-14 lg:py-20">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
-          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video order-2 lg:order-1">
+      <section className="bg-white py-10 lg:py-16">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video order-2 md:order-1">
             <img src="/plavalni-tecaj.png" alt="Plavalni tečaj" className="w-full h-full object-cover" />
           </div>
-          <div className="order-1 lg:order-2">
+          <div className="order-1 md:order-2">
             <div className="inline-flex items-center gap-2 bg-cyan-100 text-cyan-800 text-xs font-bold px-3 py-1.5 rounded-full mb-3">
               <Waves size={14} /> POLETNI PROGRAM
             </div>
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-4 leading-tight">
               Veščina za celo življenje
             </h2>
             <p className="text-slate-600 leading-relaxed mb-3">
@@ -92,7 +92,7 @@ export default function PlavalniTecajPage() {
 
       {/* Kje in kdaj */}
       <section className="bg-blue-50/40 py-14 border-y border-blue-100">
-        <div className="max-w-5xl mx-auto px-4 lg:px-8 grid md:grid-cols-2 gap-6">
+        <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl p-6 border border-slate-200/70">
             <h3 className="flex items-center gap-2 text-lg font-bold text-brand-navy mb-4">
               <MapPin className="text-brand-orange" size={20} /> Kje plavamo
@@ -149,10 +149,10 @@ export default function PlavalniTecajPage() {
       <CenikSekcija programSlug="plavalni-tecaj" />
 
       {/* FAQ */}
-      <section className="bg-blue-50/40 py-16 lg:py-20 border-t border-blue-100">
+      <section className="bg-blue-50/40 py-12 lg:py-16 border-t border-blue-100">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-brand-navy mb-2">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-2">
               Pogosta vprašanja
             </h2>
           </div>

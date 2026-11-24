@@ -163,10 +163,10 @@ export default async function CenikSekcija({
     : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
   return (
-    <section className={`${ozadje} py-16 lg:py-20`}>
+    <section className={`${ozadje} py-12 lg:py-16`}>
       <div className={`${sirina} mx-auto px-4 lg:px-8`}>
         {imaGlavo && (
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 lg:mb-10">
             {glava?.badge && (
               <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
                 <span className="w-6 h-px bg-brand-orange" />

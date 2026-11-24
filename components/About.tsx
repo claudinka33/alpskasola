@@ -2,9 +2,9 @@ import { Shield, Heart, Users, Medal } from "lucide-react";
 
 export default function About() {
   return (
-    <section className="bg-blue-50/40 py-16 lg:py-24 border-y border-blue-100">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+    <section className="bg-blue-50/40 py-12 lg:py-20 border-y border-blue-100">
+      <div className="max-w-7xl 2xl:max-w-[88rem] mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-center">
           {/* Slika */}
           <div className="relative">
             <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-brand-navy/15">
@@ -14,7 +14,7 @@ export default function About() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="absolute -bottom-6 -right-6 bg-brand-orange text-white px-6 py-4 rounded-2xl shadow-xl">
+            <div className="absolute -bottom-5 right-3 sm:-bottom-6 sm:-right-6 bg-brand-orange text-white px-6 py-4 rounded-2xl shadow-xl">
               <div className="text-2xl font-extrabold leading-none">15+ let</div>
               <div className="text-xs opacity-90">tradicije</div>
             </div>
@@ -26,7 +26,7 @@ export default function About() {
               <span className="w-6 h-px bg-brand-orange" />
               O Alpski šoli
             </div>
-            <h2 className="text-4xl lg:text-5xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-5">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-5">
               Tam, kjer se začenjajo zgodbe na snegu.
             </h2>
             <p className="text-base text-slate-600 mb-4 leading-relaxed">
