@@ -1,5 +1,6 @@
 // Instagram @alpskasola — zadnje objave za domačo stran (samo strežnik).
-// Žeton: Vercel spremenljivka INSTAGRAM_TOKEN. Ker velja 60 dni, ga sami
+// Žeton: Vercel spremenljivka INSTAGRAM_TOKEN (+ INSTAGRAM_USER_ID pri sistemskem žetonu).
+// Brez INSTAGRAM_USER_ID: Ker velja 60 dni, ga sami
 // osvežujemo in osveženega hranimo v Neon tabeli `instagram_zeton`.
 // Če v Vercel prilepiš nov žeton, se tabela samodejno ponastavi nanj.
 import { sql } from "@vercel/postgres";
@@ -69,12 +70,21 @@ async function zeton(): Promise<string | null> {
 // Vrže napako, če ni žetona ali objav — tako prazen rezultat NI predpomnjen
 // in se objave pokažejo takoj, ko je žeton nastavljen.
 async function nalozi(stevilo: number): Promise<IgObjava[]> {
-  const token = await zeton();
-  if (!token) throw new Error("INSTAGRAM_TOKEN ni nastavljen");
   const polja = "id,caption,media_type,media_url,thumbnail_url,permalink,timestamp";
-  const r = await fetch(`${API}/me/media?fields=${polja}&limit=${stevilo}&access_token=${token}`, {
-    cache: "no-store",
-  });
+  const igId = process.env.INSTAGRAM_USER_ID?.trim();
+  let url: string;
+  if (igId) {
+    // Nov način (Unified login, sistemski žeton, ki ne poteče) → Facebook Graph API
+    const token = process.env.INSTAGRAM_TOKEN?.trim();
+    if (!token) throw new Error("INSTAGRAM_TOKEN ni nastavljen");
+    url = `https://graph.facebook.com/v21.0/${igId}/media?fields=${polja}&limit=${stevilo}&access_token=${token}`;
+  } else {
+    // Star način (Instagram login, žeton 60 dni, sami ga osvežujemo)
+    const token = await zeton();
+    if (!token) throw new Error("INSTAGRAM_TOKEN ni nastavljen");
+    url = `${API}/me/media?fields=${polja}&limit=${stevilo}&access_token=${token}`;
+  }
+  const r = await fetch(url, { cache: "no-store" });
   if (!r.ok) throw new Error(`Instagram API ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const j = await r.json();
   const objave = ((j.data ?? []) as any[])
