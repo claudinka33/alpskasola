@@ -66,33 +66,42 @@ async function zeton(): Promise<string | null> {
   }
 }
 
+// Vrže napako, če ni žetona ali objav — tako prazen rezultat NI predpomnjen
+// in se objave pokažejo takoj, ko je žeton nastavljen.
 async function nalozi(stevilo: number): Promise<IgObjava[]> {
-  try {
-    const token = await zeton();
-    if (!token) return [];
-    const polja = "id,caption,media_type,media_url,thumbnail_url,permalink,timestamp";
-    const r = await fetch(`${API}/me/media?fields=${polja}&limit=${stevilo}&access_token=${token}`, {
-      cache: "no-store",
-    });
-    if (!r.ok) return [];
-    const j = await r.json();
-    return ((j.data ?? []) as any[])
-      .map((m) => ({
-        id: String(m.id),
-        tip: m.media_type,
-        slika: m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url,
-        video: m.media_type === "VIDEO" ? m.media_url : null,
-        povezava: m.permalink,
-        opis: String(m.caption ?? "").trim(),
-        datum: m.timestamp,
-      }))
-      .filter((m) => !!m.slika) as IgObjava[];
-  } catch {
-    return [];
-  }
+  const token = await zeton();
+  if (!token) throw new Error("INSTAGRAM_TOKEN ni nastavljen");
+  const polja = "id,caption,media_type,media_url,thumbnail_url,permalink,timestamp";
+  const r = await fetch(`${API}/me/media?fields=${polja}&limit=${stevilo}&access_token=${token}`, {
+    cache: "no-store",
+  });
+  if (!r.ok) throw new Error(`Instagram API ${r.status}: ${(await r.text()).slice(0, 300)}`);
+  const j = await r.json();
+  const objave = ((j.data ?? []) as any[])
+    .map((m) => ({
+      id: String(m.id),
+      tip: m.media_type,
+      slika: m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url,
+      video: m.media_type === "VIDEO" ? m.media_url : null,
+      povezava: m.permalink,
+      opis: String(m.caption ?? "").trim(),
+      datum: m.timestamp,
+    }))
+    .filter((m) => !!m.slika) as IgObjava[];
+  if (!objave.length) throw new Error("Instagram ni vrnil objav");
+  return objave;
 }
 
 // Predpomnjeno 30 minut — nova objava je na strani najkasneje v pol ure.
-export const pridobiInstagramObjave = unstable_cache(nalozi, ["alpska-instagram-objave"], {
+const nalozenoPredpomnjeno = unstable_cache(nalozi, ["alpska-instagram-objave-v2"], {
   revalidate: 1800,
 });
+
+export async function pridobiInstagramObjave(stevilo: number): Promise<IgObjava[]> {
+  try {
+    return await nalozenoPredpomnjeno(stevilo);
+  } catch (e) {
+    console.error("[instagram]", e instanceof Error ? e.message : e);
+    return [];
+  }
+}
