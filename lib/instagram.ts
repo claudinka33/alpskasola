@@ -1,5 +1,6 @@
 // Instagram @alpskasola — zadnje objave za domačo stran (samo strežnik).
-// Žeton: Vercel spremenljivka INSTAGRAM_TOKEN. Ker velja 60 dni, ga sami
+// Žeton: Vercel spremenljivka INSTAGRAM_TOKEN (+ INSTAGRAM_USER_ID pri sistemskem žetonu).
+// Brez INSTAGRAM_USER_ID: Ker velja 60 dni, ga sami
 // osvežujemo in osveženega hranimo v Neon tabeli `instagram_zeton`.
 // Če v Vercel prilepiš nov žeton, se tabela samodejno ponastavi nanj.
 import { sql } from "@vercel/postgres";
@@ -66,33 +67,64 @@ async function zeton(): Promise<string | null> {
   }
 }
 
+// Vrže napako, če ni žetona ali objav — tako prazen rezultat NI predpomnjen
+// in se objave pokažejo takoj, ko je žeton nastavljen.
 async function nalozi(stevilo: number): Promise<IgObjava[]> {
-  try {
+  const polja = "id,caption,media_type,media_url,thumbnail_url,permalink,timestamp";
+  const igId = process.env.INSTAGRAM_USER_ID?.trim();
+  let urls: string[];
+  if (igId) {
+    // Nov način (Unified login) — žeton je lahko Facebook (EAA…) ali Instagram (IG…),
+    // zato poskusimo oba strežnika.
+    const token = process.env.INSTAGRAM_TOKEN?.trim();
+    if (!token) throw new Error("INSTAGRAM_TOKEN ni nastavljen");
+    const pot = `${igId}/media?fields=${polja}&limit=${stevilo}&access_token=${token}`;
+    const fb = `https://graph.facebook.com/v21.0/${pot}`;
+    const ig = `${API}/v21.0/${pot}`;
+    urls = token.startsWith("IG") ? [ig, fb] : [fb, ig];
+  } else {
+    // Star način (Instagram login, žeton 60 dni, sami ga osvežujemo)
     const token = await zeton();
-    if (!token) return [];
-    const polja = "id,caption,media_type,media_url,thumbnail_url,permalink,timestamp";
-    const r = await fetch(`${API}/me/media?fields=${polja}&limit=${stevilo}&access_token=${token}`, {
-      cache: "no-store",
-    });
-    if (!r.ok) return [];
-    const j = await r.json();
-    return ((j.data ?? []) as any[])
-      .map((m) => ({
-        id: String(m.id),
-        tip: m.media_type,
-        slika: m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url,
-        video: m.media_type === "VIDEO" ? m.media_url : null,
-        povezava: m.permalink,
-        opis: String(m.caption ?? "").trim(),
-        datum: m.timestamp,
-      }))
-      .filter((m) => !!m.slika) as IgObjava[];
-  } catch {
-    return [];
+    if (!token) throw new Error("INSTAGRAM_TOKEN ni nastavljen");
+    urls = [`${API}/me/media?fields=${polja}&limit=${stevilo}&access_token=${token}`];
   }
+  let r: Response | null = null;
+  let napaka = "";
+  for (const url of urls) {
+    const odg = await fetch(url, { cache: "no-store" });
+    if (odg.ok) {
+      r = odg;
+      break;
+    }
+    napaka += `${odg.status}: ${(await odg.text()).slice(0, 200)} | `;
+  }
+  if (!r) throw new Error(`Instagram API ${napaka}`);
+  const j = await r.json();
+  const objave = ((j.data ?? []) as any[])
+    .map((m) => ({
+      id: String(m.id),
+      tip: m.media_type,
+      slika: m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url,
+      video: m.media_type === "VIDEO" ? m.media_url : null,
+      povezava: m.permalink,
+      opis: String(m.caption ?? "").trim(),
+      datum: m.timestamp,
+    }))
+    .filter((m) => !!m.slika) as IgObjava[];
+  if (!objave.length) throw new Error("Instagram ni vrnil objav");
+  return objave;
 }
 
 // Predpomnjeno 30 minut — nova objava je na strani najkasneje v pol ure.
-export const pridobiInstagramObjave = unstable_cache(nalozi, ["alpska-instagram-objave"], {
+const nalozenoPredpomnjeno = unstable_cache(nalozi, ["alpska-instagram-objave-v2"], {
   revalidate: 1800,
 });
+
+export async function pridobiInstagramObjave(stevilo: number): Promise<IgObjava[]> {
+  try {
+    return await nalozenoPredpomnjeno(stevilo);
+  } catch (e) {
+    console.error("[instagram]", e instanceof Error ? e.message : e);
+    return [];
+  }
+}
