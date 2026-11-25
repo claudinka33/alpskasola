@@ -49,7 +49,7 @@ async function zeton(): Promise<string | null> {
       try {
         const r = await fetch(
           `${API}/refresh_access_token?grant_type=ig_refresh_token&access_token=${token}`,
-          { cache: "no-store" }
+          { next: { revalidate: 1800 } }
         );
         const j = await r.json();
         if (j.access_token) {
@@ -91,7 +91,7 @@ async function nalozi(stevilo: number): Promise<IgObjava[]> {
   let r: Response | null = null;
   let napaka = "";
   for (const url of urls) {
-    const odg = await fetch(url, { cache: "no-store" });
+    const odg = await fetch(url, { next: { revalidate: 1800 } });
     if (odg.ok) {
       r = odg;
       break;

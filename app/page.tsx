@@ -5,7 +5,8 @@ import Programs from "@/components/Programs";
 import VpisKoraki from "@/components/VpisKoraki";
 import About from "@/components/About";
 import FotoPas from "@/components/FotoPas";
-import Utrinki from "@/components/Utrinki";
+import PredstavitveniVideo from "@/components/PredstavitveniVideo";
+import FacebookPas from "@/components/FacebookPas";
 import InstagramObjave from "@/components/InstagramObjave";
 import CtaBand from "@/components/CtaBand";
 import Footer from "@/components/Footer";
@@ -19,13 +20,14 @@ export default function HomePage() {
       <Navbar />
       <Hero />
       <StatsBand />
+      <PredstavitveniVideo />
       <Programs />
       <VpisKoraki />
       <About />
       <FotoPas />
-      <Utrinki />
       <InstagramObjave />
       <CtaBand />
+      <FacebookPas />
       <Footer />
     </main>
   );
