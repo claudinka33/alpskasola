@@ -58,7 +58,7 @@ const programs = [
     href: "/tecaj-bordanja",
     tag: null,
     accent: "bg-sky-100 text-sky-600",
-    image: "/tecaj-bordanja/01.jpg",
+    image: "/tecaj-bordanja/07.jpg",
   },
   {
     icon: Baby,

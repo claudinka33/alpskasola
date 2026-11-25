@@ -35,7 +35,7 @@ const vsebina: TecajVsebina = {
       "Učenje po korakih, prilagojeno znanju",
       "Medalja in FIS brošura ob zaključku",
     ],
-    slika: "/tecaj-bordanja/01.jpg",
+    slika: "/tecaj-bordanja/07.jpg",
     slikaAlt: "Otroci na tečaju bordanja na Rogli",
   },
   fakti: [
@@ -55,8 +55,14 @@ const vsebina: TecajVsebina = {
     podnaslov:
       "Od prvega sedenja na deski do vožnje skozi zavoje — mladi deskarji na Rogli.",
     slike: [
+      { url: "/tecaj-bordanja/07.jpg", naslov: "Prvi dan z desko in učiteljico", w: 1400, h: 930, velika: true },
       { url: "/tecaj-bordanja/01.jpg", naslov: "Prvi koraki z desko", w: 1050, h: 1400 },
+      { url: "/tecaj-bordanja/08.jpg", naslov: "Pozdrav s proge", w: 1050, h: 1400 },
+      { url: "/tecaj-bordanja/05.jpg", naslov: "Samostojna vožnja", w: 1024, h: 680, velika: true },
+      { url: "/tecaj-bordanja/09.jpg", naslov: "Na vlečnici z desko", w: 1050, h: 1400 },
       { url: "/tecaj-bordanja/04.jpg", naslov: "Pripravljen na start", w: 1050, h: 1400 },
+      { url: "/tecaj-bordanja/10.jpg", naslov: "Na sedežnici", w: 1050, h: 1400 },
+      { url: "/tecaj-bordanja/06.jpg", naslov: "Vstajanje na desko", w: 1024, h: 680, velika: true },
       { url: "/tecaj-bordanja/03.jpg", naslov: "Vožnja skozi zavoj", w: 787, h: 1400 },
       { url: "/tecaj-bordanja/02.jpg", naslov: "Z avtobusom na Roglo", w: 788, h: 1400 },
     ],

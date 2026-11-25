@@ -5,6 +5,7 @@ import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
+import GalerijaSekcija from "@/components/GalerijaSekcija";
 import { Check, Camera, Bike, Sun } from "lucide-react";
 
 // Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
@@ -129,6 +130,28 @@ export default function SolaRolanjaPage() {
           </p>
         </div>
       </section>
+
+      {/* Galerija fotografij — ureja se v CMS: /admin/galerija */}
+      <GalerijaSekcija
+        programSlug="sola-rolanja"
+        samo="slike"
+        fotoNaslov="Utrinki s tečaja rolanja"
+        fotoPodnaslov="Ravnotežje, prvi zavoji med stožci in diploma na koncu — rolanje z nami je zabava od prve ure."
+        privzeteSlike={[
+          { url: "/sola-rolanja/01.jpg", naslov: "Diplome za vse rolarje", w: 960, h: 720 },
+          { url: "/sola-rolanja/04.jpg", naslov: "Slalom med stožci", w: 640, h: 1316 },
+          { url: "/sola-rolanja/08.jpg", naslov: "Skupaj na igrišču", w: 1316, h: 640 },
+          { url: "/sola-rolanja/05.jpg", naslov: "Pod oviro", w: 640, h: 1316 },
+          { url: "/sola-rolanja/02.jpg", naslov: "Podelitev diplom", w: 960, h: 720 },
+          { url: "/sola-rolanja/09.jpg", naslov: "Palec gor!", w: 640, h: 1316 },
+          { url: "/sola-rolanja/07.jpg", naslov: "Navijamo za prijatelje", w: 1316, h: 640 },
+          { url: "/sola-rolanja/06.jpg", naslov: "Plazenje pod oviro", w: 640, h: 1316 },
+          { url: "/sola-rolanja/12.jpg", naslov: "Pomoč pri opremi", w: 640, h: 1316 },
+          { url: "/sola-rolanja/03.jpg", naslov: "Ponosni na diplome", w: 960, h: 720 },
+          { url: "/sola-rolanja/10.jpg", naslov: "Ogrevanje", w: 640, h: 1316 },
+          { url: "/sola-rolanja/11.jpg", naslov: "Prijateljici na rolerjih", w: 640, h: 1316 },
+        ]}
+      />
 
       {/* Termini — ureja se v CMS: /admin/termini */}
       <TerminiSekcija

@@ -5,6 +5,7 @@ import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
+import GalerijaSekcija from "@/components/GalerijaSekcija";
 import { Check, Waves, MapPin, Calendar, Camera, Users } from "lucide-react";
 
 // Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
@@ -136,6 +137,24 @@ export default function PlavalniTecajPage() {
           </div>
         </div>
       </section>
+
+      {/* Galerija fotografij — ureja se v CMS: /admin/galerija */}
+      <GalerijaSekcija
+        programSlug="plavalni-tecaj"
+        samo="slike"
+        fotoNaslov="Utrinki s plavalnega tečaja"
+        fotoPodnaslov="Varno, igrivo in z veliko smeha — in ob koncu tedna diploma za vsakega plavalca."
+        privzeteSlike={[
+          { url: "/plavalni-tecaj/04.jpg", naslov: "Diplome za vse plavalce", w: 720, h: 960 },
+          { url: "/plavalni-tecaj/03.jpg", naslov: "Prve vaje z rezancem", w: 960, h: 720 },
+          { url: "/plavalni-tecaj/01.jpg", naslov: "Skupaj v bazenu", w: 720, h: 960 },
+          { url: "/plavalni-tecaj/05.jpg", naslov: "Učenje z učiteljico", w: 720, h: 960 },
+          { url: "/plavalni-tecaj/02.jpg", naslov: "Navodila pred vajo", w: 960, h: 720 },
+          { url: "/plavalni-tecaj/06.jpg", naslov: "Igre v vodi", w: 720, h: 960 },
+          { url: "/plavalni-tecaj/07.jpg", naslov: "Ogrevanje ob bazenu", w: 720, h: 960 },
+          { url: "/plavalni-tecaj/08.jpg", naslov: "Pripravljen na vodo", w: 720, h: 960 },
+        ]}
+      />
 
       {/* Termini — ureja se v CMS: /admin/termini */}
       <TerminiSekcija
