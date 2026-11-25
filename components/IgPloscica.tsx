@@ -57,7 +57,7 @@ export default function IgPloscica({ o }: { o: IgObjava }) {
       rel="noopener noreferrer"
       aria-label={o.opis ? o.opis.slice(0, 90) : "Objava na Instagramu"}
       onMouseEnter={o.video ? igraj : undefined}
-      className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-brand-navy-light"
+      className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-slate-200"
     >
       {o.video && blizu ? (
         <video
