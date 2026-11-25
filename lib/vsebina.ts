@@ -76,7 +76,8 @@ export async function zagotoviVsebino() {
     console.error("uvoz mini alpske:", e);
   }
   try {
-    await uvoziVstopnoTockoAvtobus();
+    await uvoziVstopnoTockoAvtobus("avtobus-vstopna-tocka-v1", ["sola-smucanja", "tecaj-bordanja"]);
+    await uvoziVstopnoTockoAvtobus("avtobus-vstopna-tocka-mini-v1", ["mini-alpska-sola"]);
   } catch (e) {
     console.error("uvoz vstopne točke:", e);
   }
@@ -236,14 +237,13 @@ async function uvoziMiniAlpskaProgram() {
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 
-// Prijavnica za Tečaj smučanja in Tečaj bordanja: obvezna izbira vstopne točke za avtobus.
-// Polje se doda enkrat — pozneje ga lahko urejaš v CMS (/admin/prijavnica).
-async function uvoziVstopnoTockoAvtobus() {
-  const KLJUC = "avtobus-vstopna-tocka-v1";
+// Prijavnica za tečaje z avtobusom (smučanje, bordanje, mini alpska): obvezna izbira vstopne točke.
+// Polje se doda enkrat na program — pozneje ga lahko urejaš v CMS (/admin/prijavnica).
+async function uvoziVstopnoTockoAvtobus(KLJUC: string, programi: string[]) {
   if (await seedOpravljen(KLJUC)) return;
 
   await zagotoviTabele();
-  for (const slug of ["sola-smucanja", "tecaj-bordanja"]) {
+  for (const slug of programi) {
     await zagotoviPoljaZaProgram(slug);
     const ze = await sql`SELECT 1 FROM form_polja WHERE program_slug = ${slug} AND kljuc = 'vstopna_tocka';`;
     if (ze.rows.length > 0) continue;

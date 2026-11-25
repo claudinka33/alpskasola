@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import TecajStran, { type TecajVsebina } from "@/components/TecajStran";
-import { Clock, Medal, Smile, CalendarDays } from "lucide-react";
+import { Clock, Medal, Bus, CalendarDays } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -31,6 +31,7 @@ const vsebina: TecajVsebina = {
     poudarki: [
       "Paket 6 sobot + zaključna prireditev",
       "Smučamo ob sobotah 9.30 – 13.00",
+      "Organiziran avtobus: Celje, Arclin, Frankolovo, Zreče",
       "Medalja in FIS brošura",
       "Učenje skozi igro v majhnih skupinah",
     ],
@@ -40,7 +41,7 @@ const vsebina: TecajVsebina = {
   fakti: [
     { icon: CalendarDays, naslov: "6 sobot", besedilo: "Plus zaključna prireditev ob koncu sezone." },
     { icon: Clock, naslov: "9.30 – 13.00", besedilo: "Krajši urnik, prilagojen malčkom." },
-    { icon: Smile, naslov: "Skozi igro", besedilo: "Majhne skupine in potrpežljivi učitelji." },
+    { icon: Bus, naslov: "Organiziran prevoz", besedilo: "Celje (Zlatorog), Arclin (Spar), Frankolovo, Zreče." },
     { icon: Medal, naslov: "Medalja", besedilo: "Medalja in FIS brošura za vsakega otroka." },
   ],
   koraki: [
@@ -95,6 +96,10 @@ const vsebina: TecajVsebina = {
     {
       v: "Zakaj samo do 13.00?",
       o: "Malčki se hitreje utrudijo, zato je urnik krajši. Tako ostanejo zbrani, varni in se smučanja veselijo vsako soboto znova.",
+    },
+    {
+      v: "Kje lahko otrok vstopi na avtobus?",
+      o: "Vstopne točke so Celje (Zlatorog), Arclin (Spar), Frankolovo (glavna avtobusna) in Zreče (glavna avtobusna). Vstopno točko izberete na prijavnici.",
     },
     {
       v: "Kaj potrebujejo otroci s sabo?",
