@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Slika } from "./GalerijaMreza";
 
@@ -14,6 +14,10 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
   const [odprta, setOdprta] = useState<number | null>(null);
   const [zacetekX, setZacetekX] = useState<number | null>(null);
   const [razmerja, setRazmerja] = useState<Record<number, number>>({});
+  // Kolikokrat ponovimo slike v enem traku, da je trak vedno širši od zaslona
+  // (pri malo slikah bi se sicer na širokem zaslonu pokazal prazen konec).
+  const [ponovi, setPonovi] = useState(1);
+  const trakRef = useRef<HTMLDivElement>(null);
 
   const r = useCallback(
     (i: number) => {
@@ -79,6 +83,20 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
     };
   }, [odprta, naprej, nazaj]);
 
+  useEffect(() => {
+    const izmeri = () => {
+      const el = trakRef.current;
+      if (!el) return;
+      const enkrat = el.scrollWidth / ponovi;
+      if (!enkrat) return;
+      const potrebno = Math.max(1, Math.ceil((window.innerWidth + 200) / enkrat));
+      if (potrebno !== ponovi) setPonovi(potrebno);
+    };
+    izmeri();
+    window.addEventListener("resize", izmeri);
+    return () => window.removeEventListener("resize", izmeri);
+  }, [ponovi, stolpci, razmerja]);
+
   if (slike.length === 0) return null;
 
   const Fotka = ({ i, deli = 1 }: { i: number; deli?: number }) => {
@@ -118,15 +136,21 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
     );
   };
 
+  const vsiStolpci = Array.from({ length: ponovi }, () => stolpci).flat();
+
   const Trak = ({ skrit }: { skrit?: boolean }) => (
-    <div className="flex gap-[var(--rez)] pr-[var(--rez)] shrink-0" aria-hidden={skrit || undefined}>
-      {stolpci.map((c, k) =>
+    <div
+      ref={skrit ? undefined : trakRef}
+      className="flex gap-[var(--rez)] pr-[var(--rez)] shrink-0"
+      aria-hidden={skrit || undefined}
+    >
+      {vsiStolpci.map((c, k) =>
         c.tip === "cela" ? (
           <Fotka key={k} i={c.i} />
         ) : (
           <div key={k} className="flex flex-col gap-[var(--rez)] shrink-0">
             {c.ids.map((id) => (
-              <Fotka key={id} i={id} deli={c.ids.length} />
+              <Fotka key={`${k}-${id}`} i={id} deli={c.ids.length} />
             ))}
           </div>
         )
@@ -135,7 +159,7 @@ export default function FotoTrak({ slike, hitrost = 22 }: { slike: Slika[]; hitr
   );
 
   // Trajanje enega kroga: približno sorazmerno s številom slik
-  const trajanje = Math.max(40, Math.round((slike.length * 120) / hitrost));
+  const trajanje = Math.max(40, Math.round((slike.length * 120) / hitrost)) * ponovi;
 
   return (
     <>
