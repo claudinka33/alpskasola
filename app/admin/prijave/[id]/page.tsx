@@ -11,7 +11,9 @@ type Props = {
 };
 
 const programLabels: Record<string, string> = {
-  "sola-smucanja": "Smučanje",
+  "sola-smucanja": "Tečaj smučanja",
+  "tecaj-bordanja": "Tečaj bordanja",
+  "mini-alpska-sola": "Mini alpska šola",
   "ski-racing-team": "Tekmovalne ekipe",
   "smucarska-akademija": "Akademija",
   "plavalni-tecaj": "Plavanje",

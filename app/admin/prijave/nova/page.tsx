@@ -6,7 +6,9 @@ import Link from "next/link";
 import { ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 const programi = [
-  { value: "sola-smucanja", label: "Tečaji smučanja in bordanja" },
+  { value: "sola-smucanja", label: "Tečaj smučanja" },
+  { value: "tecaj-bordanja", label: "Tečaj bordanja" },
+  { value: "mini-alpska-sola", label: "Mini alpska šola" },
   { value: "ski-racing-team", label: "Tekmovalne ekipe" },
   { value: "smucarska-akademija", label: "Smučarska akademija" },
   { value: "plavalni-tecaj", label: "Tečaj plavanja" },

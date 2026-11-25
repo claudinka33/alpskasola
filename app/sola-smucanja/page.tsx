@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import PageHero from "@/components/PageHero";
-import ProgramCta from "@/components/ProgramCta";
-import SmucanjeTabs from "@/components/SmucanjeTabs";
-import TerminiSekcija from "@/components/TerminiSekcija";
-import CenikSekcija from "@/components/CenikSekcija";
-import { Mountain, Snowflake, Bus, Utensils } from "lucide-react";
+import TecajStran, { type TecajVsebina } from "@/components/TecajStran";
+import { Bus, Utensils, Users, CalendarDays } from "lucide-react";
 
 // Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
 export const dynamic = "force-dynamic";
@@ -14,147 +8,97 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Tečaji smučanja in bordanja | Alpska šola Rogla",
+  title: "Tečaj smučanja za otroke | Alpska šola Rogla",
   description:
-    "Tečaji smučanja in bordanja za vse stopnje. MINI Alpska šola (4-6 let), Šola smučanja (6+) in Šola bordanja (5+). Začnemo 10. januarja 2026.",
+    "Tečaj smučanja za otroke od 6. leta naprej na Rogli. 8 sobot od 9h do 15h, organiziran avtobus, kosilo v hotelu Planja, skupine do 6 otrok.",
 };
 
-const fakti = [
-  {
-    icon: Bus,
-    title: "Organiziran prevoz",
-    text: "Avtobus iz Celja in Zreč (po potrebi tudi drugi kraji).",
+// SLIKE: zamenjaj poti, ko dobimo nove fotografije (naloži jih v /public/tecaj-smucanja/)
+const vsebina: TecajVsebina = {
+  programSlug: "sola-smucanja",
+  hero: {
+    badge: "Zimski program",
+    naslov: "Tečaj smučanja",
+    podnaslov:
+      "Otroci od 6. leta naprej z izkušenimi učitelji osvojijo smučanje na varen in igriv način — po starosti in znanju razdeljeni v manjše skupine.",
   },
-  {
-    icon: Utensils,
-    title: "Kosilo vključeno",
-    text: "Toplo kosilo s čajem v restavraciji hotela Planja.",
+  uvod: {
+    znacka: "⛷️ 6 let in več",
+    naslov: "Alpska šola — tečaj smučanja",
+    odstavki: [
+      "Tečaj za otroke od 6. leta naprej, ki se smučanja učijo prvič ali svoje znanje nadgrajujejo. Začnemo s spoznavanjem in prilagajanjem na opremo, igrami na snegu, drsenjem po hribu, zavijanjem in uporabo žičnice.",
+      "Tisti, ki so z osnovami že seznanjeni, se učijo pravilne smučarske tehnike — osnovno vijuganje, ritem smučanja, uporaba palic, smučanje v celcu in v snežnem parku.",
+    ],
+    poudarki: [
+      "Paket 8 sobot, od 9h do 15h",
+      "Organiziran avtobus: Celje, Arclin, Frankolovo, Zreče",
+      "Kosilo s čajem v hotelu Planja",
+      "Skupine do 6 otrok na učitelja",
+      "Medalja in FIS brošura ob zaključku",
+    ],
+    slika: "/tecaj-smucanja/03.jpg",
+    slikaAlt: "Otroci na tečaju smučanja na Rogli",
   },
-  {
-    icon: Mountain,
-    title: "Po skupinah",
-    text: "6 otrok na učitelja — glede na starost in znanje.",
+  fakti: [
+    { icon: Bus, naslov: "Organiziran prevoz", besedilo: "Celje (Zlatorog), Arclin (Spar), Frankolovo, Zreče." },
+    { icon: Utensils, naslov: "Kosilo vključeno", besedilo: "Toplo kosilo s čajem v hotelu Planja." },
+    { icon: Users, naslov: "Majhne skupine", besedilo: "Do 6 otrok na učitelja — po starosti in znanju." },
+    { icon: CalendarDays, naslov: "8 sobot", besedilo: "Celodnevni tečaj od 9h do 15h." },
+  ],
+  koraki: [
+    { naslov: "Oprema in sneg", opis: "Spoznavanje opreme, igre na snegu, hoja in drsenje po ravnem." },
+    { naslov: "Prvi zavoji", opis: "Plužni lok, ustavljanje in varna uporaba vlečnice in sedežnice." },
+    { naslov: "Vijuganje", opis: "Osnovno vijuganje, ritem smučanja in pravilna uporaba palic." },
+    { naslov: "Nadgradnja", opis: "Smučanje v celcu, v snežnem parku in na zahtevnejših progah." },
+  ],
+  galerija: {
+    naslov: "Utrinki s tečaja smučanja",
+    podnaslov:
+      "Zasnežena Rogla, majhne skupine, nasmejani obrazi in medalja ob koncu sezone — tako je videti sobota z nami.",
+    slike: [
+      { url: "/tecaj-smucanja/08.jpg", naslov: "Zaključek sezone z medaljami", w: 1400, h: 1050, velika: true },
+      { url: "/tecaj-smucanja/03.jpg", naslov: "Pozdrav s proge", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/01.jpg", naslov: "Navodila pred spustom", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/11.jpg", naslov: "Na sedežnici", w: 1400, h: 1050 },
+      { url: "/tecaj-smucanja/04.jpg", naslov: "Skupaj na vlečnici", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/07.jpg", naslov: "Jutranje ogrevanje", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/10.jpg", naslov: "Z avtobusom na Roglo", w: 788, h: 1400 },
+      { url: "/tecaj-smucanja/06.jpg", naslov: "Skupina pripravljena na spust", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/02.jpg", naslov: "Priprava opreme", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/09.jpg", naslov: "Zabava po smučanju", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/12.jpg", naslov: "Skupina na Rogli", w: 1050, h: 1400 },
+      { url: "/tecaj-smucanja/05.jpg", naslov: "Naši učitelji", w: 1050, h: 1400 },
+    ],
   },
-  {
-    icon: Snowflake,
-    title: "Vsa sezona",
-    text: "8 sobot od 10.1.2026 naprej.",
-  },
-];
-
-const vprasanja = [
-  {
-    v: "Zakaj smučamo od 9h – 15h?",
-    o: "Želimo, da postanejo otroci samostojni smučarji in na začetku posvetimo nekaj časa tudi spoznavanju opreme. V času med kosilom se otroci spočijejo. V popoldanskem času se smučišče izprazni, čakalne vrste so krajše in proge samo za nas.",
-  },
-  {
-    v: "Kaj potrebujejo otroci s sabo?",
-    o: "Smuči, palice, smučarske čevlje, čelado, očala in smučarske rokavice. V nahrbtniku lahko imajo dodatne nogavice in prigrizek.",
-  },
-  {
-    v: "Kje imajo otroci kosilo?",
-    o: "Otroci dobijo kosilo v restavraciji hotela Planja. Hrana je raznolika. Alergije sporočite vnaprej — dogovorimo se s kuhinjo za poseben obrok.",
-  },
-  {
-    v: "Ali otrok potrebuje smučarsko karto?",
-    o: "Da, otrok potrebuje svojo karto. Pri nas jo lahko kupite po akcijski ceni 27,50€. Izjema so počitniški programi, kjer je karta vključena.",
-  },
-  {
-    v: "Koliko otrok smuča v eni skupini?",
-    o: "Skupine se oblikujejo glede na starost in predznanje. Z enim učiteljem smuča okoli 6 otrok.",
-  },
-  {
-    v: "Kako je v primeru slabega vremena?",
-    o: "Vsakodnevno spremljamo vreme in razmere. V primeru slabega vremena starše pravočasno obvestimo na spletni strani in osebno.",
-  },
-];
+  vprasanja: [
+    {
+      v: "Zakaj smučamo od 9h – 15h?",
+      o: "Želimo, da postanejo otroci samostojni smučarji in na začetku posvetimo nekaj časa tudi spoznavanju opreme. V času med kosilom se otroci spočijejo. V popoldanskem času se smučišče izprazni, čakalne vrste so krajše in proge samo za nas.",
+    },
+    {
+      v: "Kje lahko otrok vstopi na avtobus?",
+      o: "Vstopne točke so Celje (Zlatorog), Arclin (Spar), Frankolovo (glavna avtobusna) in Zreče (glavna avtobusna). Vstopno točko izberete na prijavnici.",
+    },
+    {
+      v: "Kaj potrebujejo otroci s sabo?",
+      o: "Smuči, palice, smučarske čevlje, čelado, očala in smučarske rokavice. V nahrbtniku lahko imajo dodatne nogavice in prigrizek.",
+    },
+    {
+      v: "Kje imajo otroci kosilo?",
+      o: "Otroci dobijo kosilo v restavraciji hotela Planja. Alergije sporočite vnaprej — dogovorimo se s kuhinjo za poseben obrok.",
+    },
+    {
+      v: "Ali otrok potrebuje smučarsko karto?",
+      o: "Da, otrok potrebuje svojo karto. Pri nas jo lahko kupite po akcijski ceni 27,50€.",
+    },
+    {
+      v: "Kako je v primeru slabega vremena?",
+      o: "Vsakodnevno spremljamo vreme in razmere. V primeru slabega vremena starše pravočasno obvestimo na spletni strani in osebno.",
+    },
+  ],
+  cta: { naslov: "Prijava na tečaj smučanja", podnaslov: "Mesta so omejena. Rezervirajte mesto za vašega otroka." },
+};
 
 export default function SolaSmucanjaPage() {
-  return (
-    <main>
-      <Navbar />
-      <PageHero
-        badge="Zimski program"
-        title="Tečaji smučanja in bordanja"
-        subtitle="Otroci z izkušenimi učitelji spoznavajo osnove smučanja in bordanja na varen in igriv način. Po starosti in znanju razdeljeni v manjše skupine."
-      />
-
-      {/* Trije zavihki: Alpska šola tečaj / Tečaj bordanja / Mini alpska šola */}
-      <SmucanjeTabs />
-
-      {/* Fakti */}
-      <section className="bg-blue-50/40 py-14 border-y border-blue-100">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {fakti.map((f, i) => {
-              const Icon = f.icon;
-              return (
-                <div
-                  key={i}
-                  className="bg-white rounded-xl p-5 border border-slate-200/70 text-center"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-orange-100 text-brand-orange mx-auto mb-3 flex items-center justify-center">
-                    <Icon size={20} />
-                  </div>
-                  <strong className="block text-sm font-bold text-brand-navy mb-1">
-                    {f.title}
-                  </strong>
-                  <span className="text-xs text-slate-600">{f.text}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Termini — ureja se v CMS: /admin/termini */}
-      <TerminiSekcija
-        programSlug="sola-smucanja"
-        badge="Kje in kdaj"
-        naslov="Termini"
-      />
-
-      {/* Cenik in paketi — ureja se v CMS: /admin/cenik */}
-      <CenikSekcija programSlug="sola-smucanja" />
-
-      {/* FAQ */}
-      <section className="bg-blue-50/40 py-12 lg:py-16 border-t border-blue-100">
-        <div className="max-w-3xl mx-auto px-4 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-brand-navy mb-2">
-              Pogosta vprašanja
-            </h2>
-            <p className="text-sm text-slate-600">
-              Vse, kar morate vedeti pred prijavo.
-            </p>
-          </div>
-          <div className="space-y-3">
-            {vprasanja.map((q, i) => (
-              <details
-                key={i}
-                className="bg-white rounded-xl border border-slate-200/70 group"
-              >
-                <summary className="px-5 py-4 cursor-pointer font-semibold text-brand-navy flex items-center justify-between hover:bg-slate-50 transition-colors">
-                  {q.v}
-                  <span className="text-brand-orange group-open:rotate-45 transition-transform text-xl">
-                    +
-                  </span>
-                </summary>
-                <div className="px-5 pb-4 text-sm text-slate-600 leading-relaxed">
-                  {q.o}
-                </div>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <ProgramCta
-        programSlug="sola-smucanja"
-        title="Prijava na tečaj smučanja"
-        subtitle="Mesta so omejena. Rezervirajte zdaj za sezono 2025/26."
-      />
-      <Footer />
-    </main>
-  );
+  return <TecajStran v={vsebina} />;
 }

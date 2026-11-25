@@ -2,6 +2,7 @@
 // Tabele in stolpci se ustvarijo sami ob prvem klicu — ročnega SQL-a ni treba.
 
 import { sql } from "@vercel/postgres";
+import { zagotoviTabele, zagotoviPoljaZaProgram } from "@/lib/migracije";
 
 let izvedeno = false;
 
@@ -68,6 +69,16 @@ export async function zagotoviVsebino() {
     await uvoziRojstniDan();
   } catch (e) {
     console.error("uvoz vsebine:", e);
+  }
+  try {
+    await uvoziMiniAlpskaProgram();
+  } catch (e) {
+    console.error("uvoz mini alpske:", e);
+  }
+  try {
+    await uvoziVstopnoTockoAvtobus();
+  } catch (e) {
+    console.error("uvoz vstopne točke:", e);
   }
 }
 
@@ -174,6 +185,77 @@ Mini turnir z medaljami za vse igralce
 Spretnostne vaje in goli
 Darilce za slavljenca
 Pogostitev po tekmi');`;
+
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Razdelitev "Tečaji smučanja in bordanja" na tri ločene programe:
+//   sola-smucanja     → Tečaj smučanja (obstoječe prijave ostanejo tukaj)
+//   tecaj-bordanja    → Tečaj bordanja
+//   mini-alpska-sola  → Mini alpska šola
+// Vsak ima svoje termine, cenik, prijavnico in prijave. Zažene se enkrat.
+async function uvoziMiniAlpskaProgram() {
+  const KLJUC = "smucanje-razdelitev-v1";
+  if (await seedOpravljen(KLJUC)) return;
+
+  await sql`ALTER TABLE programi ADD COLUMN IF NOT EXISTS na_prijavnici BOOLEAN DEFAULT false;`;
+
+  await sql`UPDATE programi SET naziv = 'Tečaj smučanja' WHERE slug = 'sola-smucanja';`;
+
+  await sql`
+    INSERT INTO programi (slug, naziv, opis, aktiven, na_prijavnici)
+    SELECT 'tecaj-bordanja', 'Tečaj bordanja',
+           'Tečaj bordanja za otroke od 5. leta naprej — 8 sobot od 9h do 15h', true, true
+    WHERE NOT EXISTS (SELECT 1 FROM programi WHERE slug = 'tecaj-bordanja');`;
+
+  await sql`
+    INSERT INTO programi (slug, naziv, opis, aktiven, na_prijavnici)
+    SELECT 'mini-alpska-sola', 'Mini alpska šola',
+           'Smučanje za najmlajše od 4. do 6. leta — sobote 9.30 – 13.00', true, true
+    WHERE NOT EXISTS (SELECT 1 FROM programi WHERE slug = 'mini-alpska-sola');`;
+
+  // Cenik: kartici za bordanje in mini preselimo na njuni strani
+  await sql`UPDATE cenik SET program_slug = 'tecaj-bordanja', poudarjen = false, znacka = NULL
+            WHERE program_slug = 'sola-smucanja' AND naziv ILIKE '%BORDANJ%';`;
+  await sql`UPDATE cenik SET program_slug = 'mini-alpska-sola', poudarjen = false, znacka = NULL
+            WHERE program_slug = 'sola-smucanja' AND naziv ILIKE '%MINI%';`;
+
+  await sql`
+    UPDATE cenik_sekcija SET podnaslov = 'Paket za celo sezono.'
+    WHERE program_slug = 'sola-smucanja' AND podnaslov = 'Tri možnosti, prilagojene starosti in panogi.';`;
+  await sql`
+    INSERT INTO cenik_sekcija (program_slug, badge, naslov, podnaslov, opomba_spodaj)
+    VALUES ('tecaj-bordanja', 'Cenik', 'Cena tečaja', 'Paket za celo sezono.',
+            '**Dnevna smučarska karta** na voljo po akcijski ceni **27,50€** (ni všteto v paketu).')
+    ON CONFLICT (program_slug) DO NOTHING;`;
+  await sql`
+    INSERT INTO cenik_sekcija (program_slug, badge, naslov, podnaslov)
+    VALUES ('mini-alpska-sola', 'Cenik', 'Cena tečaja', '6 sobot + zaključna prireditev.')
+    ON CONFLICT (program_slug) DO NOTHING;`;
+
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Prijavnica za Tečaj smučanja in Tečaj bordanja: obvezna izbira vstopne točke za avtobus.
+// Polje se doda enkrat — pozneje ga lahko urejaš v CMS (/admin/prijavnica).
+async function uvoziVstopnoTockoAvtobus() {
+  const KLJUC = "avtobus-vstopna-tocka-v1";
+  if (await seedOpravljen(KLJUC)) return;
+
+  await zagotoviTabele();
+  for (const slug of ["sola-smucanja", "tecaj-bordanja"]) {
+    await zagotoviPoljaZaProgram(slug);
+    const ze = await sql`SELECT 1 FROM form_polja WHERE program_slug = ${slug} AND kljuc = 'vstopna_tocka';`;
+    if (ze.rows.length > 0) continue;
+    // Polje postavimo takoj za "Predznanje otroka" (vrstni red 1), ostala zamaknemo
+    await sql`UPDATE form_polja SET vrstni_red = vrstni_red + 1 WHERE program_slug = ${slug} AND vrstni_red >= 1;`;
+    await sql`
+      INSERT INTO form_polja (program_slug, kljuc, label, tip, moznosti, obvezno, viden, vrstni_red, sistemsko)
+      VALUES (${slug}, 'vstopna_tocka', 'Vstopna točka za avtobus', 'select',
+              'Celje (Zlatorog), Arclin (Spar), Frankolovo (glavna avtobusna), Zreče (glavna avtobusna), Brez avtobusa (pridemo sami na Roglo)',
+              true, true, 1, false)
+      ON CONFLICT (program_slug, kljuc) DO NOTHING;`;
+  }
 
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }

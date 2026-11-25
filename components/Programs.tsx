@@ -10,6 +10,8 @@ import {
   Wrench,
   Package,
   Cake,
+  Snowflake,
+  Baby,
 } from "lucide-react";
 
 const programs = [
@@ -42,12 +44,30 @@ const programs = [
   },
   {
     icon: Mountain,
-    title: "Tečaji smučanja in bordanja",
-    description: "Za vse stopnje znanja — od začetnikov do izkušenih.",
+    title: "Tečaj smučanja",
+    description: "Za otroke od 6. leta — od začetnikov do izkušenih.",
     href: "/sola-smucanja",
     tag: null,
     accent: "bg-blue-100 text-blue-600",
-    image: "/smucanje.jpg",
+    image: "/tecaj-smucanja/03.jpg",
+  },
+  {
+    icon: Snowflake,
+    title: "Tečaj bordanja",
+    description: "Za mlade deskarje od 5. leta naprej.",
+    href: "/tecaj-bordanja",
+    tag: null,
+    accent: "bg-sky-100 text-sky-600",
+    image: "/tecaj-bordanja/01.jpg",
+  },
+  {
+    icon: Baby,
+    title: "Mini alpska šola",
+    description: "Prvi koraki na smučeh za malčke od 4 do 6 let.",
+    href: "/mini-alpska-sola",
+    tag: null,
+    accent: "bg-rose-100 text-rose-600",
+    image: "/mini-alpska-sola/01.jpg",
   },
   {
     icon: Trophy,

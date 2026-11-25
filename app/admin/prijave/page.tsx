@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Search, Filter, Download, Plus, Loader2, X, Phone, Mail, Calendar, ChevronDown, ListChecks, Printer, Trash2, FileSpreadsheet, SlidersHorizontal } from "lucide-react";
 
 const programLabels: Record<string, string> = {
-  "sola-smucanja": "Smučanje",
+  "sola-smucanja": "Tečaj smučanja",
+  "tecaj-bordanja": "Tečaj bordanja",
+  "mini-alpska-sola": "Mini alpska šola",
   "ski-racing-team": "Tekmovalne ekipe",
   "smucarska-akademija": "Akademija",
   "plavalni-tecaj": "Plavanje",

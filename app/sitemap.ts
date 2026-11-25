@@ -6,6 +6,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const strani = [
     "",
     "/sola-smucanja",
+    "/tecaj-bordanja",
+    "/mini-alpska-sola",
     "/plavalni-tecaj",
     "/sportna-abeceda",
     "/smucarska-akademija",

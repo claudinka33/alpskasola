@@ -5,12 +5,15 @@ interface ProgramCtaProps {
   programSlug: string;
   title?: string;
   subtitle?: string;
+  // Dodatni gumbi za prijavo na sorodne programe (npr. Mini alpska šola)
+  dodatniProgrami?: { slug: string; label: string }[];
 }
 
 export default function ProgramCta({
   programSlug,
   title = "Pripravljeni za prijavo?",
   subtitle = "Termini se hitro polnijo. Rezervirajte mesto za vašega otroka.",
+  dodatniProgrami = [],
 }: ProgramCtaProps) {
   return (
     <section className="relative bg-brand-navy text-white py-14 lg:py-16 overflow-hidden">
@@ -39,6 +42,15 @@ export default function ProgramCta({
           >
             Prijavi se na ta program <ArrowRight size={16} />
           </Link>
+          {dodatniProgrami.map((d) => (
+            <Link
+              key={d.slug}
+              href={`/prijava?program=${d.slug}`}
+              className="inline-flex items-center gap-2 bg-white text-brand-navy px-6 py-3.5 rounded-xl text-sm font-bold hover:bg-orange-50 transition-colors"
+            >
+              {d.label} <ArrowRight size={16} />
+            </Link>
+          ))}
           <a
             href="tel:064230888"
             className="inline-flex items-center gap-2 bg-transparent text-white px-6 py-3.5 rounded-xl text-sm font-semibold border border-white/30 hover:bg-white/10 transition-colors"
