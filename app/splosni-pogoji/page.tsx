@@ -30,6 +30,7 @@ export default function SplosniPogojiPage() {
     <main>
       <Navbar />
       <PageHero
+        alpi="kaze"
         badge="Pravno"
         title="Splošni pogoji in zasebnost"
         subtitle="Pogoji uporabe spletne strani, varstvo osebnih podatkov (GDPR) in politika piškotkov."

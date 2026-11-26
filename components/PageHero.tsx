@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import Alpi, { type AlpiPoza } from "@/components/Alpi";
 
 interface PageHeroProps {
   badge?: string;
   title: string;
   subtitle?: string;
   bgGradient?: string;
+  alpi?: AlpiPoza | false;
 }
 
 export default function PageHero({
@@ -13,6 +15,7 @@ export default function PageHero({
   title,
   subtitle,
   bgGradient = "from-blue-50 via-blue-100/40 to-white",
+  alpi = "maha",
 }: PageHeroProps) {
   return (
     <section className={`relative bg-gradient-to-b ${bgGradient} pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 overflow-hidden border-b border-blue-100`}>
@@ -34,7 +37,14 @@ export default function PageHero({
         />
       </svg>
 
-      <div className="relative max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
+      {alpi && (
+        <Alpi
+          poza={alpi}
+          className="absolute bottom-0 right-1 sm:right-6 lg:right-[7%] h-20 sm:h-32 lg:h-44 w-auto translate-y-[12%] drop-shadow-lg"
+        />
+      )}
+
+      <div className="relative z-10 max-w-6xl 2xl:max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
         {/* Breadcrumb */}
         <nav className="flex items-center justify-center gap-2 text-xs text-slate-500 mb-4 lg:mb-5">
           <Link href="/" className="hover:text-brand-orange transition-colors">

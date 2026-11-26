@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import Alpi from "@/components/Alpi";
 import Footer from "@/components/Footer";
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -265,10 +266,8 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
         <Navbar />
         <section className="bg-gradient-to-b from-blue-50 to-white min-h-[70vh] flex items-center py-20">
           <div className="max-w-2xl mx-auto px-4 lg:px-8 text-center">
-            <div className="bg-green-100 text-green-700 w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-6">
-              <CheckCircle2 size={42} />
-            </div>
-            <h1 className="text-4xl font-extrabold text-brand-navy mb-3">Prijava poslana!</h1>
+            <Alpi poza="skok" className="mx-auto mb-4 h-40 sm:h-52 w-auto" alt="Alpi skoči od veselja" />
+            <h1 className="text-4xl font-extrabold text-brand-navy mb-3">Prijava poslana! 🎉</h1>
             <p className="text-lg text-slate-600 mb-8">Hvala, kontaktiramo vas v kratkem.</p>
             <Link href="/" className="inline-flex items-center gap-2 bg-brand-orange text-white px-6 py-3 rounded-xl font-semibold">
               Nazaj domov <ArrowRight size={16} />
@@ -286,6 +285,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
       <section className="relative overflow-hidden bg-brand-navy">
         <img src="/tekmovalci/14.jpg" alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-35" />
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/80 to-brand-navy/40" />
+        <Alpi poza="kaze" className="absolute bottom-0 left-1 sm:left-[6%] lg:left-[12%] h-20 sm:h-32 lg:h-40 w-auto translate-y-[10%]" alt="Alpi pokaže na prijavnico" />
         <div className="relative max-w-3xl mx-auto px-4 lg:px-8 py-8 lg:py-10 text-center text-white">
           <div className="inline-flex items-center gap-2 bg-brand-orange text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
             ⛷️ Alpska šola · Rogla

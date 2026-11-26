@@ -55,6 +55,7 @@ export default function SkiRacingTeamPage() {
     <main>
       <Navbar />
       <PageHero
+        alpi="smuca"
         badge="Tekmovalno smučanje"
         title="Tekmovalne ekipe"
         subtitle="Za otroke in mladostnike, ki si želijo nadgraditi smučarsko kariero. Resni treningi, tekmovanja, ekipni duh."

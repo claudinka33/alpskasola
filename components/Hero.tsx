@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Shield, Medal, Heart, Bus } from "lucide-react";
+import Alpi, { AlpiOblacek } from "@/components/Alpi";
 
 // Začetek domače strani: besedilo levo, kolaž pravih fotografij s tečajev desno.
 // Fotografije zamenjaš tukaj (poti do slik v /public).
@@ -112,6 +113,14 @@ export default function Hero() {
       </div>
 
       {/* Gorska silhueta na dnu */}
+      {/* Alpi pozdravi obiskovalce */}
+      <div className="pointer-events-none absolute bottom-2 right-2 z-20 flex items-end gap-1 sm:right-6 lg:right-[3%]">
+        <AlpiOblacek rep="desno" className="mb-16 hidden sm:block lg:mb-24">
+          Živjo, jaz sem Alpi! 👋
+        </AlpiOblacek>
+        <Alpi poza="maha" className="h-24 w-auto drop-shadow-xl sm:h-36 lg:h-48" alt="Alpi, maskota Alpske šole, pomaha" />
+      </div>
+
       <svg
         className="pointer-events-none absolute bottom-0 left-0 right-0 h-12 w-full lg:h-16"
         viewBox="0 0 800 80"

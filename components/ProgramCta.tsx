@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
+import Alpi, { type AlpiPoza } from "@/components/Alpi";
 
 interface ProgramCtaProps {
   programSlug: string;
@@ -7,6 +8,7 @@ interface ProgramCtaProps {
   subtitle?: string;
   // Dodatni gumbi za prijavo na sorodne programe (npr. Mini alpska šola)
   dodatniProgrami?: { slug: string; label: string }[];
+  alpi?: AlpiPoza;
 }
 
 export default function ProgramCta({
@@ -14,6 +16,7 @@ export default function ProgramCta({
   title = "Pripravljeni za prijavo?",
   subtitle = "Termini se hitro polnijo. Rezervirajte mesto za vašega otroka.",
   dodatniProgrami = [],
+  alpi = "palca",
 }: ProgramCtaProps) {
   return (
     <section className="relative bg-brand-navy text-white py-14 lg:py-16 overflow-hidden">
@@ -28,7 +31,11 @@ export default function ProgramCta({
         />
       </svg>
 
+      {/* Alpi — na računalniku ob strani, na telefonu nad naslovom */}
+      <Alpi poza={alpi} className="hidden lg:block absolute left-[4%] xl:left-[8%] bottom-0 h-56 xl:h-64 w-auto translate-y-[8%]" />
+
       <div className="relative max-w-3xl mx-auto px-4 lg:px-8 text-center">
+        <Alpi poza={alpi} className="lg:hidden mx-auto mb-3 h-24 w-auto" />
         <h2 className="text-2xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] mb-3">
           {title}
         </h2>

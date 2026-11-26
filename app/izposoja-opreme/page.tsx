@@ -32,6 +32,7 @@ export default function IzposojaPage() {
     <main>
       <Navbar />
       <PageHero
+        alpi="smuci"
         badge="Izposoja"
         title="Izposoja smučarske opreme"
         subtitle="Kakovostna oprema za otroke in odrasle. Smuči, deska, čevlji, čelade — vse, kar potrebujete za varno smučanje."
