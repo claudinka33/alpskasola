@@ -79,13 +79,20 @@ export async function posodobiStatus(id: number, status: string) {
   await sql`UPDATE prijave SET status = ${status} WHERE id = ${id};`;
 }
 
+// Vrstni red programov ureja admin (Nastavitve prijavnice → puščice gor/dol)
+async function zagotoviVrstniRedProgramov() {
+  await sql`ALTER TABLE programi ADD COLUMN IF NOT EXISTS vrstni_red INT;`;
+}
+
 export async function pridobiProgrami() {
-  const r = await sql<Program>`SELECT * FROM programi ORDER BY naziv;`;
+  await zagotoviVrstniRedProgramov();
+  const r = await sql<Program>`SELECT * FROM programi ORDER BY COALESCE(vrstni_red, 9999), naziv;`;
   return r.rows;
 }
 
 export async function pridobiProgramiAktivni() {
-  const r = await sql<Program>`SELECT * FROM programi WHERE aktiven = true ORDER BY naziv;`;
+  await zagotoviVrstniRedProgramov();
+  const r = await sql<Program>`SELECT * FROM programi WHERE aktiven = true ORDER BY COALESCE(vrstni_red, 9999), naziv;`;
   return r.rows;
 }
 
