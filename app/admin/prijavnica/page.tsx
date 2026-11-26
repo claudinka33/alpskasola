@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import RazvrstiSeznam from "@/components/admin/RazvrstiSeznam";
 import {
   ClipboardList,
   Loader2,
@@ -67,11 +68,7 @@ export default function PrijavnicaPage() {
   };
 
   // Premik programa gor/dol — vrstni red velja za prijavnico in izbiro programa v adminu
-  const premakni = async (i: number, smer: -1 | 1) => {
-    const j = i + smer;
-    if (j < 0 || j >= programi.length) return;
-    const nov = [...programi];
-    [nov[i], nov[j]] = [nov[j], nov[i]];
+  const razvrsti = async (nov: Program[]) => {
     setProgrami(nov);
     setShranjujem("__vrstni_red");
     try {
@@ -106,8 +103,8 @@ export default function PrijavnicaPage() {
           <div>
             <h2 className="text-lg font-bold text-brand-navy">Programi na prijavnici</h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Vklopi programe, ki naj se pokažejo v spustnem meniju „Izberi program“. S puščicami
-              določiš vrstni red — v takem vrstnem redu jih starši vidijo na prijavnici.
+              Vklopi programe, ki naj se pokažejo v spustnem meniju „Izberi program“. Primi za ročko ⋮⋮ in
+              povleci, da določiš vrstni red — v takem vrstnem redu jih starši vidijo na prijavnici.
             </p>
           </div>
           <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
@@ -124,27 +121,15 @@ export default function PrijavnicaPage() {
             Ni programov. (Si zagnala SQL migracijo in dodala programe v bazo?)
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
-            {programi.map((p, i) => (
-              <li key={p.slug} className="flex items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
-                <div className="flex shrink-0 flex-col">
-                  <button
-                    onClick={() => premakni(i, -1)}
-                    disabled={i === 0 || shranjujem === "__vrstni_red"}
-                    aria-label="Premakni gor"
-                    className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-brand-navy disabled:opacity-25"
-                  >
-                    <ChevronUp size={18} />
-                  </button>
-                  <button
-                    onClick={() => premakni(i, 1)}
-                    disabled={i === programi.length - 1 || shranjujem === "__vrstni_red"}
-                    aria-label="Premakni dol"
-                    className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-brand-navy disabled:opacity-25"
-                  >
-                    <ChevronDown size={18} />
-                  </button>
-                </div>
+          <RazvrstiSeznam
+            items={programi}
+            getId={(p) => p.slug}
+            onReorder={razvrsti}
+            className="divide-y divide-slate-100"
+            itemClassName="flex items-center justify-between gap-3 px-4 py-3.5 sm:px-6 bg-white"
+            renderItem={(p, i, rocka) => (
+              <>
+                {rocka}
                 <span className="w-6 shrink-0 text-center text-xs font-bold text-slate-400">{i + 1}.</span>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-brand-navy truncate">{p.naziv}</div>
@@ -168,9 +153,9 @@ export default function PrijavnicaPage() {
                   )}
                   {p.na_prijavnici ? "Na prijavnici" : "Skrit"}
                 </button>
-              </li>
-            ))}
-          </ul>
+              </>
+            )}
+          />
         )}
       </div>
 
@@ -262,11 +247,7 @@ function PoljaEditor({ programi }: { programi: Program[] }) {
     });
   };
 
-  const premakni = async (i: number, smer: -1 | 1) => {
-    const j = i + smer;
-    if (j < 0 || j >= polja.length) return;
-    const nova = [...polja];
-    [nova[i], nova[j]] = [nova[j], nova[i]];
+  const razvrsti = async (nova: FormPolje[]) => {
     setPolja(nova);
     await Promise.all(
       nova.map((p, idx) =>
@@ -342,17 +323,15 @@ function PoljaEditor({ programi }: { programi: Program[] }) {
         </div>
       ) : (
         <>
-          <ul className="divide-y divide-slate-100">
-            {polja.map((p, i) => (
-              <li key={p.id} className="flex items-center gap-3 px-6 py-3">
-                <div className="flex flex-col gap-0.5">
-                  <button onClick={() => premakni(i, -1)} disabled={i === 0} className="text-slate-300 hover:text-brand-navy disabled:opacity-30">
-                    <ChevronUp size={14} />
-                  </button>
-                  <button onClick={() => premakni(i, 1)} disabled={i === polja.length - 1} className="text-slate-300 hover:text-brand-navy disabled:opacity-30">
-                    <ChevronDown size={14} />
-                  </button>
-                </div>
+          <RazvrstiSeznam
+            items={polja}
+            getId={(p) => p.id}
+            onReorder={razvrsti}
+            className="divide-y divide-slate-100"
+            itemClassName="flex items-center gap-3 px-6 py-3 bg-white"
+            renderItem={(p, _i, rocka) => (
+              <>
+                {rocka}
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-brand-navy text-sm truncate">
                     {p.label}
@@ -388,9 +367,9 @@ function PoljaEditor({ programi }: { programi: Program[] }) {
                     <Trash2 size={15} />
                   </button>
                 )}
-              </li>
-            ))}
-          </ul>
+              </>
+            )}
+          />
 
           {/* Novo polje */}
           <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
