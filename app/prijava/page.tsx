@@ -283,19 +283,31 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
   return (
     <>
       <Navbar />
-      <section className="mountain-bg py-6 lg:py-8 border-b border-blue-100">
-        <div className="max-w-3xl mx-auto px-4 lg:px-8 text-center">
-          <h1 className="text-3xl lg:text-4xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-2">Prijavnica</h1>
-          <p className="text-base text-slate-600 max-w-xl mx-auto">Izpolnite obrazec. Polja z * so obvezna.</p>
+      <section className="relative overflow-hidden bg-brand-navy">
+        <img src="/tekmovalci/14.jpg" alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-35" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/80 to-brand-navy/40" />
+        <div className="relative max-w-3xl mx-auto px-4 lg:px-8 py-8 lg:py-10 text-center text-white">
+          <div className="inline-flex items-center gap-2 bg-brand-orange text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+            ⛷️ Alpska šola · Rogla
+          </div>
+          <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight leading-[1.1] mb-2">Prijavnica 🎿</h1>
+          <p className="text-sm lg:text-base text-white/85 max-w-xl mx-auto">
+            Prijava vzame le nekaj minut. Polja z * so obvezna — potrditev dobite na e-pošto. 📩
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 mt-4 text-xs font-semibold">
+            <span className="bg-white/10 border border-white/20 rounded-full px-3 py-1">🏔️ Šola na Rogli</span>
+            <span className="bg-white/10 border border-white/20 rounded-full px-3 py-1">👨‍🏫 Licencirani učitelji</span>
+            <a href="tel:064230888" className="bg-white/10 border border-white/20 rounded-full px-3 py-1 hover:bg-white/20">📞 064 230 888</a>
+          </div>
         </div>
       </section>
 
-      <section className="bg-white py-6 lg:py-8">
+      <section className="bg-slate-50 py-6 lg:py-8">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
-          <form onSubmit={onSubmit} className="bg-white border border-slate-200/70 rounded-2xl p-4 sm:p-6">
+          <form onSubmit={onSubmit} className="bg-white border border-slate-200/70 border-t-4 border-t-brand-orange rounded-2xl p-4 sm:p-6 shadow-xl shadow-brand-navy/5">
             {/* Program */}
             <div className="mb-5">
-              <h2 className="text-base font-bold text-brand-navy mb-2">1. Program</h2>
+              <h2 className="text-base font-bold text-brand-navy mb-2">🎿 1. Program</h2>
               <select required value={form.program} onChange={(e) => update("program", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm bg-white">
                 <option value="">— izberi program —</option>
                 {programi.map((p) => <option key={p.slug} value={p.slug}>{p.naziv}</option>)}
@@ -352,7 +364,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
             {/* Otrok */}
             <div className="mb-5">
               <h2 className="text-base font-bold text-brand-navy mb-2">
-                {jeRojstniDan ? "2. Slavljenec" : "2. Otrok"}
+                {jeRojstniDan ? "🎂 2. Slavljenec" : "🧒 2. Otrok"}
               </h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 <F label="Ime *" value={form.otrok_ime} onChange={(v) => update("otrok_ime", v)} required />
@@ -537,7 +549,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
             {/* Starš */}
             <div className="mb-5">
-              <h2 className="text-base font-bold text-brand-navy mb-2">3. Starš</h2>
+              <h2 className="text-base font-bold text-brand-navy mb-2">👨‍👩‍👧 3. Starš</h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 <F label="Ime *" value={form.starsi_ime} onChange={(v) => update("starsi_ime", v)} required />
                 <F label="Priimek *" value={form.starsi_priimek} onChange={(v) => update("starsi_priimek", v)} required />
@@ -565,7 +577,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
             {/* Nastavljiva polja (alergije, opomba, polja po meri...) */}
             {ostalaPolja.length > 0 && (
               <div className="mb-5">
-                <h2 className="text-base font-bold text-brand-navy mb-2">4. Dodatno</h2>
+                <h2 className="text-base font-bold text-brand-navy mb-2">📝 4. Dodatno</h2>
                 <div className="space-y-3">
                   {ostalaPolja.map((p) => {
                     const jeOpomba = p.kljuc === "opomba";
