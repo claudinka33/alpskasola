@@ -54,7 +54,7 @@ const programs = [
   {
     icon: Snowflake,
     title: "Alpska šola bordanja",
-    description: "Za mlade deskarje od 5. leta naprej.",
+    description: "Za mlade deskarje od 6. leta naprej.",
     href: "/tecaj-bordanja",
     tag: "PRIJAVE ODPRTE",
     accent: "bg-sky-100 text-sky-600",

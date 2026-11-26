@@ -10,7 +10,7 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: "Alpska šola smučanja za otroke | Rogla",
   description:
-    "Alpska šola smučanja za otroke od 6. leta naprej na Rogli. 8 sobot od 9h do 15h, organiziran avtobus, kosilo v hotelu Planja, skupine do 6 otrok.",
+    "Alpska šola smučanja za otroke od 6. leta naprej na Rogli. 8 sobot od 9h do 15h (od 9. 1. 2027), organiziran avtobus, kosilo v hotelu Planja, skupine do 6 otrok.",
 };
 
 // SLIKE: zamenjaj poti, ko dobimo nove fotografije (naloži jih v /public/tecaj-smucanja/)
@@ -30,9 +30,10 @@ const vsebina: TecajVsebina = {
       "Tisti, ki so z osnovami že seznanjeni, se učijo pravilne smučarske tehnike — osnovno vijuganje, ritem smučanja, uporaba palic, smučanje v celcu in v snežnem parku.",
     ],
     poudarki: [
-      "Paket 8 sobot, od 9h do 15h",
+      "Paket 8 sobot z zaključno prireditvijo, od 9h do 15h",
+      "Začnemo v soboto, 9. 1. 2027",
       "Organiziran avtobus: Celje, Arclin, Frankolovo, Zreče",
-      "Kosilo s čajem v hotelu Planja",
+      "Kosilo v hotelu Planja",
       "Skupine do 6 otrok na učitelja",
       "Medalja in FIS brošura ob zaključku",
     ],
@@ -40,10 +41,10 @@ const vsebina: TecajVsebina = {
     slikaAlt: "Otroci na tečaju smučanja na Rogli",
   },
   fakti: [
-    { icon: Bus, naslov: "Organiziran prevoz", besedilo: "Celje (Zlatorog), Arclin (Spar), Frankolovo, Zreče." },
+    { icon: Bus, naslov: "Organiziran prevoz", besedilo: "Celje 7.30 · Arclin 7.40 · Frankolovo 7.50 · Zreče 8.00. Nazaj ob 15.05." },
     { icon: Utensils, naslov: "Kosilo vključeno", besedilo: "Toplo kosilo s čajem v hotelu Planja." },
     { icon: Users, naslov: "Majhne skupine", besedilo: "Do 6 otrok na učitelja — po starosti in znanju." },
-    { icon: CalendarDays, naslov: "8 sobot", besedilo: "Celodnevni tečaj od 9h do 15h." },
+    { icon: CalendarDays, naslov: "8 sobot", besedilo: "Od 9. 1. 2027, od 9h do 15h, z zaključno prireditvijo." },
   ],
   koraki: [
     { naslov: "Oprema in sneg", opis: "Spoznavanje opreme, igre na snegu, hoja in drsenje po ravnem." },
@@ -74,12 +75,16 @@ const vsebina: TecajVsebina = {
   },
   vprasanja: [
     {
+      v: "Koliko stane in kdaj začnemo?",
+      o: "Paket 8 sobot z zaključno prireditvijo stane 500 €. Začnemo v soboto, 9. 1. 2027. Smučarska karta ni vključena (pri nas 29 €).",
+    },
+    {
       v: "Zakaj smučamo od 9h – 15h?",
       o: "Želimo, da postanejo otroci samostojni smučarji in na začetku posvetimo nekaj časa tudi spoznavanju opreme. V času med kosilom se otroci spočijejo. V popoldanskem času se smučišče izprazni, čakalne vrste so krajše in proge samo za nas.",
     },
     {
       v: "Kje lahko otrok vstopi na avtobus?",
-      o: "Vstopne točke so Celje (Zlatorog), Arclin (Spar), Frankolovo (glavna avtobusna) in Zreče (glavna avtobusna). Vstopno točko izberete na prijavnici.",
+      o: "Avtobus odpelje približno ob: 7.30 Celje (Zlatorog), 7.40 Arclin (avtobusna postaja), 7.50 Frankolovo (avtobusna postaja), 8.00 Zreče (avtobusna postaja). Nazaj z Rogle odpelje ob 15.05. Vstopno točko izberete na prijavnici.",
     },
     {
       v: "Kaj potrebujejo otroci s sabo?",
@@ -91,11 +96,11 @@ const vsebina: TecajVsebina = {
     },
     {
       v: "Ali otrok potrebuje smučarsko karto?",
-      o: "Da, otrok potrebuje svojo karto. Pri nas jo lahko kupite po akcijski ceni 27,50€.",
+      o: "Da, otrok potrebuje svojo karto — v paket ni vključena. Pri nas jo lahko kupite po promocijski ceni 29 € (redna cena je 32 €).",
     },
     {
       v: "Kako je v primeru slabega vremena?",
-      o: "Vsakodnevno spremljamo vreme in razmere. V primeru slabega vremena starše pravočasno obvestimo na spletni strani in osebno.",
+      o: "Vreme in razmere spremljamo sproti. Če je tečaj zaradi slabega vremena odpovedan, vas obvestimo že v petek po e-pošti in SMS-u.",
     },
   ],
   cta: { naslov: "Prijava v Alpsko šolo smučanja", podnaslov: "Mesta so omejena. Rezervirajte mesto za vašega otroka." },

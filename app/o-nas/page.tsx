@@ -40,7 +40,7 @@ const ekipa = [
 
 const programi = [
   { naziv: "Alpska šola smučanja", opis: "Za otroke od 6. leta naprej" },
-  { naziv: "Alpska šola bordanja", opis: "Za mlade deskarje od 5. leta" },
+  { naziv: "Alpska šola bordanja", opis: "Za mlade deskarje od 6. leta" },
   { naziv: "Mini alpska šola", opis: "Za malčke od 4 do 6 let" },
   { naziv: "V skupini", opis: "Učenje + druženje" },
   { naziv: "Športna abeceda", opis: "Za otroke od 3 leta naprej" },
