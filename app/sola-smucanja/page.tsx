@@ -56,7 +56,7 @@ const vsebina: TecajVsebina = {
   ],
   koraki: [
     { naslov: "Oprema in sneg", opis: "Spoznavanje opreme, igre na snegu, hoja in drsenje po ravnem." },
-    { naslov: "Prvi zavoji", opis: "Plužni lok, ustavljanje in varna uporaba vlečnice in sedežnice." },
+    { naslov: "Prvi zavoji", opis: "Klinasti zavoj, ustavljanje in varna uporaba vlečnice in sedežnice." },
     { naslov: "Vijuganje", opis: "Osnovno vijuganje, ritem smučanja in pravilna uporaba palic." },
     { naslov: "Nadgradnja", opis: "Smučanje v celcu, v snežnem parku in na zahtevnejših progah." },
   ],

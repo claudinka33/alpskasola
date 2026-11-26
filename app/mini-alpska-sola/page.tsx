@@ -55,7 +55,7 @@ const vsebina: TecajVsebina = {
   ],
   koraki: [
     { naslov: "Navajanje na opremo", opis: "Obuvanje čevljev, hoja s smučmi in igre na snegu." },
-    { naslov: "Drsenje", opis: "Prvo drsenje po blagem naklonu in ustavljanje v plužnem položaju." },
+    { naslov: "Drsenje", opis: "Prvo drsenje po blagem naklonu in ustavljanje v klinastem položaju." },
     { naslov: "Prvi zavoji", opis: "Zavoji skozi igro — med stožci, obroči in figurami." },
     { naslov: "Žičnica", opis: "Varna vožnja s tekočim trakom in vlečnico ter prvi spusti." },
   ],
