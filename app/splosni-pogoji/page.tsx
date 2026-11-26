@@ -45,8 +45,8 @@ export default function SplosniPogojiPage() {
             Upravljavec spletne strani in vaših podatkov je{" "}
             <strong className="text-brand-navy">Športno društvo Alpska šola</strong>,
             Tepanje 60, 3210 Slovenske Konjice. Kontakt:{" "}
-            <a href="mailto:info@alpskasola.com" className="text-brand-orange font-semibold">
-              info@alpskasola.com
+            <a href="mailto:alpskasola.com@gmail.com" className="text-brand-orange font-semibold">
+              alpskasola.com@gmail.com
             </a>{" "}
             · 064 230 888.
           </div>
@@ -153,8 +153,8 @@ export default function SplosniPogojiPage() {
             Imate pravico do dostopa do svojih podatkov, popravka, izbrisa („pozaba“),
             omejitve obdelave, ugovora obdelavi in prenosljivosti podatkov ter pravico
             do preklica privolitve. Zahtevo lahko kadar koli pošljete na{" "}
-            <a href="mailto:info@alpskasola.com" className="text-brand-orange font-semibold">
-              info@alpskasola.com
+            <a href="mailto:alpskasola.com@gmail.com" className="text-brand-orange font-semibold">
+              alpskasola.com@gmail.com
             </a>
             . Če menite, da obdelava krši predpise, lahko vložite pritožbo pri
             Informacijskem pooblaščencu Republike Slovenije (www.ip-rs.si).

@@ -20,8 +20,8 @@ export default function OdjavaPage({ searchParams }: { searchParams: { napaka?: 
           </h1>
           <p className="text-slate-600 mb-8">
             {napaka
-              ? "Povezava za odjavo ni veljavna ali je potekla. Pišite nam na info@alpskasola.com in vas odjavimo ročno."
-              : "Od naših email obvestil ste uspešno odjavljeni. Če se premislite, nam pišite na info@alpskasola.com."}
+              ? "Povezava za odjavo ni veljavna ali je potekla. Pišite nam na alpskasola.com@gmail.com in vas odjavimo ročno."
+              : "Od naših email obvestil ste uspešno odjavljeni. Če se premislite, nam pišite na alpskasola.com@gmail.com."}
           </p>
           <Link href="/" className="inline-flex items-center gap-2 bg-brand-orange text-white px-6 py-3 rounded-xl font-semibold">
             Nazaj na stran

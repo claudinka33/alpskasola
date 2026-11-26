@@ -143,8 +143,10 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <Clock size={14} /> Pon–Pet, 16h–20h
               </li>
-              <li className="flex items-center gap-2">
-                <Mail size={14} /> info@alpskasola.com
+              <li>
+                <a href="mailto:alpskasola.com@gmail.com" className="flex items-center gap-2 hover:text-brand-orange break-all">
+                  <Mail size={14} className="shrink-0" /> alpskasola.com@gmail.com
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin size={14} className="mt-0.5 shrink-0" /> Tepanje 60, 3210
