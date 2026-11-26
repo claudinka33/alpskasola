@@ -1,5 +1,6 @@
 "use client";
 
+import PrijavnicaZavihki from "@/components/admin/PrijavnicaZavihki";
 import { useState, useEffect } from "react";
 import { Mail, Loader2, Save, Check, Inbox, BadgeCheck } from "lucide-react";
 
@@ -72,6 +73,7 @@ export default function EmailPredlogaPage() {
 
   return (
     <div>
+      <PrijavnicaZavihki />
       <div className="mb-6">
         <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
           <Mail size={26} className="text-brand-orange" /> Sporočilo staršem

@@ -18,22 +18,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     return <div data-admin className="min-h-screen bg-slate-50">{children}</div>;
   }
 
+  // Prijavnica = en modul z zavihki (programi, polja, termini, rojstni dan, potrditveni e-mail).
+  // V meniju je ena postavka; vodi na prvi zavihek, ki ga uporabnik sme videti.
+  const prijavnicaZavihki = [
+    { kljuc: "prijavnica", href: "/admin/prijavnica" },
+    { kljuc: "termini", href: "/admin/termini" },
+    { kljuc: "rojstni-dan", href: "/admin/rojstni-dan" },
+    { kljuc: "email", href: "/admin/email" },
+  ].filter((z) => vidi(z.kljuc));
+
   const skupine: Skupina[] = [
     { label: null, postavke: [{ kljuc: "pregled", href: "/admin", label: "Pregled" }] },
     {
-      label: "Šola",
+      label: "Prijave",
       postavke: [
-        // Kartica tečajnika (master–detail) — vidi jo, kdor vidi oddane prijave
-        ...(vidi("prijave") ? [{ kljuc: "tecajniki", href: "/admin/tecajniki", label: "Tečajniki" }] : []),
-      ],
-    },
-    {
-      label: "Prijavnica",
-      postavke: [
-        { kljuc: "prijavnica", href: "/admin/prijavnica", label: "Nastavitve prijavnice" },
-        { kljuc: "email", href: "/admin/email", label: "Sporočilo staršem" },
+        // Kartica tečajnika (master–detail) z izvozom PDF/Excel — vidi jo, kdor vidi oddane prijave
+        { kljuc: "prijave", href: "/admin/tecajniki", label: "Tečajniki", tudi: ["/admin/izvoz"] },
         { kljuc: "prijave", href: "/admin/prijave", label: "Oddane prijave" },
-        { kljuc: "izvoz", href: "/admin/izvoz", label: "Izvoz (PDF, Excel)" },
       ].filter((p) => vidi(p.kljuc)),
     },
     {
@@ -59,12 +60,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       ].filter((p) => vidi(p.kljuc)),
     },
     {
-      label: "Vsebina strani",
+      label: "Spletna stran",
       postavke: [
-        { kljuc: "termini", href: "/admin/termini", label: "Termini" },
-        { kljuc: "cenik", href: "/admin/cenik", label: "Cenik" },
-        { kljuc: "galerija", href: "/admin/galerija", label: "Galerija in videi" },
-      ].filter((p) => vidi(p.kljuc)),
+        ...(prijavnicaZavihki.length
+          ? [{
+              kljuc: "prijavnica",
+              href: prijavnicaZavihki[0].href,
+              label: "Prijavnica in termini",
+              tudi: ["/admin/prijavnica", "/admin/termini", "/admin/rojstni-dan", "/admin/email"],
+            }]
+          : []),
+        ...[
+          { kljuc: "cenik", href: "/admin/cenik", label: "Cenik" },
+          { kljuc: "galerija", href: "/admin/galerija", label: "Galerija in videi" },
+        ].filter((p) => vidi(p.kljuc)),
+      ],
     },
     {
       label: "Nastavitve",

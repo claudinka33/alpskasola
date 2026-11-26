@@ -45,7 +45,8 @@ const IKONE: Record<string, any> = {
   admini: Users,
 };
 
-export type Postavka = { kljuc: string; href: string; label: string };
+// tudi: druge poti, ki spadajo pod isto postavko (npr. zavihki Prijavnice)
+export type Postavka = { kljuc: string; href: string; label: string; tudi?: string[] };
 export type Skupina = { label: string | null; postavke: Postavka[] };
 
 const LOGO =

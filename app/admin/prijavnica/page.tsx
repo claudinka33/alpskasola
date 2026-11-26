@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import PrijavnicaZavihki from "@/components/admin/PrijavnicaZavihki";
 import Link from "next/link";
 import RazvrstiSeznam from "@/components/admin/RazvrstiSeznam";
 import {
@@ -28,6 +30,15 @@ type Program = {
 };
 
 export default function PrijavnicaPage() {
+  return (
+    <Suspense fallback={null}>
+      <PrijavnicaVsebina />
+    </Suspense>
+  );
+}
+
+function PrijavnicaVsebina() {
+  const zavihek = useSearchParams().get("zavihek");
   const [programi, setProgrami] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [shranjujem, setShranjujem] = useState<string | null>(null);
@@ -88,16 +99,10 @@ export default function PrijavnicaPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2">
-          <ClipboardList size={26} className="text-brand-orange" /> Prijavnica
-        </h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Tukaj urejaš vse okoli javne prijavnice — kateri programi so na voljo, termini, rojstni dan in oddane prijave.
-        </p>
-      </div>
+      <PrijavnicaZavihki />
 
       {/* Programi na prijavnici */}
+      {zavihek !== "polja" && (
       <div className="bg-white rounded-2xl border border-slate-200/70 overflow-hidden mb-8">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div>
@@ -159,33 +164,11 @@ export default function PrijavnicaPage() {
         )}
       </div>
 
-      {/* Polja prijavnice po programih */}
-      <PoljaEditor programi={programi} />
+      )}
 
-      {/* Bližnjice */}
-      <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">
-        Uredi vsebino prijavnice
-      </h2>
-      <div className="grid sm:grid-cols-3 gap-4">
-        <Bliznjica
-          href="/admin/termini"
-          icon={CalendarDays}
-          naslov="Termini"
-          opis="Razpiši termine (npr. plavalni tečaj)."
-        />
-        <Bliznjica
-          href="/admin/rojstni-dan"
-          icon={Cake}
-          naslov="Rojstni dan"
-          opis="Uredi pakete in aktivnosti."
-        />
-        <Bliznjica
-          href="/admin/prijave"
-          icon={FileText}
-          naslov="Oddane prijave"
-          opis="Pregled prijav, statusi, izvoz."
-        />
-      </div>
+      {/* Polja prijavnice po programih */}
+      {zavihek === "polja" && <PoljaEditor programi={programi} />}
+
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import PrijavnicaZavihki from "@/components/admin/PrijavnicaZavihki";
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -129,6 +130,7 @@ export default function TerminiPage() {
 
   return (
     <div>
+      <PrijavnicaZavihki />
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">

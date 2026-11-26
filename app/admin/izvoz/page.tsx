@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download, Loader2, FileSpreadsheet, FileText } from "lucide-react";
+import { skupinaPrijave } from "@/lib/izvozPrijav";
 
 const programLabels: Record<string, string> = {
   "sola-smucanja": "Alpska šola smučanja",
@@ -69,6 +70,7 @@ export default function IzvozPage() {
   const [filterProgram, setFilterProgram] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   // Obdobje oddaje prijave (od–do), prazno = brez omejitve
+  const [skupina, setSkupina] = useState("");
   const [od, setOd] = useState("");
   const [doDatuma, setDoDatuma] = useState("");
 
@@ -98,7 +100,9 @@ export default function IzvozPage() {
     return () => clearTimeout(t);
   }, [iskanje, filterProgram, filterStatus]);
 
+  const skupine = Array.from(new Set(prijave.map(skupinaPrijave).filter(Boolean))).sort((a, b) => a.localeCompare(b, "sl"));
   const vObdobju = prijave.filter((p) => {
+    if (skupina && skupinaPrijave(p) !== skupina) return false;
     const d = (p.ustvarjeno || "").slice(0, 10);
     if (od && d < od) return false;
     if (doDatuma && d > doDatuma) return false;
@@ -113,6 +117,7 @@ export default function IzvozPage() {
       return {
         ID: p.id,
         Program: programLabels[p.program] || p.program,
+        "Skupina / termin": skupinaPrijave(p),
         "Otrok ime": p.otrok_ime,
         "Otrok priimek": p.otrok_priimek,
         Rojstvo: p.otrok_rojstvo ? new Date(p.otrok_rojstvo).toLocaleDateString("sl-SI") : "",
@@ -141,7 +146,7 @@ export default function IzvozPage() {
   const izvoziPdf = () => {
     setNapaka("");
     const vrstice = vrsticeZaIzvoz();
-    const stolpci = ["Program", "Otrok ime", "Otrok priimek", "Rojstvo", "Starš ime", "Starš priimek", "Telefon", "Email", "Vstopna točka", "Opomba / alergije", "Status", "Oddano"];
+    const stolpci = ["Program", "Skupina / termin", "Otrok ime", "Otrok priimek", "Rojstvo", "Starš ime", "Starš priimek", "Telefon", "Email", "Vstopna točka", "Opomba / alergije", "Status", "Oddano"];
     const esc = (v: any) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] as string));
     const html = `<!doctype html><html lang="sl"><head><meta charset="utf-8"><title>Prijave ${esc(obdobjeOpis())}</title>
 <style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,Helvetica,sans-serif;font-size:9px;color:#1B2733;margin:0}
@@ -171,7 +176,7 @@ ${vrstice.map((v: any) => `<tr>${stolpci.map((c) => `<td>${esc(v[c])}</td>`).joi
 
       const ws = XLSX.utils.json_to_sheet(data);
       ws["!cols"] = [
-        { wch: 6 }, { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 12 },
+        { wch: 6 }, { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 12 },
         { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 24 }, { wch: 14 },
         { wch: 20 }, { wch: 10 }, { wch: 20 }, { wch: 22 }, { wch: 40 }, { wch: 12 }, { wch: 18 },
       ];
@@ -185,7 +190,7 @@ ${vrstice.map((v: any) => `<tr>${stolpci.map((c) => `<td>${esc(v[c])}</td>`).joi
     }
   };
 
-  const aktivenFilter = iskanje || filterProgram || filterStatus || od || doDatuma;
+  const aktivenFilter = iskanje || filterProgram || filterStatus || skupina || od || doDatuma;
 
   return (
     <div className="max-w-3xl">
@@ -229,6 +234,16 @@ ${vrstice.map((v: any) => `<tr>${stolpci.map((c) => `<td>${esc(v[c])}</td>`).joi
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
+        <select
+          value={skupina}
+          onChange={(e) => setSkupina(e.target.value)}
+          className="px-4 py-2.5 rounded-lg border border-slate-200 text-sm bg-white focus:border-brand-orange outline-none"
+        >
+          <option value="">Vse skupine / termini</option>
+          {skupine.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
         <label className="flex items-center gap-1.5 text-sm text-slate-600">
           Od
           <input type="date" value={od} onChange={(e) => setOd(e.target.value)} className="px-2 py-2 rounded-lg border border-slate-200 text-sm bg-white" />
@@ -243,6 +258,7 @@ ${vrstice.map((v: any) => `<tr>${stolpci.map((c) => `<td>${esc(v[c])}</td>`).joi
               setIskanje("");
               setFilterProgram("");
               setFilterStatus("");
+              setSkupina("");
               setOd("");
               setDoDatuma("");
             }}

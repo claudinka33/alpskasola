@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
       const r = await sql`
         SELECT p.id, p.program, p.otrok_ime, p.otrok_priimek, p.otrok_rojstvo, p.starsi_ime, p.starsi_priimek,
                p.email, p.telefon, p.status, p.oznaka, p.termin, p.ustvarjeno,
+               p.otrok_znanje, p.naslov, p.posta, p.opomba, p.dodatno,
                COALESCE(pr.naziv, p.program) AS program_naziv
         FROM prijave p
         LEFT JOIN programi pr ON pr.slug = p.program
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
                OR p.starsi_ime ILIKE ${like} OR p.starsi_priimek ILIKE ${like}
                OR p.email ILIKE ${like} OR p.telefon ILIKE ${like})
         ORDER BY p.ustvarjeno DESC
-        LIMIT 500;`;
+        LIMIT 2000;`;
       const programi = await varno(
         async () =>
           (await sql`SELECT slug, naziv FROM programi ORDER BY COALESCE(vrstni_red, 9999), naziv;`).rows,

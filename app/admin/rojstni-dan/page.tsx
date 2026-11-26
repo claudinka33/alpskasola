@@ -1,5 +1,6 @@
 "use client";
 
+import PrijavnicaZavihki from "@/components/admin/PrijavnicaZavihki";
 import { useState, useEffect } from "react";
 import { Plus, Loader2, X, AlertCircle, Pencil, Trash2, Cake, Eye, EyeOff } from "lucide-react";
 
@@ -74,6 +75,7 @@ export default function RojstniDanPage() {
 
   return (
     <div>
+      <PrijavnicaZavihki />
       <h1 className="text-3xl font-extrabold text-brand-navy flex items-center gap-2 mb-1">
         <Cake size={26} className="text-brand-orange" /> Rojstni dan
       </h1>

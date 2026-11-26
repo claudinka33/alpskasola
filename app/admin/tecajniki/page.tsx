@@ -5,9 +5,10 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, ChevronRight, ArrowLeft, Pencil, Mail, Phone, Printer, ExternalLink, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronRight, ArrowLeft, Pencil, Mail, Phone, Printer, ExternalLink, Loader2, FileText, FileSpreadsheet } from "lucide-react";
+import { izvoziExcel, izvoziPdf, skupinaPrijave, vrsticeZaIzvoz, type PrijavaZaIzvoz } from "@/lib/izvozPrijav";
 
-type Vrstica = {
+type Vrstica = PrijavaZaIzvoz & {
   id: number; program: string; program_naziv: string; otrok_ime: string; otrok_priimek: string;
   otrok_rojstvo: string | null; starsi_ime: string; starsi_priimek: string; email: string; telefon: string;
   status: string; oznaka: string | null; termin: string | null; ustvarjeno: string;
@@ -308,6 +309,9 @@ function Tecajniki() {
   const izbranId = Number(sp.get("id") || 0);
   const [q, setQ] = useState(sp.get("q") || "");
   const [program, setProgram] = useState("");
+  const [skupina, setSkupina] = useState("");
+  const [status, setStatus] = useState("");
+  const [izvazam, setIzvazam] = useState(false);
   const [seznam, setSeznam] = useState<Vrstica[]>([]);
   const [programi, setProgrami] = useState<{ slug: string; naziv: string }[]>([]);
   const [nalagam, setNalagam] = useState(true);
@@ -348,8 +352,41 @@ function Tecajniki() {
     router.push(`/admin/tecajniki?${params}`, { scroll: false });
   };
 
-  // Programi, ki imajo v seznamu vsaj enega tečajnika, so prvi med filtri
   const filtri = useMemo(() => [{ slug: "", naziv: "Vsi" }, ...programi], [programi]);
+
+  // Skupine / termini v izbranem programu (iz oznak in terminov na prijavah)
+  const skupine = useMemo(
+    () => Array.from(new Set(seznam.map(skupinaPrijave).filter(Boolean))).sort((a, b) => a.localeCompare(b, "sl")),
+    [seznam]
+  );
+  useEffect(() => setSkupina(""), [program]);
+
+  const prikazan = useMemo(
+    () => seznam.filter((z) => (!skupina || skupinaPrijave(z) === skupina) && (!status || z.status === status)),
+    [seznam, skupina, status]
+  );
+
+  // Izvoz trenutnega seznama (po filtrih), razvrščen po priimku
+  const zaIzvoz = () =>
+    [...prikazan].sort((a, b) => `${a.otrok_priimek} ${a.otrok_ime}`.localeCompare(`${b.otrok_priimek} ${b.otrok_ime}`, "sl"));
+  const naslovIzvoza = () => {
+    const prog = programi.find((x) => x.slug === program)?.naziv;
+    return [prog || "Vsi programi", skupina].filter(Boolean).join(" — ");
+  };
+  const excel = async () => {
+    setIzvazam(true);
+    try {
+      await izvoziExcel(vrsticeZaIzvoz(zaIzvoz()), naslovIzvoza());
+    } catch (e: any) {
+      alert(e?.message || "Izvoz ni uspel.");
+    } finally {
+      setIzvazam(false);
+    }
+  };
+  const pdf = () => {
+    const ok = izvoziPdf(vrsticeZaIzvoz(zaIzvoz()), `Alpska šola — ${naslovIzvoza()}`, q.trim() ? `Iskanje: ${q.trim()}` : "");
+    if (!ok) alert("Brskalnik je blokiral novo okno. Dovoli pojavna okna za to stran in poskusi znova.");
+  };
   const aktivenId = izbranId || 0;
 
   return (
@@ -363,8 +400,7 @@ function Tecajniki() {
           <div className="flex items-center justify-between">
             <h1 className="text-[13px] font-bold text-brand-navy">Tečajniki</h1>
             <span className="flex items-center gap-2 text-[11px] text-[#5B6B7B]">
-              {nalagam ? "…" : `${seznam.length} zapisov`}
-              <Link href="/admin/izvoz" className="text-brand-navy underline decoration-[#C9D2DD] underline-offset-2 hover:text-[#C2410C]">Izvoz</Link>
+              {nalagam ? "…" : `${prikazan.length} zapisov`}
             </span>
           </div>
           <input
@@ -384,11 +420,45 @@ function Tecajniki() {
               <option key={f.slug} value={f.slug}>{f.slug ? f.naziv : "Vsi programi"}</option>
             ))}
           </select>
+          <div className="grid grid-cols-2 gap-1.5">
+            <select
+              value={skupina}
+              onChange={(e) => setSkupina(e.target.value)}
+              aria-label="Filter po skupini ali terminu"
+              className="h-8 min-w-0 rounded border border-[#C9D2DD] bg-white px-1.5 text-[12px]"
+            >
+              <option value="">Vse skupine / termini</option>
+              {skupine.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              aria-label="Filter po statusu"
+              className="h-8 min-w-0 rounded border border-[#C9D2DD] bg-white px-1.5 text-[12px]"
+            >
+              <option value="">Vsi statusi</option>
+              {Object.entries(STATUSI).map(([k, v]) => (
+                <option key={k} value={k}>{v.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] text-[#5B6B7B]">Izvozi seznam:</span>
+            <button onClick={pdf} disabled={nalagam || prikazan.length === 0} className="inline-flex h-7 items-center gap-1 rounded border border-[#C9D2DD] bg-white px-2 text-[12px] text-brand-navy hover:border-brand-navy disabled:opacity-40">
+              <FileText size={12} /> PDF
+            </button>
+            <button onClick={excel} disabled={izvazam || nalagam || prikazan.length === 0} className="inline-flex h-7 items-center gap-1 rounded border border-[#C9D2DD] bg-white px-2 text-[12px] text-brand-navy hover:border-brand-navy disabled:opacity-40">
+              {izvazam ? <Loader2 size={12} className="animate-spin" /> : <FileSpreadsheet size={12} />} Excel
+            </button>
+            <Link href="/admin/izvoz" className="ml-auto text-[11px] text-[#5B6B7B] underline decoration-[#C9D2DD] underline-offset-2 hover:text-[#C2410C]">Po datumu</Link>
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto">
           {napaka && <div className="p-3 text-[12px] text-[#991B1B]">{napaka}</div>}
-          {!napaka && !nalagam && seznam.length === 0 && <div className="p-3 text-[12px] text-[#5B6B7B]">Ni zadetkov.</div>}
-          {seznam.map((z) => (
+          {!napaka && !nalagam && prikazan.length === 0 && <div className="p-3 text-[12px] text-[#5B6B7B]">Ni zadetkov.</div>}
+          {prikazan.map((z) => (
             <button
               key={z.id}
               onClick={() => odpri(z.id)}

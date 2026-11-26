@@ -13,12 +13,14 @@ import {
 } from "lucide-react";
 import type { Skupina } from "./Meni";
 
+// Ikona po poti modula (zadnji del naslova)
 const IKONE: Record<string, any> = {
-  pregled: LayoutDashboard, tecajniki: UserRound, prijavnica: ClipboardList, email: Mail, prijave: FileText,
+  admin: LayoutDashboard, tecajniki: UserRound, prijavnica: ClipboardList, email: Mail, prijave: FileText,
   izvoz: FileDown, prisotnost: CheckCircle2, placila: Euro, ure: Clock, ekipa: Mountain, kontakti: Contact,
-  kampanje: Send, datoteke: HardDrive, termini: CalendarDays, cenik: Tag, galerija: Images,
-  "rojstni-dan": Cake, programi: Settings, admini: Users,
+  kampanje: Send, datoteke: HardDrive, termini: ClipboardList, cenik: Tag, galerija: Images,
+  "rojstni-dan": ClipboardList, programi: Settings, admini: Users,
 };
+const ikona = (href: string) => IKONE[href.split("/").filter(Boolean).pop() || "admin"] || FileText;
 
 export default function Lupina({
   skupine, ime, vloga, children,
@@ -35,10 +37,12 @@ export default function Lupina({
   }, [odprt]);
 
   const vse = skupine.flatMap((s) => s.postavke);
+  const ujema = (h: string) => pot === h || pot.startsWith(h + "/");
   const trenutna = vse
-    .filter((p) => pot === p.href || pot.startsWith(p.href + "/"))
+    .filter((p) => ujema(p.href) || (p.tudi || []).some(ujema))
     .sort((a, b) => b.href.length - a.href.length)[0];
   const ima = (k: string) => vse.some((p) => p.kljuc === k);
+  const imaPot = (h: string) => vse.some((p) => p.href === h);
 
   const isci = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +61,7 @@ export default function Lupina({
               </div>
             )}
             {s.postavke.map((p) => {
-              const Ikona = IKONE[p.kljuc] || FileText;
+              const Ikona = ikona(p.href);
               const aktiven = trenutna?.href === p.href;
               return (
                 <Link
@@ -81,9 +85,9 @@ export default function Lupina({
   );
 
   const spodaj = [
-    ima("tecajniki") ? { href: "/admin/tecajniki", label: "Tečajniki", Ikona: UserRound } : { href: "/admin", label: "Pregled", Ikona: LayoutDashboard },
-    ima("prisotnost") ? { href: "/admin/prisotnost", label: "Prisotnost", Ikona: CheckCircle2 } : null,
-    ima("placila") ? { href: "/admin/placila", label: "Plačila", Ikona: Euro } : null,
+    imaPot("/admin/tecajniki") ? { href: "/admin/tecajniki", label: "Tečajniki", Ikona: UserRound } : { href: "/admin", label: "Pregled", Ikona: LayoutDashboard },
+    imaPot("/admin/prisotnost") ? { href: "/admin/prisotnost", label: "Prisotnost", Ikona: CheckCircle2 } : null,
+    imaPot("/admin/placila") ? { href: "/admin/placila", label: "Plačila", Ikona: Euro } : null,
   ];
 
   return (
