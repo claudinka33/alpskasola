@@ -2,7 +2,11 @@ import { pridobiAdminaSPravicami } from "@/lib/auth";
 import { imaPravico, smeNaPot, jeAdmin } from "@/lib/pravice";
 import { headers } from "next/headers";
 import Link from "next/link";
-import Meni, { type Skupina } from "./Meni";
+import { type Skupina } from "./Meni";
+import Lupina from "./Lupina";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-admin" });
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await pridobiAdminaSPravicami();
@@ -17,11 +21,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const skupine: Skupina[] = [
     { label: null, postavke: [{ kljuc: "pregled", href: "/admin", label: "Pregled" }] },
     {
+      label: "Šola",
+      postavke: [
+        // Kartica tečajnika (master–detail) — vidi jo, kdor vidi oddane prijave
+        ...(vidi("prijave") ? [{ kljuc: "tecajniki", href: "/admin/tecajniki", label: "Tečajniki" }] : []),
+      ],
+    },
+    {
       label: "Prijavnica",
       postavke: [
         { kljuc: "prijavnica", href: "/admin/prijavnica", label: "Nastavitve prijavnice" },
         { kljuc: "email", href: "/admin/email", label: "Sporočilo staršem" },
         { kljuc: "prijave", href: "/admin/prijave", label: "Oddane prijave" },
+        { kljuc: "izvoz", href: "/admin/izvoz", label: "Izvoz (PDF, Excel)" },
       ].filter((p) => vidi(p.kljuc)),
     },
     {
@@ -64,10 +76,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   ];
 
   return (
-    <div data-admin className="min-h-screen bg-slate-50 lg:flex overflow-x-hidden">
-      <Meni skupine={skupine} ime={admin.ime} vloga={admin.vloga} />
-
-      <main className="flex-1 min-w-0 max-w-full p-4 sm:p-6 lg:p-8">
+    <div className={inter.variable}>
+      <Lupina skupine={skupine} ime={admin.ime} vloga={admin.vloga}>
         {sme ? (
           children
         ) : (
@@ -84,7 +94,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
           </div>
         )}
-      </main>
+      </Lupina>
     </div>
   );
 }

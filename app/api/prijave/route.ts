@@ -3,8 +3,13 @@ import { ustvariPrijavo, pridobiPrijave, pridobiProgrami, pridobiFormPolja, upse
 import { oznakeZaPrijavo, zagotoviModule } from "@/lib/moduli";
 import { posljiPotrditevStarsu, posljiObvestiloSoli } from "@/lib/email";
 import { zagotoviTabele } from "@/lib/migracije";
+import { pridobiTrenutniAdmin } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
+  // Seznam prijav (podatki otrok in staršev) sme brati samo prijavljen uporabnik admina
+  if (!(await pridobiTrenutniAdmin())) {
+    return NextResponse.json({ error: "Ni dostopa" }, { status: 401 });
+  }
   try {
     const { searchParams } = new URL(req.url);
     const program = searchParams.get("program") || undefined;

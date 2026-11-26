@@ -112,3 +112,66 @@ img {
     box-shadow: none !important;
   }
 }
+
+/* ==========================================================================
+   ADMIN — kompakten ERP slog (velja samo znotraj .erp, javna stran ostane enaka)
+   Pomanjša pisavo, razmike in zaobljenost na vseh obstoječih straneh admina,
+   brez spreminjanja njihove logike (shranjevanje, e-pošta, pošiljanje).
+   ========================================================================== */
+.erp { font-family: var(--font-admin), Inter, system-ui, sans-serif; font-size: 12.5px; }
+.erp main :is(input, select, textarea, button) { font-family: inherit; }
+
+/* Pisava */
+.erp main .text-base { font-size: 13px; line-height: 1.45; }
+.erp main .text-sm { font-size: 12.5px; line-height: 1.45; }
+.erp main .text-xs { font-size: 11.5px; line-height: 1.4; }
+.erp main .text-lg { font-size: 14px; line-height: 1.35; }
+.erp main .text-xl { font-size: 15px; line-height: 1.3; }
+.erp main :is(.text-2xl, .sm\:text-2xl, .md\:text-2xl, .lg\:text-2xl) { font-size: 16px; line-height: 1.3; }
+.erp main :is(.text-3xl, .sm\:text-3xl, .md\:text-3xl, .lg\:text-3xl, .text-4xl, .lg\:text-4xl) { font-size: 18px; line-height: 1.25; }
+.erp main :is(.font-extrabold) { font-weight: 700; }
+.erp main h1 { letter-spacing: 0; }
+
+/* Zaobljenost — ostrejši, poslovni robovi */
+.erp main :is(.rounded-3xl, .rounded-2xl, .rounded-xl) { border-radius: 6px; }
+.erp main .rounded-lg { border-radius: 4px; }
+
+/* Gostejši razmiki */
+.erp main .p-8 { padding: 16px; }
+.erp main .p-6 { padding: 12px; }
+.erp main .p-5 { padding: 10px; }
+.erp main .p-4 { padding: 9px; }
+.erp main .px-6 { padding-left: 12px; padding-right: 12px; }
+.erp main .px-5 { padding-left: 11px; padding-right: 11px; }
+.erp main .px-4 { padding-left: 10px; padding-right: 10px; }
+.erp main .py-16 { padding-top: 28px; padding-bottom: 28px; }
+.erp main .py-12 { padding-top: 22px; padding-bottom: 22px; }
+.erp main .py-5 { padding-top: 10px; padding-bottom: 10px; }
+.erp main .py-4 { padding-top: 8px; padding-bottom: 8px; }
+.erp main .py-3\.5 { padding-top: 7px; padding-bottom: 7px; }
+.erp main .py-3 { padding-top: 6px; padding-bottom: 6px; }
+.erp main .py-2\.5 { padding-top: 5px; padding-bottom: 5px; }
+.erp main .mb-8 { margin-bottom: 14px; }
+.erp main .mb-6 { margin-bottom: 12px; }
+.erp main .mb-5 { margin-bottom: 10px; }
+.erp main .mb-4 { margin-bottom: 9px; }
+.erp main .mt-8 { margin-top: 14px; }
+.erp main .mt-6 { margin-top: 12px; }
+.erp main .gap-6 { gap: 12px; }
+.erp main .gap-4 { gap: 9px; }
+.erp main .space-y-6 > * + * { margin-top: 12px; }
+.erp main .space-y-4 > * + * { margin-top: 9px; }
+
+/* Kartice in tabele — enoten slog */
+.erp main :is(.border-slate-200\/70, .border-slate-200) { border-color: #DDE3EA; }
+.erp main .bg-slate-50 { background-color: #F6F8FB; }
+.erp main table { font-size: 12px; }
+.erp main :is(th) { font-size: 10.5px; letter-spacing: .04em; color: #5B6B7B; }
+.erp main :is(td, th) { padding-top: 5px; padding-bottom: 5px; }
+.erp main :is(.shadow-lg, .shadow-xl, .shadow-2xl) { box-shadow: 0 1px 2px rgba(12, 35, 64, .08); }
+
+/* Telefon: nič ne sme štrleti vstran */
+@media (max-width: 1023px) {
+  .erp main { overflow-x: clip; }
+  .erp main table { display: block; max-width: 100%; overflow-x: auto; }
+}
