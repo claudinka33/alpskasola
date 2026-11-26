@@ -186,7 +186,7 @@ function Naslov({ znacka, naslov }: { znacka: string; naslov: string }) {
 
 export default function Programs() {
   return (
-    <section id="programi" className="scroll-mt-24 bg-white py-14 lg:py-20">
+    <section id="programi" className="scroll-mt-24 lg:scroll-mt-40 bg-white py-14 lg:py-20">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 2xl:max-w-[88rem]">
         <div className="mb-10 text-center lg:mb-14">
           <div className="mb-3 inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-brand-orange">

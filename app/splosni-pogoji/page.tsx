@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 function Naslov({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-2xl font-extrabold text-brand-navy mt-10 mb-3 scroll-mt-24">
+    <h2 className="text-2xl font-extrabold text-brand-navy mt-10 mb-3 scroll-mt-24 lg:scroll-mt-40">
       {children}
     </h2>
   );
