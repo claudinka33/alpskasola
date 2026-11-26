@@ -81,6 +81,7 @@ export async function zagotoviVsebino() {
     await uvoziVstopnoTockoAvtobus("avtobus-vstopna-tocka-mini-v1", ["mini-alpska-sola"]);
     await zima2027Podatki();
     await zima2027CenikV2();
+    await prijavnicaAlergije();
   } catch (e) {
     console.error("uvoz vstopne točke:", e);
   }
@@ -324,6 +325,25 @@ async function zima2027CenikV2() {
   await sql`
     UPDATE cenik SET vkljuceno = ${"7 sobot, zadnja z zaključno prireditvijo\nStarost 4 – 6 let\nZačnemo v soboto, 9. 1. 2027\nSobote 9.30 – 13.00 (odmor s starši 11.00 – 11.30)\nZbirno mesto: vrh Uniorčka (brez avtobusa)\nMedalja in FIS brošura\nKarta ni v paketu — pri nas 29 € ~~32 €~~"}
     WHERE naziv ILIKE '%MINI%';`;
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Prijavnica: alergije vidne pri Alpski šoli smučanja in bordanja (kosilo v hotelu)
+async function prijavnicaAlergije() {
+  const KLJUC = "prijavnica-alergije-v1";
+  if (await seedOpravljen(KLJUC)) return;
+  await zagotoviTabele();
+  for (const slug of ["sola-smucanja", "tecaj-bordanja"]) {
+    await zagotoviPoljaZaProgram(slug);
+    const max = await sql`SELECT COALESCE(MAX(vrstni_red), 0)::int AS m FROM form_polja WHERE program_slug = ${slug};`;
+    await sql`
+      INSERT INTO form_polja (program_slug, kljuc, label, tip, moznosti, obvezno, viden, vrstni_red, sistemsko)
+      VALUES (${slug}, 'alergije', 'Alergije', 'textarea', NULL, false, true, ${max.rows[0].m + 1}, true)
+      ON CONFLICT (program_slug, kljuc) DO UPDATE SET viden = true, tip = 'textarea';`;
+  }
+  await sql`
+    UPDATE form_polja SET moznosti = 'Celje (Zlatorog), Arclin (avtobusna postaja), Frankolovo (avtobusna postaja), Zreče (avtobusna postaja), Brez avtobusa (pridemo sami na Roglo)'
+    WHERE kljuc = 'vstopna_tocka' AND program_slug IN ('sola-smucanja', 'tecaj-bordanja');`;
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 

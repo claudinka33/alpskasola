@@ -54,6 +54,14 @@ const PRIVZETA_POLJA: FormPolje[] = [
   { kljuc: "opomba", label: "Opomba", tip: "textarea", moznosti: null, obvezno: false },
 ];
 
+// Ure odhoda avtobusa po postajah (ujemanje po začetku imena postaje)
+const VOZNI_RED: [string, string][] = [
+  ["celje", "7.30"],
+  ["arclin", "7.40"],
+  ["frankolovo", "7.50"],
+  ["zreče", "8.00"],
+];
+
 function PrijavnaStranContent() {
   const searchParams = useSearchParams();
   const initialProgram = searchParams.get("program") || "";
@@ -148,9 +156,19 @@ function PrijavnaStranContent() {
   }, [form.program]);
 
   const polje = (kljuc: string) => polja.find((p) => p.kljuc === kljuc);
+  // Avtobus, alergije in karta so v svojem okvirju pod programom
+  const POSEBNA = ["vstopna_tocka", "alergije", "karta"];
+  const poljeAvtobus = polje("vstopna_tocka");
+  const poljeAlergije = polje("alergije");
+  const poljeKarta = polje("karta");
   const ostalaPolja = polja.filter(
-    (p) => !["otrok_znanje", "naslov", "posta"].includes(p.kljuc)
+    (p) => !["otrok_znanje", "naslov", "posta", ...POSEBNA].includes(p.kljuc)
   );
+  const nastaviDodatno = (k: string, v: string) => setDodatnoVal((prev) => ({ ...prev, [k]: v }));
+  const postaje = (poljeAvtobus?.moznosti || "")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
 
   useEffect(() => {
     // Samo programi, ki so v CRM označeni kot "Na prijavnici"
@@ -328,6 +346,85 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* AVTOBUS, KOSILO, KARTA (Alpska šola smučanja / bordanja, Mini) */}
+            {(poljeAvtobus || poljeAlergije || poljeKarta) && !jeRojstniDan && (
+              <div className="mb-6 bg-sky-50 border-2 border-sky-200 rounded-xl p-5 space-y-5">
+                {poljeAvtobus && (
+                  <div>
+                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">🚌 Avtobus na Roglo</h2>
+                    <p className="text-sm text-slate-600 mb-3">
+                      Avtobus pelje vsako soboto zjutraj na Roglo in ob <strong className="text-brand-navy">15.05</strong> z Rogle nazaj. Označite, kje bo otrok vstopil.
+                    </p>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      {postaje.map((m) => {
+                        const izbrana = dodatnoVal.vstopna_tocka === m;
+                        const ura = VOZNI_RED.find(([kraj]) => m.toLowerCase().startsWith(kraj))?.[1];
+                        const brez = m.toLowerCase().startsWith("brez");
+                        return (
+                          <label
+                            key={m}
+                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-3 cursor-pointer transition-colors ${
+                              izbrana ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
+                            } ${brez ? "sm:col-span-2" : ""}`}
+                          >
+                            <input
+                              type="radio"
+                              name="vstopna_tocka"
+                              value={m}
+                              checked={izbrana}
+                              required={poljeAvtobus.obvezno}
+                              onChange={() => nastaviDodatno("vstopna_tocka", m)}
+                              className="w-4 h-4 accent-brand-orange shrink-0"
+                            />
+                            <span className="flex-1 text-sm font-medium text-brand-navy">{m}</span>
+                            {ura && <span className="text-sm font-bold text-brand-navy tabular-nums">{ura}</span>}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {poljeKarta && (
+                  <div>
+                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">🎿 Smučarska karta</h2>
+                    <p className="text-sm text-slate-600 mb-3">Karta ni vključena v paket. Pri nas jo dobite po promocijski ceni.</p>
+                    <label
+                      className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-3 cursor-pointer transition-colors ${
+                        dodatnoVal.karta === "Da" ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={dodatnoVal.karta === "Da"}
+                        required={poljeKarta.obvezno}
+                        onChange={(e) => nastaviDodatno("karta", e.target.checked ? "Da" : "")}
+                        className="w-4 h-4 accent-brand-orange shrink-0"
+                      />
+                      <span className="flex-1 text-sm font-medium text-brand-navy">Da, želim karto</span>
+                      <span className="text-sm font-bold text-brand-navy">29 €</span>
+                      <s className="text-sm text-slate-400 decoration-red-500/70 decoration-2">32 €</s>
+                    </label>
+                  </div>
+                )}
+
+                {poljeAlergije && (
+                  <div>
+                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">🍽️ Kosilo in alergije</h2>
+                    <p className="text-sm text-slate-600 mb-3">Za kosilo v hotelu nam sporočite alergije, prehranske omejitve ali zdravstvene posebnosti otroka.</p>
+                    <textarea
+                      value={dodatnoVal.alergije || ""}
+                      onChange={(e) => nastaviDodatno("alergije", e.target.value)}
+                      required={poljeAlergije.obvezno}
+                      rows={2}
+                      placeholder="npr. alergija na oreščke, brez laktoze … (če ni ničesar, pustite prazno)"
+                      className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y bg-white"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
