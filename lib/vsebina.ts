@@ -80,6 +80,7 @@ export async function zagotoviVsebino() {
     await uvoziVstopnoTockoAvtobus("avtobus-vstopna-tocka-v1", ["sola-smucanja", "tecaj-bordanja"]);
     await uvoziVstopnoTockoAvtobus("avtobus-vstopna-tocka-mini-v1", ["mini-alpska-sola"]);
     await zima2027Podatki();
+    await zima2027CenikV2();
   } catch (e) {
     console.error("uvoz vstopne točke:", e);
   }
@@ -309,6 +310,20 @@ async function zima2027Podatki() {
       ON CONFLICT (program_slug, kljuc) DO NOTHING;`;
   }
 
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Cenik: vozni red avtobusa v paketu in prečrtana redna cena karte
+async function zima2027CenikV2() {
+  const KLJUC = "zima-2027-cenik-v2";
+  if (await seedOpravljen(KLJUC)) return;
+  await sql`
+    UPDATE cenik SET vkljuceno = ${"8 sobot od 9h do 15h, z zaključno prireditvijo\nZačnemo v soboto, 9. 1. 2027\nAvtobus: Celje (Zlatorog) 7.30 · Arclin 7.40 · Frankolovo 7.50 · Zreče 8.00\nPovratek: avtobus z Rogle ob 15.05\nKosilo v hotelu Planja\nMedalja + FIS brošura\nKarta ni v paketu — pri nas 29 € ~~32 €~~"}
+    WHERE naziv NOT ILIKE '%MINI%'
+      AND (naziv ILIKE '%ŠOLA SMUČANJA%' OR naziv ILIKE '%ŠOLA BORDANJA%' OR naziv ILIKE '%TEČAJ BORDANJA%' OR naziv ILIKE '%TEČAJ SMUČANJA%');`;
+  await sql`
+    UPDATE cenik SET vkljuceno = ${"7 sobot, zadnja z zaključno prireditvijo\nStarost 4 – 6 let\nZačnemo v soboto, 9. 1. 2027\nSobote 9.30 – 13.00 (odmor s starši 11.00 – 11.30)\nZbirno mesto: vrh Uniorčka (brez avtobusa)\nMedalja in FIS brošura\nKarta ni v paketu — pri nas 29 € ~~32 €~~"}
+    WHERE naziv ILIKE '%MINI%';`;
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 

@@ -301,7 +301,7 @@ export default async function CenikSekcija({
                             velika ? b.tekst : "text-brand-orange"
                           }`}
                         />
-                        <span className="text-slate-700">{v}</span>
+                        <span className="text-slate-700">{sPrecrtanim(v)}</span>
                       </li>
                     ))}
                   </ul>
@@ -337,5 +337,18 @@ export default async function CenikSekcija({
         )}
       </div>
     </section>
+  );
+}
+
+// "~~32 €~~" v vrstici cenika se izpiše prečrtano (npr. redna cena)
+function sPrecrtanim(t: string) {
+  return t.split(/(~~[^~]+~~)/g).map((del, i) =>
+    del.startsWith("~~") && del.endsWith("~~") ? (
+      <s key={i} className="text-slate-400 decoration-red-500/70 decoration-2">
+        {del.slice(2, -2)}
+      </s>
+    ) : (
+      del
+    )
   );
 }

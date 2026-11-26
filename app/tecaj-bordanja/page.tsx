@@ -91,7 +91,7 @@ const vsebina: TecajVsebina = {
     },
     {
       v: "Kaj potrebujejo otroci s sabo?",
-      o: "Desko z vezmi, čevlje za bordanje, čelado, očala in rokavice. Priporočamo tudi ščitnike za zapestja. Opremo si lahko izposodite pri nas.",
+      o: "Desko z vezmi, čevlje za bordanje, čelado, očala in rokavice. Priporočamo tudi ščitnike za zapestja. Opremo si lahko izposodite pri nas. V nahrbtniku naj imajo rezervne rokavice, dodatne nogavice, nekaj suhega za preobleči in prigrizek.",
     },
     {
       v: "Kje imajo otroci kosilo?",
