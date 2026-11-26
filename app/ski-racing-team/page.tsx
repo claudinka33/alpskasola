@@ -5,6 +5,7 @@ import PageHero from "@/components/PageHero";
 import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
+import GalerijaSekcija from "@/components/GalerijaSekcija";
 import { Trophy, Target, Users, Award } from "lucide-react";
 
 // Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
@@ -81,7 +82,7 @@ export default function SkiRacingTeamPage() {
             </p>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-brand-navy/10 aspect-video">
-            <img src="/tekmovalna_1.JPG" alt="Tekmovalne ekipe" className="w-full h-full object-cover" />
+            <img src="/tekmovalci/14.jpg" alt="Tekmovalne ekipe" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -140,6 +141,54 @@ export default function SkiRacingTeamPage() {
           </div>
         </div>
       </section>
+
+      {/* Galerija fotografij — ureja se v CMS: /admin/galerija */}
+      <GalerijaSekcija
+        programSlug="ski-racing-team"
+        samo="slike"
+        fotoNaslov="Utrinki tekmovalne ekipe"
+        fotoPodnaslov="Priprave na ledeniku, tekme, stopničke in ekipa, ki drži skupaj — tako je videti sezona z nami."
+        privzeteSlike={[
+      { url: "/tekmovalci/14.jpg", naslov: "Priprave na ledeniku", w: 1400, h: 1050, velika: true },
+      { url: "/tekmovalci/22.jpg", naslov: "Med vratci", w: 1400, h: 933 },
+      { url: "/tekmovalci/01.jpg", naslov: "Pozdrav z ledenika", w: 1050, h: 1400 },
+      { url: "/tekmovalci/19.jpg", naslov: "Zmagovalna ekipa", w: 1400, h: 933, velika: true },
+      { url: "/tekmovalci/05.jpg", naslov: "Na stopničkah", w: 787, h: 1400 },
+      { url: "/tekmovalci/07.jpg", naslov: "Pred startom", w: 1050, h: 1400 },
+      { url: "/tekmovalci/17.jpg", naslov: "Na vrhu z ekipo", w: 1400, h: 1050, velika: true },
+      { url: "/tekmovalci/23.jpg", naslov: "Hitro skozi vratca", w: 1400, h: 933 },
+      { url: "/tekmovalci/13.jpg", naslov: "Ena ekipa", w: 787, h: 1400 },
+      { url: "/tekmovalci/30.jpg", naslov: "Pokal Vitranc", w: 1050, h: 1400 },
+      { url: "/tekmovalci/18.jpg", naslov: "Saalbach, prizorišče SP 2025", w: 1400, h: 1050, velika: true },
+      { url: "/tekmovalci/26.jpg", naslov: "Veleslalom", w: 1400, h: 933 },
+      { url: "/tekmovalci/04.jpg", naslov: "S trenerko po tekmi", w: 1400, h: 933 },
+      { url: "/tekmovalci/10.jpg", naslov: "Na poti na priprave", w: 1400, h: 1050, velika: true },
+      { url: "/tekmovalci/25.jpg", naslov: "Polna koncentracija", w: 1400, h: 933 },
+      { url: "/tekmovalci/15.jpg", naslov: "Nasmejani na ledeniku", w: 1050, h: 1400 },
+      { url: "/tekmovalci/36.jpg", naslov: "Na startu", w: 1050, h: 1400 },
+      { url: "/tekmovalci/03.jpg", naslov: "V coni za start", w: 1400, h: 933 },
+      { url: "/tekmovalci/24.jpg", naslov: "Na tekmi", w: 1400, h: 933 },
+      { url: "/tekmovalci/06.jpg", naslov: "Medalja in prijateljstvo", w: 1050, h: 1400 },
+      { url: "/tekmovalci/34.jpg", naslov: "Ekipa pred startom", w: 1400, h: 1050 },
+      { url: "/tekmovalci/28.jpg", naslov: "Obisk skakalnice", w: 1050, h: 1400 },
+      { url: "/tekmovalci/02.jpg", naslov: "Pripravljena na slalom", w: 720, h: 960 },
+      { url: "/tekmovalci/27.jpg", naslov: "V zavoju", w: 1400, h: 933 },
+      { url: "/tekmovalci/08.jpg", naslov: "Pred startom na Argeta Junior", w: 1050, h: 1400 },
+      { url: "/tekmovalci/12.jpg", naslov: "Trening na ledeniku", w: 1400, h: 1050 },
+      { url: "/tekmovalci/33.jpg", naslov: "Druženje po treningu", w: 1400, h: 1050 },
+      { url: "/tekmovalci/29.jpg", naslov: "Trening v Kranjski Gori", w: 1050, h: 1400 },
+      { url: "/tekmovalci/31.jpg", naslov: "Najmlajša na tekmi", w: 1050, h: 1400 },
+      { url: "/tekmovalci/09.jpg", naslov: "Ogled proge", w: 1050, h: 1400 },
+      { url: "/tekmovalci/20.jpg", naslov: "Podelitev diplom", w: 1400, h: 933 },
+      { url: "/tekmovalci/35.jpg", naslov: "Prva tekma", w: 1050, h: 1400 },
+      { url: "/tekmovalci/16.jpg", naslov: "Skupaj na progi", w: 720, h: 960 },
+      { url: "/tekmovalci/32.jpg", naslov: "Pokal Vitranc v Kranjski Gori", w: 1050, h: 1400 },
+      { url: "/tekmovalci/11.jpg", naslov: "Ekipa na poti", w: 787, h: 1400 },
+      { url: "/tekmovalci/37.jpg", naslov: "Čaka na start", w: 1050, h: 1400 },
+      { url: "/tekmovalci/21.jpg", naslov: "Slalomista", w: 1050, h: 1400 },
+      { url: "/tekmovalci/38.jpg", naslov: "Start z razgledom", w: 1050, h: 1400 },
+        ]}
+      />
 
       {/* Kontakt vodje */}
       <section className="bg-blue-50/40 py-14 border-t border-blue-100">

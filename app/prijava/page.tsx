@@ -349,6 +349,18 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
               </div>
             )}
 
+            {/* Otrok */}
+            <div className="mb-5">
+              <h2 className="text-base font-bold text-brand-navy mb-2">
+                {jeRojstniDan ? "2. Slavljenec" : "2. Otrok"}
+              </h2>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <F label="Ime *" value={form.otrok_ime} onChange={(v) => update("otrok_ime", v)} required />
+                <F label="Priimek *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
+                <F label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
+              </div>
+            </div>
+
             {/* AVTOBUS, KOSILO, KARTA (Alpska šola smučanja / bordanja, Mini) */}
             {(poljeAvtobus || poljeAlergije || poljeKarta || polje("otrok_znanje")) && !jeRojstniDan && (
               <div className="mb-5 bg-sky-50 border-2 border-sky-200 rounded-xl p-4 space-y-5">
@@ -522,18 +534,6 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                 </div>
               </div>
             )}
-
-            {/* Otrok */}
-            <div className="mb-5">
-              <h2 className="text-base font-bold text-brand-navy mb-2">
-                {jeRojstniDan ? "2. Slavljenec" : "2. Otrok"}
-              </h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <F label="Ime *" value={form.otrok_ime} onChange={(v) => update("otrok_ime", v)} required />
-                <F label="Priimek *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
-                <F label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
-              </div>
-            </div>
 
             {/* Starš */}
             <div className="mb-5">
