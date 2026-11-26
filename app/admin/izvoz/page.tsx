@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ArrowLeft, Download, Loader2, FileSpreadsheet } from "lucide-react";
 
 const programLabels: Record<string, string> = {
-  "sola-smucanja": "Tečaj smučanja",
-  "tecaj-bordanja": "Tečaj bordanja",
+  "sola-smucanja": "Alpska šola smučanja",
+  "tecaj-bordanja": "Alpska šola bordanja",
   "mini-alpska-sola": "Mini alpska šola",
   "ski-racing-team": "Tekmovalne ekipe",
   "smucarska-akademija": "Akademija",

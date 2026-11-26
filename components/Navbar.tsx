@@ -9,8 +9,8 @@ const navLinks = [
   {
     label: "Programi",
     dropdown: [
-      { href: "/sola-smucanja", label: "⛷️ Tečaj smučanja" },
-      { href: "/tecaj-bordanja", label: "🏂 Tečaj bordanja" },
+      { href: "/sola-smucanja", label: "⛷️ Alpska šola smučanja" },
+      { href: "/tecaj-bordanja", label: "🏂 Alpska šola bordanja" },
       { href: "/mini-alpska-sola", label: "🎿 Mini alpska šola" },
       { href: "/smucarska-akademija", label: "🎓 Akademija" },
       { href: "/ski-racing-team", label: "🏆 Tekmovalne ekipe" },
@@ -112,8 +112,8 @@ export default function Navbar() {
               <Link href="/o-nas" onClick={() => setOpen(false)} className="text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">O nas</Link>
               <div className="border-t border-slate-100 pt-2 mt-1">
                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2 mb-1">Programi</div>
-                <Link href="/sola-smucanja" onClick={() => setOpen(false)} className="block text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">⛷️ Tečaj smučanja</Link>
-                <Link href="/tecaj-bordanja" onClick={() => setOpen(false)} className="block text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">🏂 Tečaj bordanja</Link>
+                <Link href="/sola-smucanja" onClick={() => setOpen(false)} className="block text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">⛷️ Alpska šola smučanja</Link>
+                <Link href="/tecaj-bordanja" onClick={() => setOpen(false)} className="block text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">🏂 Alpska šola bordanja</Link>
                 <Link href="/mini-alpska-sola" onClick={() => setOpen(false)} className="block text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">🎿 Mini alpska šola</Link>
                 <Link href="/smucarska-akademija" onClick={() => setOpen(false)} className="block text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">🎓 Akademija</Link>
                 <Link href="/ski-racing-team" onClick={() => setOpen(false)} className="block text-base font-medium text-brand-navy py-2.5 px-2 rounded-lg hover:bg-orange-50">🏆 Tekmovalne ekipe</Link>

@@ -73,12 +73,12 @@ export default function Footer() {
                   href="/sola-smucanja"
                   className="hover:text-brand-orange transition-colors"
                 >
-                  Tečaj smučanja
+                  Alpska šola smučanja
                 </Link>
               </li>
               <li>
                 <Link href="/tecaj-bordanja" className="hover:text-brand-orange transition-colors">
-                  Tečaj bordanja
+                  Alpska šola bordanja
                 </Link>
               </li>
               <li>

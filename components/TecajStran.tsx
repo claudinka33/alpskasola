@@ -1,4 +1,4 @@
-// Skupna predloga za podstrani tečajev (Tečaj smučanja, Tečaj bordanja, Mini alpska šola).
+// Skupna predloga za podstrani tečajev (Alpska šola smučanja, Alpska šola bordanja, Mini alpska šola).
 // Besedila in slike so v datoteki posamezne strani (app/<program>/page.tsx),
 // termini in cenik pa se berejo iz CMS-a po programSlug.
 

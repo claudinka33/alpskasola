@@ -8,9 +8,9 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Tečaj smučanja za otroke | Alpska šola Rogla",
+  title: "Alpska šola smučanja za otroke | Rogla",
   description:
-    "Tečaj smučanja za otroke od 6. leta naprej na Rogli. 8 sobot od 9h do 15h, organiziran avtobus, kosilo v hotelu Planja, skupine do 6 otrok.",
+    "Alpska šola smučanja za otroke od 6. leta naprej na Rogli. 8 sobot od 9h do 15h, organiziran avtobus, kosilo v hotelu Planja, skupine do 6 otrok.",
 };
 
 // SLIKE: zamenjaj poti, ko dobimo nove fotografije (naloži jih v /public/tecaj-smucanja/)
@@ -18,13 +18,13 @@ const vsebina: TecajVsebina = {
   programSlug: "sola-smucanja",
   hero: {
     badge: "Zimski program",
-    naslov: "Tečaj smučanja",
+    naslov: "Alpska šola smučanja",
     podnaslov:
       "Otroci od 6. leta naprej z izkušenimi učitelji osvojijo smučanje na varen in igriv način — po starosti in znanju razdeljeni v manjše skupine.",
   },
   uvod: {
     znacka: "⛷️ 6 let in več",
-    naslov: "Alpska šola — tečaj smučanja",
+    naslov: "Smučanje z Alpsko šolo",
     odstavki: [
       "Tečaj za otroke od 6. leta naprej, ki se smučanja učijo prvič ali svoje znanje nadgrajujejo. Začnemo s spoznavanjem in prilagajanjem na opremo, igrami na snegu, drsenjem po hribu, zavijanjem in uporabo žičnice.",
       "Tisti, ki so z osnovami že seznanjeni, se učijo pravilne smučarske tehnike — osnovno vijuganje, ritem smučanja, uporaba palic, smučanje v celcu in v snežnem parku.",
@@ -52,7 +52,7 @@ const vsebina: TecajVsebina = {
     { naslov: "Nadgradnja", opis: "Smučanje v celcu, v snežnem parku in na zahtevnejših progah." },
   ],
   galerija: {
-    naslov: "Utrinki s tečaja smučanja",
+    naslov: "Utrinki iz Alpske šole smučanja",
     podnaslov:
       "Zasnežena Rogla, majhne skupine, nasmejani obrazi in medalja ob koncu sezone — tako je videti sobota z nami.",
     slike: [
@@ -98,7 +98,7 @@ const vsebina: TecajVsebina = {
       o: "Vsakodnevno spremljamo vreme in razmere. V primeru slabega vremena starše pravočasno obvestimo na spletni strani in osebno.",
     },
   ],
-  cta: { naslov: "Prijava na tečaj smučanja", podnaslov: "Mesta so omejena. Rezervirajte mesto za vašega otroka." },
+  cta: { naslov: "Prijava v Alpsko šolo smučanja", podnaslov: "Mesta so omejena. Rezervirajte mesto za vašega otroka." },
 };
 
 export default function SolaSmucanjaPage() {

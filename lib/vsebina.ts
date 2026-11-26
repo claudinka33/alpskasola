@@ -72,6 +72,7 @@ export async function zagotoviVsebino() {
   }
   try {
     await uvoziMiniAlpskaProgram();
+    await preimenujAlpskaSola();
   } catch (e) {
     console.error("uvoz mini alpske:", e);
   }
@@ -257,6 +258,16 @@ async function uvoziVstopnoTockoAvtobus(KLJUC: string, programi: string[]) {
       ON CONFLICT (program_slug, kljuc) DO NOTHING;`;
   }
 
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Preimenovanje (dogovor z Damjanom): Alpska šola smučanja, Alpska šola bordanja, Mini alpska šola.
+async function preimenujAlpskaSola() {
+  const KLJUC = "preimenovanje-alpska-sola-v1";
+  if (await seedOpravljen(KLJUC)) return;
+  await sql`UPDATE programi SET naziv = 'Alpska šola smučanja' WHERE slug = 'sola-smucanja';`;
+  await sql`UPDATE programi SET naziv = 'Alpska šola bordanja' WHERE slug = 'tecaj-bordanja';`;
+  await sql`UPDATE programi SET naziv = 'Mini alpska šola' WHERE slug = 'mini-alpska-sola';`;
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 

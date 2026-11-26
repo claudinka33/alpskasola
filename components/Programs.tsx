@@ -44,7 +44,7 @@ const programs = [
   },
   {
     icon: Mountain,
-    title: "Tečaj smučanja",
+    title: "Alpska šola smučanja",
     description: "Za otroke od 6. leta — od začetnikov do izkušenih.",
     href: "/sola-smucanja",
     tag: null,
@@ -53,7 +53,7 @@ const programs = [
   },
   {
     icon: Snowflake,
-    title: "Tečaj bordanja",
+    title: "Alpska šola bordanja",
     description: "Za mlade deskarje od 5. leta naprej.",
     href: "/tecaj-bordanja",
     tag: null,

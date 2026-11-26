@@ -7,9 +7,9 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Tečaj bordanja za otroke | Alpska šola Rogla",
+  title: "Alpska šola bordanja za otroke | Rogla",
   description:
-    "Tečaj bordanja (deskanja na snegu) za otroke od 5. leta naprej na Rogli. 8 sobot od 9h do 15h, organiziran avtobus in kosilo v hotelu Planja.",
+    "Alpska šola bordanja (deskanja na snegu) za otroke od 5. leta naprej na Rogli. 8 sobot od 9h do 15h, organiziran avtobus in kosilo v hotelu Planja.",
 };
 
 // SLIKE: zamenjaj poti, ko dobimo nove fotografije (naloži jih v /public/tecaj-bordanja/)
@@ -17,13 +17,13 @@ const vsebina: TecajVsebina = {
   programSlug: "tecaj-bordanja",
   hero: {
     badge: "Zimski program",
-    naslov: "Tečaj bordanja",
+    naslov: "Alpska šola bordanja",
     podnaslov:
       "Za vse mlade deskarje od 5. leta naprej — od prvega stika z desko do samostojne in varne vožnje po urejenih progah.",
   },
   uvod: {
     znacka: "🏂 5 let in več",
-    naslov: "Alpska šola — tečaj bordanja",
+    naslov: "Bordanje z Alpsko šolo",
     odstavki: [
       "Najprej se spoznamo z desko in opremo, se naučimo pravilnega padanja in vstajanja ter drsenja po blagem naklonu.",
       "Sledijo osnovni zavoji, vožnja z vlečnico in sedežnico ter nadgradnja tehnike — od prvih zavojev do samostojne in varne vožnje po urejenih progah.",
@@ -51,7 +51,7 @@ const vsebina: TecajVsebina = {
     { naslov: "Samostojna vožnja", opis: "Povezani zavoji in varna vožnja po urejenih progah." },
   ],
   galerija: {
-    naslov: "Utrinki s tečaja bordanja",
+    naslov: "Utrinki iz Alpske šole bordanja",
     podnaslov:
       "Od prvega sedenja na deski do vožnje skozi zavoje — mladi deskarji na Rogli.",
     slike: [
@@ -69,7 +69,7 @@ const vsebina: TecajVsebina = {
   },
   vprasanja: [
     {
-      v: "Od katere starosti je tečaj bordanja?",
+      v: "Od katere starosti je Alpska šola bordanja?",
       o: "Tečaj je primeren za otroke od 5. leta naprej, tako za začetnike kot za tiste, ki že imajo nekaj izkušenj.",
     },
     {
@@ -93,7 +93,7 @@ const vsebina: TecajVsebina = {
       o: "Vsakodnevno spremljamo vreme in razmere. V primeru slabega vremena starše pravočasno obvestimo na spletni strani in osebno.",
     },
   ],
-  cta: { naslov: "Prijava na tečaj bordanja", podnaslov: "Mesta so omejena. Rezervirajte mesto za vašega otroka." },
+  cta: { naslov: "Prijava v Alpsko šolo bordanja", podnaslov: "Mesta so omejena. Rezervirajte mesto za vašega otroka." },
 };
 
 export default function TecajBordanjaPage() {
