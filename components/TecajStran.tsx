@@ -10,7 +10,7 @@ import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
 import GalerijaSekcija from "@/components/GalerijaSekcija";
-import type { AlpiPoza } from "@/components/Alpi";
+import { AlpiVmes, type AlpiPoza } from "@/components/Alpi";
 import type { Slika } from "@/components/GalerijaMreza";
 import { Check, ArrowRight, type LucideIcon } from "lucide-react";
 
@@ -82,6 +82,8 @@ export default function TecajStran({ v }: { v: TecajVsebina }) {
         </div>
       </section>
 
+      <AlpiVmes poza={v.alpi === "bord" ? "bord" : "smuca"} />
+
       {/* Fakti */}
       <section className="bg-blue-50/40 py-14 border-y border-blue-100">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
@@ -142,6 +144,8 @@ export default function TecajStran({ v }: { v: TecajVsebina }) {
           </div>
         </section>
       )}
+
+      <AlpiVmes poza="palca" stran="levo" />
 
       {/* Galerija fotografij — ureja se v CMS: /admin/galerija */}
       {v.galerija && (

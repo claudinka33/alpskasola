@@ -32,7 +32,7 @@ export default function ProgramCta({
       </svg>
 
       {/* Alpi — na računalniku ob strani, na telefonu nad naslovom */}
-      <Alpi poza={alpi} className="hidden lg:block absolute left-[4%] xl:left-[8%] bottom-0 h-56 xl:h-64 w-auto translate-y-[8%]" />
+      <Alpi poza={alpi} className="hidden lg:block absolute left-[4%] xl:left-[8%] bottom-4 h-56 xl:h-64 w-auto animate-alpi" />
 
       <div className="relative max-w-3xl mx-auto px-4 lg:px-8 text-center">
         <Alpi poza={alpi} className="lg:hidden mx-auto mb-3 h-24 w-auto" />

@@ -285,8 +285,9 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
       <section className="relative overflow-hidden bg-brand-navy">
         <img src="/tekmovalci/14.jpg" alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-35" />
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/80 to-brand-navy/40" />
-        <Alpi poza="kaze" className="absolute bottom-0 left-1 sm:left-[6%] lg:left-[12%] h-20 sm:h-32 lg:h-40 w-auto translate-y-[10%]" alt="Alpi pokaže na prijavnico" />
+        <Alpi poza="kaze" className="hidden sm:block absolute bottom-3 left-[4%] lg:left-[12%] h-32 lg:h-40 w-auto animate-alpi" alt="Alpi pokaže na prijavnico" />
         <div className="relative max-w-3xl mx-auto px-4 lg:px-8 py-8 lg:py-10 text-center text-white">
+          <Alpi poza="kaze" className="sm:hidden mx-auto mb-2 h-24 w-auto" alt="Alpi pokaže na prijavnico" />
           <div className="inline-flex items-center gap-2 bg-brand-orange text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
             ⛷️ Alpska šola · Rogla
           </div>

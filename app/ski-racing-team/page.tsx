@@ -6,6 +6,7 @@ import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
 import GalerijaSekcija from "@/components/GalerijaSekcija";
+import { AlpiVmes } from "@/components/Alpi";
 import { Trophy, Target, Users, Award } from "lucide-react";
 
 // Cenik in termini se berejo iz baze (CMS) — stran se ne sme predpomniti.
@@ -142,6 +143,8 @@ export default function SkiRacingTeamPage() {
           </div>
         </div>
       </section>
+
+      <AlpiVmes poza="smuca" />
 
       {/* Galerija fotografij — ureja se v CMS: /admin/galerija */}
       <GalerijaSekcija

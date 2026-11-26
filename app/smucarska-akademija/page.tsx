@@ -6,6 +6,7 @@ import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
 import GalerijaSekcija from "@/components/GalerijaSekcija";
+import { AlpiVmes } from "@/components/Alpi";
 import {
   Mountain,
   Sun,
@@ -203,6 +204,8 @@ export default function SmucarskaAkademijaPage() {
           ))}
         </div>
       </section>
+
+      <AlpiVmes poza="skok" />
 
       {/* Galerija fotografij — ureja se v CMS: /admin/galerija */}
       <GalerijaSekcija

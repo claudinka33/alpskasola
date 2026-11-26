@@ -40,7 +40,7 @@ export default function PageHero({
       {alpi && (
         <Alpi
           poza={alpi}
-          className="absolute bottom-0 right-1 sm:right-6 lg:right-[7%] h-20 sm:h-32 lg:h-44 w-auto translate-y-[12%] drop-shadow-lg"
+          className="hidden md:block absolute bottom-3 right-6 lg:right-[6%] h-36 lg:h-48 w-auto drop-shadow-lg animate-alpi"
         />
       )}
 
@@ -71,6 +71,9 @@ export default function PageHero({
             {subtitle}
           </p>
         )}
+
+        {/* Na telefonu je Alpi pod besedilom, da je viden cel in ne prekriva teksta */}
+        {alpi && <Alpi poza={alpi} className="md:hidden mx-auto mt-5 h-28 w-auto drop-shadow-lg animate-alpi" />}
       </div>
     </section>
   );

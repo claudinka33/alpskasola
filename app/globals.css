@@ -175,3 +175,10 @@ img {
   .erp main { overflow-x: clip; }
   .erp main table { display: block; max-width: 100%; overflow-x: auto; }
 }
+
+/* Alpi — maskota: rahlo pozibavanje in smučanje sem ter tja */
+@keyframes alpi-zib { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(-2deg); } }
+@keyframes alpi-smuca { 0% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(-28px) rotate(-3deg); } 100% { transform: translateX(0) rotate(0deg); } }
+.animate-alpi { animation: alpi-zib 3.2s ease-in-out infinite; }
+.animate-alpi-smuca { animation: alpi-smuca 5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-alpi, .animate-alpi-smuca { animation: none; } }

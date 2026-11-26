@@ -52,9 +52,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20 lg:h-24">
           <Link href="/" className="flex items-center shrink-0">
             <img
-              src="/alpska-logo.png"
+              src="/alpska-logo-t.png"
               alt="Alpska šola"
-              className="h-16 lg:h-20 w-auto"
+              className="h-9 sm:h-10 lg:h-12 w-auto"
             />
           </Link>
 

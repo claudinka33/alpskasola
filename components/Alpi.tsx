@@ -59,3 +59,23 @@ export function AlpiOblacek({
     </div>
   );
 }
+
+// Alpi med dvema sekcijama — stoji na meji, viden cel, na telefonu manjši.
+export function AlpiVmes({
+  poza = "smuca",
+  stran = "desno",
+}: {
+  poza?: AlpiPoza;
+  stran?: "levo" | "desno";
+}) {
+  return (
+    <div className="relative z-20 h-0" aria-hidden>
+      <Alpi
+        poza={poza}
+        className={`absolute -top-12 sm:-top-16 lg:-top-20 h-24 sm:h-32 lg:h-40 w-auto drop-shadow-xl animate-alpi-smuca ${
+          stran === "desno" ? "right-3 sm:right-[6%]" : "left-3 sm:left-[6%]"
+        }`}
+      />
+    </div>
+  );
+}
