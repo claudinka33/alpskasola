@@ -613,6 +613,49 @@ function Tecajniki() {
                 </tbody>
               </table>
             )}
+
+            {/* Izbran program / skupina: velika tabela otrok s kontakti */}
+            {(program || skupina) && !nalagam && (
+              <div className="border-t-2 border-[#DDE3EA]">
+                <div className="flex flex-wrap items-center gap-2 bg-[#F6F8FB] px-3 py-2">
+                  <strong className="text-[14px] text-brand-navy">{naslovIzvoza()}</strong>
+                  <span className="text-[12px] text-[#5B6B7B]">· {prikazan.length} otrok</span>
+                  <div className="ml-auto flex gap-1">
+                    <button onClick={pdf} className="inline-flex h-7 items-center gap-1 rounded border border-[#C9D2DD] bg-white px-2.5 text-[12px] hover:border-brand-navy"><FileText size={12} /> PDF</button>
+                    <button onClick={excel} disabled={izvazam} className="inline-flex h-7 items-center gap-1 rounded border border-[#C9D2DD] bg-white px-2.5 text-[12px] hover:border-brand-navy disabled:opacity-50"><FileSpreadsheet size={12} /> Excel</button>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[760px] border-collapse text-left text-[13px]">
+                    <thead>
+                      <tr className="border-b border-[#DDE3EA] bg-white">
+                        {["#", "Otrok", "Starost", "Skupina / termin", "Starš", "Telefon", "E-pošta", "Status"].map((h) => (
+                          <th key={h} className="whitespace-nowrap px-3 py-2 text-[10.5px] font-bold uppercase tracking-[0.05em] text-[#5B6B7B]">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {zaIzvoz().map((z, i) => (
+                        <tr key={z.id} onClick={() => odpri(z.id)} className="cursor-pointer border-b border-[#EEF1F5] hover:bg-[#FFF7ED]">
+                          <td className="px-3 py-2 text-[#5B6B7B]">{i + 1}</td>
+                          <td className="px-3 py-2 font-semibold text-brand-navy">{z.otrok_priimek} {z.otrok_ime}</td>
+                          <td className="whitespace-nowrap px-3 py-2">{starost(z.otrok_rojstvo)}</td>
+                          <td className="max-w-[220px] truncate px-3 py-2" title={skupinaPrijave(z) || ""}>{skupinaPrijave(z) || "—"}</td>
+                          <td className="whitespace-nowrap px-3 py-2">{z.starsi_ime} {z.starsi_priimek}</td>
+                          <td className="whitespace-nowrap px-3 py-2">
+                            {z.telefon ? <a href={`tel:${z.telefon}`} onClick={(e) => e.stopPropagation()} className="font-medium hover:text-[#C2410C]">{z.telefon}</a> : "—"}
+                          </td>
+                          <td className="px-3 py-2">
+                            {z.email ? <a href={`mailto:${z.email}`} onClick={(e) => e.stopPropagation()} className="break-all hover:text-[#C2410C]">{z.email}</a> : "—"}
+                          </td>
+                          <td className="px-3 py-2"><Znacka status={z.status} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -9,7 +9,7 @@ export default function About() {
           <div className="relative">
             <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-brand-navy/15">
               <img
-                src="/tecaj-smucanja/08.jpg"
+                src="/o-soli-sneg.jpg"
                 alt="Alpska šola - zgodbe na snegu"
                 className="w-full h-full object-cover"
               />
