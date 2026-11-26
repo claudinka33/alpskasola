@@ -41,10 +41,18 @@ const vsebina: TecajVsebina = {
     slikaAlt: "Otroci na tečaju smučanja na Rogli",
   },
   fakti: [
-    { icon: Bus, naslov: "Organiziran prevoz", besedilo: "Celje 7.30 · Arclin 7.40 · Frankolovo 7.50 · Zreče 8.00. Nazaj ob 15.05." },
-    { icon: Utensils, naslov: "Kosilo vključeno", besedilo: "Toplo kosilo s čajem v hotelu Planja." },
-    { icon: Users, naslov: "Majhne skupine", besedilo: "Do 6 otrok na učitelja — po starosti in znanju." },
-    { icon: CalendarDays, naslov: "8 sobot", besedilo: "Od 9. 1. 2027, od 9h do 15h, z zaključno prireditvijo." },
+    {
+      icon: CalendarDays,
+      naslov: "8 sobot",
+      vrstice: [["Začetek", "sob, 9. 1. 2027"], ["Ura", "9.00 – 15.00"], ["Zadnja sobota", "zaključna prireditev"]],
+    },
+    {
+      icon: Bus,
+      naslov: "Avtobus na Roglo",
+      vrstice: [["Celje (Zlatorog)", "7.30"], ["Arclin", "7.40"], ["Frankolovo", "7.50"], ["Zreče", "8.00"], ["Nazaj z Rogle", "15.05"]],
+    },
+    { icon: Utensils, naslov: "Kosilo vključeno", besedilo: "Toplo kosilo s čajem v hotelu Planja — vsako soboto." },
+    { icon: Users, naslov: "Majhne skupine", besedilo: "Do 6 otrok na učitelja, razdeljeni po starosti in znanju." },
   ],
   koraki: [
     { naslov: "Oprema in sneg", opis: "Spoznavanje opreme, igre na snegu, hoja in drsenje po ravnem." },
