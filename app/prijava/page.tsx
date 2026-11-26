@@ -283,20 +283,20 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
   return (
     <>
       <Navbar />
-      <section className="mountain-bg py-12 lg:py-16 border-b border-blue-100">
+      <section className="mountain-bg py-6 lg:py-8 border-b border-blue-100">
         <div className="max-w-3xl mx-auto px-4 lg:px-8 text-center">
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-3">Prijavnica</h1>
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-2">Prijavnica</h1>
           <p className="text-base text-slate-600 max-w-xl mx-auto">Izpolnite obrazec. Polja z * so obvezna.</p>
         </div>
       </section>
 
-      <section className="bg-white py-12 lg:py-16">
+      <section className="bg-white py-6 lg:py-8">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
-          <form onSubmit={onSubmit} className="bg-white border border-slate-200/70 rounded-2xl p-6 lg:p-10">
+          <form onSubmit={onSubmit} className="bg-white border border-slate-200/70 rounded-2xl p-4 sm:p-6">
             {/* Program */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-brand-navy mb-3">1. Program</h2>
-              <select required value={form.program} onChange={(e) => update("program", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
+            <div className="mb-5">
+              <h2 className="text-base font-bold text-brand-navy mb-2">1. Program</h2>
+              <select required value={form.program} onChange={(e) => update("program", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm bg-white">
                 <option value="">— izberi program —</option>
                 {programi.map((p) => <option key={p.slug} value={p.slug}>{p.naziv}</option>)}
               </select>
@@ -304,8 +304,8 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
             {/* Termini (razpisani v CRM) */}
             {termini.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-brand-navy mb-3">Izberite termin *</h2>
+              <div className="mb-5">
+                <h2 className="text-base font-bold text-brand-navy mb-2">Izberite termin *</h2>
                 <div className="space-y-2">
                   {termini.map((t) => {
                     const izbran = izbranTermin?.id === t.id;
@@ -314,7 +314,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                       <label
                         key={t.id}
                         id={`termin-${t.id}`}
-                        className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
+                        className={`flex items-center gap-3 rounded-xl border-2 px-3 py-2.5 transition-colors ${
                           poln
                             ? "opacity-50 cursor-not-allowed border-slate-200"
                             : izbran
@@ -351,20 +351,20 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
             {/* AVTOBUS, KOSILO, KARTA (Alpska šola smučanja / bordanja, Mini) */}
             {(poljeAvtobus || poljeAlergije || poljeKarta || polje("otrok_znanje")) && !jeRojstniDan && (
-              <div className="mb-6 bg-sky-50 border-2 border-sky-200 rounded-xl p-5 space-y-6">
+              <div className="mb-5 bg-sky-50 border-2 border-sky-200 rounded-xl p-4 space-y-5">
                 {polje("otrok_znanje") && (
                   <div>
-                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">
+                    <h2 className="text-base font-bold text-brand-navy mb-0.5 flex items-center gap-2">
                       ⛷️ Predznanje otroka{polje("otrok_znanje")!.obvezno ? " *" : ""}
                     </h2>
-                    <p className="text-sm text-slate-600 mb-3">Označite, kar najbolj opiše otroka — po tem ga razvrstimo v pravo skupino.</p>
-                    <div className="grid sm:grid-cols-2 gap-2">
+                    <p className="text-[13px] text-slate-600 mb-2">Označite, kar najbolj opiše otroka — po tem ga razvrstimo v pravo skupino.</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {znanja.map((z) => {
                         const izbrano = form.otrok_znanje === z.value;
                         return (
                           <label
                             key={z.value}
-                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-2.5 cursor-pointer transition-colors ${
+                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3 py-1.5 cursor-pointer transition-colors ${
                               izbrano ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
                             }`}
                           >
@@ -390,8 +390,8 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
                 {poljeAvtobus && (
                   <div>
-                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">🚌 Avtobus na Roglo</h2>
-                    <p className="text-sm text-slate-600 mb-3">
+                    <h2 className="text-base font-bold text-brand-navy mb-0.5 flex items-center gap-2">🚌 Avtobus na Roglo</h2>
+                    <p className="text-[13px] text-slate-600 mb-2">
                       Avtobus pelje vsako soboto zjutraj na Roglo in ob <strong className="text-brand-navy">15.05</strong> z Rogle nazaj. Označite, kje bo otrok vstopil.
                     </p>
                     <div className="grid sm:grid-cols-2 gap-2">
@@ -402,7 +402,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                         return (
                           <label
                             key={m}
-                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-3 cursor-pointer transition-colors ${
+                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3 py-2 cursor-pointer transition-colors ${
                               izbrana ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
                             } ${brez ? "sm:col-span-2" : ""}`}
                           >
@@ -426,10 +426,10 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
                 {poljeKarta && (
                   <div>
-                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">🎿 Smučarska karta</h2>
-                    <p className="text-sm text-slate-600 mb-3">Karta ni vključena v paket. Pri nas jo dobite po promocijski ceni.</p>
+                    <h2 className="text-base font-bold text-brand-navy mb-0.5 flex items-center gap-2">🎿 Smučarska karta</h2>
+                    <p className="text-[13px] text-slate-600 mb-2">Karta ni vključena v paket. Pri nas jo dobite po promocijski ceni.</p>
                     <label
-                      className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-3 cursor-pointer transition-colors ${
+                      className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3 py-2 cursor-pointer transition-colors ${
                         dodatnoVal.karta === "Da" ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
                       }`}
                     >
@@ -449,15 +449,15 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
                 {poljeAlergije && (
                   <div>
-                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">🍽️ Kosilo in alergije</h2>
-                    <p className="text-sm text-slate-600 mb-3">Za kosilo v hotelu nam sporočite alergije, prehranske omejitve ali zdravstvene posebnosti otroka.</p>
+                    <h2 className="text-base font-bold text-brand-navy mb-0.5 flex items-center gap-2">🍽️ Kosilo in alergije</h2>
+                    <p className="text-[13px] text-slate-600 mb-2">Za kosilo v hotelu nam sporočite alergije, prehranske omejitve ali zdravstvene posebnosti otroka.</p>
                     <textarea
                       value={dodatnoVal.alergije || ""}
                       onChange={(e) => nastaviDodatno("alergije", e.target.value)}
                       required={poljeAlergije.obvezno}
                       rows={2}
                       placeholder="npr. alergija na oreščke, brez laktoze … (če ni ničesar, pustite prazno)"
-                      className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y bg-white"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm resize-y bg-white"
                     />
                   </div>
                 )}
@@ -466,20 +466,20 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
             {/* ROJSTNI DAN polja */}
             {jeRojstniDan && (
-              <div className="mb-6 bg-purple-50 border-2 border-purple-200 rounded-xl p-5">
-                <h2 className="text-lg font-bold text-brand-navy mb-3 flex items-center gap-2">
+              <div className="mb-5 bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
+                <h2 className="text-base font-bold text-brand-navy mb-2 flex items-center gap-2">
                   🎂 Rojstnodnevne podrobnosti
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-semibold text-brand-navy mb-1.5">Paket *</label>
-                    <select required value={form.rd_paket} onChange={(e) => update("rd_paket", e.target.value)} className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white">
+                    <label className="block text-[13px] font-semibold text-brand-navy mb-1">Paket *</label>
+                    <select required value={form.rd_paket} onChange={(e) => update("rd_paket", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm bg-white">
                       <option value="">— izberi paket —</option>
                       {paketiRojstniDan.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
                     </select>
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid sm:grid-cols-2 gap-3">
                     <F label="Želen datum praznovanja *" type="date" value={form.rd_datum} onChange={(v) => update("rd_datum", v)} required />
                     <F label="Pričakovano število otrok *" type="number" value={form.rd_stevilo_otrok} onChange={(v) => update("rd_stevilo_otrok", v)} required />
                   </div>
@@ -524,11 +524,11 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
             )}
 
             {/* Otrok */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-brand-navy mb-3">
+            <div className="mb-5">
+              <h2 className="text-base font-bold text-brand-navy mb-2">
                 {jeRojstniDan ? "2. Slavljenec" : "2. Otrok"}
               </h2>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-3">
                 <F label="Ime *" value={form.otrok_ime} onChange={(v) => update("otrok_ime", v)} required />
                 <F label="Priimek *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
                 <F label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
@@ -536,9 +536,9 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
             </div>
 
             {/* Starš */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-brand-navy mb-3">3. Starš</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
+            <div className="mb-5">
+              <h2 className="text-base font-bold text-brand-navy mb-2">3. Starš</h2>
+              <div className="grid sm:grid-cols-2 gap-3">
                 <F label="Ime *" value={form.starsi_ime} onChange={(v) => update("starsi_ime", v)} required />
                 <F label="Priimek *" value={form.starsi_priimek} onChange={(v) => update("starsi_priimek", v)} required />
                 <F label="Email *" type="email" value={form.email} onChange={(v) => update("email", v)} required />
@@ -564,9 +564,9 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
 
             {/* Nastavljiva polja (alergije, opomba, polja po meri...) */}
             {ostalaPolja.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-brand-navy mb-3">4. Dodatno</h2>
-                <div className="space-y-4">
+              <div className="mb-5">
+                <h2 className="text-base font-bold text-brand-navy mb-2">4. Dodatno</h2>
+                <div className="space-y-3">
                   {ostalaPolja.map((p) => {
                     const jeOpomba = p.kljuc === "opomba";
                     const vrednost = jeOpomba ? form.opomba : dodatnoVal[p.kljuc] || "";
@@ -576,7 +576,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                         : setDodatnoVal((prev) => ({ ...prev, [p.kljuc]: v }));
                     return (
                       <div key={p.kljuc}>
-                        <label className="block text-sm font-semibold text-brand-navy mb-1.5">
+                        <label className="block text-[13px] font-semibold text-brand-navy mb-1">
                           {p.label}{p.obvezno ? " *" : ""}
                         </label>
                         {p.tip === "textarea" ? (
@@ -585,14 +585,14 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                             onChange={(e) => nastavi(e.target.value)}
                             required={p.obvezno}
                             rows={3}
-                            className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm resize-y"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm resize-y"
                           />
                         ) : p.tip === "select" ? (
                           <select
                             value={vrednost}
                             onChange={(e) => nastavi(e.target.value)}
                             required={p.obvezno}
-                            className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm bg-white"
                           >
                             <option value="">— izberi —</option>
                             {(p.moznosti || "")
@@ -620,7 +620,7 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                             value={vrednost}
                             onChange={(e) => nastavi(e.target.value)}
                             required={p.obvezno}
-                            className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm"
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
                           />
                         )}
                       </div>
@@ -678,13 +678,13 @@ function F({
 }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-brand-navy mb-1.5">{label}</label>
+      <label className="block text-[13px] font-semibold text-brand-navy mb-1">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm"
+        className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
       />
     </div>
   );
