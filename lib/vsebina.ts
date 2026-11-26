@@ -82,6 +82,7 @@ export async function zagotoviVsebino() {
     await zima2027Podatki();
     await zima2027CenikV2();
     await prijavnicaAlergije();
+    await prijavnicaKartaAlpska();
   } catch (e) {
     console.error("uvoz vstopne točke:", e);
   }
@@ -344,6 +345,22 @@ async function prijavnicaAlergije() {
   await sql`
     UPDATE form_polja SET moznosti = 'Celje (Zlatorog), Arclin (avtobusna postaja), Frankolovo (avtobusna postaja), Zreče (avtobusna postaja), Brez avtobusa (pridemo sami na Roglo)'
     WHERE kljuc = 'vstopna_tocka' AND program_slug IN ('sola-smucanja', 'tecaj-bordanja');`;
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Prijavnica: kljukica za smučarsko karto tudi pri Alpski šoli smučanja in bordanja
+async function prijavnicaKartaAlpska() {
+  const KLJUC = "prijavnica-karta-alpska-v1";
+  if (await seedOpravljen(KLJUC)) return;
+  await zagotoviTabele();
+  for (const slug of ["sola-smucanja", "tecaj-bordanja"]) {
+    await zagotoviPoljaZaProgram(slug);
+    const max = await sql`SELECT COALESCE(MAX(vrstni_red), 0)::int AS m FROM form_polja WHERE program_slug = ${slug};`;
+    await sql`
+      INSERT INTO form_polja (program_slug, kljuc, label, tip, moznosti, obvezno, viden, vrstni_red, sistemsko)
+      VALUES (${slug}, 'karta', 'Želim smučarsko karto po promocijski ceni 29 € (redna cena 32 €)', 'checkbox', NULL, false, true, ${max.rows[0].m + 1}, false)
+      ON CONFLICT (program_slug, kljuc) DO UPDATE SET viden = true;`;
+  }
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 
