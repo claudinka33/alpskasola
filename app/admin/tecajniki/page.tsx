@@ -359,7 +359,28 @@ function Tecajniki() {
     () => Array.from(new Set(seznam.map(skupinaPrijave).filter(Boolean))).sort((a, b) => a.localeCompare(b, "sl")),
     [seznam]
   );
-  useEffect(() => setSkupina(""), [program]);
+
+  // Pregled: koliko otrok je prijavljenih na posamezen program in skupino/termin
+  const pregled = useMemo(() => {
+    const m = new Map<string, { slug: string; naziv: string; st: number; nove: number; skupine: Map<string, number> }>();
+    for (const z of seznam) {
+      if (z.status === "preklicano") continue;
+      const k = z.program;
+      if (!m.has(k)) m.set(k, { slug: k, naziv: z.program_naziv || k, st: 0, nove: 0, skupine: new Map() });
+      const e = m.get(k)!;
+      e.st++;
+      if (z.status === "nova") e.nove++;
+      const sk = skupinaPrijave(z) || "Brez skupine";
+      e.skupine.set(sk, (e.skupine.get(sk) || 0) + 1);
+    }
+    // Vrstni red kot na prijavnici (Nastavitve prijavnice), ostali na koncu
+    const red = new Map(programi.map((x, i) => [x.slug, i]));
+    return Array.from(m.values()).sort((a, b) => (red.get(a.slug) ?? 999) - (red.get(b.slug) ?? 999));
+  }, [seznam, programi]);
+  const izberi = (slug: string, sk = "") => {
+    setProgram(slug);
+    setSkupina(sk === "Brez skupine" ? "" : sk);
+  };
 
   const prikazan = useMemo(
     () => seznam.filter((z) => (!skupina || skupinaPrijave(z) === skupina) && (!status || z.status === status)),
@@ -412,7 +433,10 @@ function Tecajniki() {
           />
           <select
             value={program}
-            onChange={(e) => setProgram(e.target.value)}
+            onChange={(e) => {
+              setProgram(e.target.value);
+              setSkupina("");
+            }}
             aria-label="Filter po programu"
             className="h-8 rounded border border-[#C9D2DD] bg-white px-1.5 text-[12px]"
           >
@@ -483,8 +507,55 @@ function Tecajniki() {
         {aktivenId ? (
           <Kartica id={aktivenId} nazaj={nazaj} />
         ) : (
-          <div className="grid h-60 place-items-center rounded border border-dashed border-[#C9D2DD] text-[12px] text-[#5B6B7B]">
-            Izberi tečajnika na seznamu levo.
+          <div className="rounded border border-[#DDE3EA] bg-white">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-t border-b border-[#DDE3EA] bg-[#F6F8FB] px-2.5 py-1.5">
+              <strong className="text-brand-navy">Prijavljeni po programih</strong>
+              <span className="text-[11px] text-[#5B6B7B]">Brez preklicanih · klikni program ali skupino za seznam in izvoz</span>
+            </div>
+            {nalagam ? (
+              <div className="grid place-items-center py-10"><Loader2 className="animate-spin text-brand-orange" size={20} /></div>
+            ) : pregled.length === 0 ? (
+              <div className="px-3 py-4 text-[12px] text-[#5B6B7B]">Ni prijav.</div>
+            ) : (
+              <table className="w-full border-collapse text-left text-[12px]">
+                <thead>
+                  <tr className="border-b border-[#DDE3EA]">
+                    {["Program", "Otrok", "Nove", "Skupine / termini"].map((h) => (
+                      <th key={h} className="whitespace-nowrap px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.05em] text-[#5B6B7B]">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {pregled.map((g) => (
+                    <tr key={g.slug} className="border-b border-[#EEF1F5] align-top">
+                      <td className="px-2.5 py-1.5">
+                        <button onClick={() => izberi(g.slug)} className="text-left font-semibold text-brand-navy hover:text-[#C2410C]">
+                          {g.naziv}
+                        </button>
+                      </td>
+                      <td className="px-2.5 py-1.5 font-semibold">{g.st}</td>
+                      <td className="px-2.5 py-1.5">{g.nove ? <span className="font-semibold text-[#9A3412]">{g.nove}</span> : "—"}</td>
+                      <td className="px-2.5 py-1">
+                        <div className="flex flex-wrap gap-1">
+                          {Array.from(g.skupine.entries())
+                            .sort((a, b) => a[0].localeCompare(b[0], "sl"))
+                            .map(([sk, st]) => (
+                              <button
+                                key={sk}
+                                onClick={() => izberi(g.slug, sk)}
+                                className="inline-flex items-center gap-1 rounded-[3px] border border-[#C9D2DD] bg-white px-1.5 py-px text-[11.5px] hover:border-brand-navy"
+                              >
+                                <span className="max-w-[220px] truncate">{sk}</span>
+                                <span className="font-semibold text-brand-navy">{st}</span>
+                              </button>
+                            ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
       </div>
