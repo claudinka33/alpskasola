@@ -24,7 +24,8 @@ export type TecajVsebina = {
     slika: string;
     slikaAlt: string;
   };
-  fakti: { icon: LucideIcon; naslov: string; besedilo: string }[];
+  // vrstice: kratka tabela (npr. vozni red) — [levo, desno]
+  fakti: { icon: LucideIcon; naslov: string; besedilo?: string; vrstice?: [string, string][] }[];
   // Sekcija "Kaj se naučijo" — koraki/stopnje
   koraki?: { naslov: string; opis: string }[];
   // Galerija (enaka kot pri akademiji). Privzete slike iz /public — v CMS (/admin/galerija)
@@ -81,16 +82,30 @@ export default function TecajStran({ v }: { v: TecajVsebina }) {
       {/* Fakti */}
       <section className="bg-blue-50/40 py-14 border-y border-blue-100">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {v.fakti.map((f, i) => {
               const Icon = f.icon;
               return (
-                <div key={i} className="bg-white rounded-xl p-5 border border-slate-200/70 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-orange-100 text-brand-orange mx-auto mb-3 flex items-center justify-center">
-                    <Icon size={20} />
+                <div key={i} className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm shadow-brand-navy/5 flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 text-brand-orange shrink-0 flex items-center justify-center">
+                      <Icon size={19} />
+                    </div>
+                    <strong className="text-[15px] font-bold text-brand-navy leading-tight">{f.naslov}</strong>
                   </div>
-                  <strong className="block text-sm font-bold text-brand-navy mb-1">{f.naslov}</strong>
-                  <span className="text-xs text-slate-600">{f.besedilo}</span>
+                  {f.vrstice && (
+                    <dl className="text-sm divide-y divide-dashed divide-slate-200">
+                      {f.vrstice.map(([l, d], j) => (
+                        <div key={j} className="flex items-baseline justify-between gap-3 py-1.5">
+                          <dt className="text-slate-500">{l}</dt>
+                          <dd className="font-semibold text-brand-navy text-right tabular-nums">{d}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {f.besedilo && (
+                    <p className={`text-sm text-slate-600 leading-relaxed ${f.vrstice ? "mt-3 pt-3 border-t border-slate-100" : ""}`}>{f.besedilo}</p>
+                  )}
                 </div>
               );
             })}

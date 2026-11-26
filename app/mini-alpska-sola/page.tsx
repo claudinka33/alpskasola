@@ -40,10 +40,18 @@ const vsebina: TecajVsebina = {
     slikaAlt: "Najmlajši smučarji v Mini alpski šoli",
   },
   fakti: [
-    { icon: CalendarDays, naslov: "7 sobot", besedilo: "Od 9. 1. 2027, zadnja z zaključno prireditvijo." },
-    { icon: Clock, naslov: "9.30 – 13.00", besedilo: "Krajši urnik, prilagojen malčkom." },
-    { icon: MapPin, naslov: "Vrh Uniorčka", besedilo: "Zbirno mesto na Rogli — otroke pripeljete starši." },
-    { icon: Medal, naslov: "Medalja", besedilo: "Medalja in FIS brošura za vsakega otroka." },
+    {
+      icon: CalendarDays,
+      naslov: "7 sobot",
+      vrstice: [["Začetek", "sob, 9. 1. 2027"], ["Zadnja sobota", "zaključna prireditev"]],
+    },
+    {
+      icon: Clock,
+      naslov: "Potek sobote",
+      vrstice: [["Smučanje", "9.30 – 11.00"], ["Odmor s starši", "11.00 – 11.30"], ["Smučanje", "11.30 – 13.00"]],
+    },
+    { icon: MapPin, naslov: "Zbirno mesto", besedilo: "Vrh Uniorčka na Rogli. Avtobusa ni — otroke pripeljete starši." },
+    { icon: Medal, naslov: "Medalja za vsakega", besedilo: "Ob koncu medalja in FIS brošura za vsakega otroka." },
   ],
   koraki: [
     { naslov: "Navajanje na opremo", opis: "Obuvanje čevljev, hoja s smučmi in igre na snegu." },
