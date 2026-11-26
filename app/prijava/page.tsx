@@ -350,8 +350,44 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
             )}
 
             {/* AVTOBUS, KOSILO, KARTA (Alpska šola smučanja / bordanja, Mini) */}
-            {(poljeAvtobus || poljeAlergije || poljeKarta) && !jeRojstniDan && (
-              <div className="mb-6 bg-sky-50 border-2 border-sky-200 rounded-xl p-5 space-y-5">
+            {(poljeAvtobus || poljeAlergije || poljeKarta || polje("otrok_znanje")) && !jeRojstniDan && (
+              <div className="mb-6 bg-sky-50 border-2 border-sky-200 rounded-xl p-5 space-y-6">
+                {polje("otrok_znanje") && (
+                  <div>
+                    <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">
+                      ⛷️ Predznanje otroka{polje("otrok_znanje")!.obvezno ? " *" : ""}
+                    </h2>
+                    <p className="text-sm text-slate-600 mb-3">Označite, kar najbolj opiše otroka — po tem ga razvrstimo v pravo skupino.</p>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      {znanja.map((z) => {
+                        const izbrano = form.otrok_znanje === z.value;
+                        return (
+                          <label
+                            key={z.value}
+                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-2.5 cursor-pointer transition-colors ${
+                              izbrano ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="otrok_znanje"
+                              value={z.value}
+                              checked={izbrano}
+                              required={polje("otrok_znanje")!.obvezno}
+                              onChange={() => update("otrok_znanje", z.value)}
+                              className="w-4 h-4 accent-brand-orange shrink-0"
+                            />
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-brand-navy">{z.label}</span>
+                              <span className="block text-xs text-slate-500">{z.opis}</span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {poljeAvtobus && (
                   <div>
                     <h2 className="text-lg font-bold text-brand-navy mb-1 flex items-center gap-2">🚌 Avtobus na Roglo</h2>
@@ -496,40 +532,6 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                 <F label="Ime *" value={form.otrok_ime} onChange={(v) => update("otrok_ime", v)} required />
                 <F label="Priimek *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
                 <F label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
-                {!jeRojstniDan && polje("otrok_znanje") && (
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-semibold text-brand-navy mb-1.5">
-                      Predznanje{polje("otrok_znanje")!.obvezno ? " *" : ""}
-                    </label>
-                    <div className="grid sm:grid-cols-2 gap-2">
-                      {znanja.map((z) => {
-                        const izbrano = form.otrok_znanje === z.value;
-                        return (
-                          <label
-                            key={z.value}
-                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-2.5 cursor-pointer transition-colors ${
-                              izbrano ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="otrok_znanje"
-                              value={z.value}
-                              checked={izbrano}
-                              required={polje("otrok_znanje")!.obvezno}
-                              onChange={() => update("otrok_znanje", z.value)}
-                              className="w-4 h-4 accent-brand-orange shrink-0"
-                            />
-                            <span className="min-w-0">
-                              <span className="block text-sm font-semibold text-brand-navy">{z.label}</span>
-                              <span className="block text-xs text-slate-500">{z.opis}</span>
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
