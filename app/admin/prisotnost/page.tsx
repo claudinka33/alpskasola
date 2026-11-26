@@ -19,7 +19,10 @@ import {
   AlertCircle,
   Lock,
   Pencil,
+  ChevronDown,
+  Settings2,
 } from "lucide-react";
+import Link from "next/link";
 import { IskalnikOtrok, StarsVrstica, ustrezaIskanju, PodatkiStarsa } from "@/components/admin/Starsi";
 
 type Program = { id: number; slug: string; naziv: string };
@@ -53,13 +56,19 @@ type Ucitelj = { id: number; ime: string };
 type Povzetek = { prijava_id: number; otrok_ime: string; otrok_priimek: string; skupaj: number; prisoten: number } & PodatkiStarsa;
 type NajdenOtrok = { id: number; otrok_ime: string; otrok_priimek: string; termin_id: number | null; termin: string | null; program: string } & PodatkiStarsa;
 
-const danes = () => new Date().toISOString().slice(0, 10);
+const danes = () => new Date().toLocaleDateString("sv-SE");
 const slDatum = (d: string) =>
   new Date(d).toLocaleDateString("sl-SI", { day: "2-digit", month: "2-digit", year: "numeric" });
 const casZaklepa = (d: string) =>
   new Date(d).toLocaleString("sl-SI", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 const kratekDatum = (d: string) =>
   new Date(d).toLocaleDateString("sl-SI", { day: "2-digit", month: "2-digit" });
+
+// Današnji dan v tednu (kot ga vpisujemo pri skupinah: "Ponedeljek", "Sobota" ...)
+const DNEVI_TEDNA = ["Nedelja", "Ponedeljek", "Torek", "Sreda", "Četrtek", "Petek", "Sobota"];
+const danesDan = () => DNEVI_TEDNA[new Date().getDay()];
+const jeDanes = (dan?: string | null) =>
+  !!dan && dan.toLowerCase().replace(/[^a-zčšž]/g, "").startsWith(danesDan().toLowerCase().slice(0, 3));
 
 export default function PrisotnostPage() {
   const [skupine, setSkupine] = useState<Skupina[]>([]);
@@ -137,6 +146,17 @@ export default function PrisotnostPage() {
     naloziPregled();
   }, []);
 
+  // Povezava /admin/prisotnost?skupina=ID (npr. iz "Skupine in ekipe") odpre skupino takoj
+  const [samodejno, setSamodejno] = useState(true);
+  useEffect(() => {
+    if (!samodejno || nalagamPregled || izbrana) return;
+    setSamodejno(false);
+    const id = Number(new URLSearchParams(window.location.search).get("skupina") || 0);
+    const s = id && skupine.find((x) => x.id === id);
+    if (s) odpriSkupino(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nalagamPregled, skupine]);
+
   const programNaziv = (slug: string) => programi.find((p) => p.slug === slug)?.naziv || slug;
 
   // Skupina je aktualna, dokler ji ne poteče "datum do".
@@ -184,6 +204,12 @@ export default function PrisotnostPage() {
     setSrecanja(sr.srecanja || []);
     setJeAdmin(!!sr.admin);
     setPovzetek(pv.povzetek || []);
+    // Če današnja vadba že obstaja, jo odpri takoj (manj klikov za učitelja)
+    const danasnja = (sr.srecanja || []).find((x: Srecanje) => x.datum.slice(0, 10) === danes());
+    if (danasnja) {
+      setSrecanje(danasnja);
+      await naloziVrstice(danasnja.id);
+    }
   };
 
   const nazaj = () => {
@@ -205,14 +231,14 @@ export default function PrisotnostPage() {
     setShranjeno(false);
   };
 
-  const odpriVadbo = async () => {
-    if (!izbrana || !datum) return;
+  const odpriVadbo = async (zaDatum: string = datum) => {
+    if (!izbrana || !zaDatum) return;
     setNalagam(true);
     try {
       const r = await fetch("/api/prisotnost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ program_slug: izbrana.program_slug, termin_id: izbrana.id, datum }),
+        body: JSON.stringify({ program_slug: izbrana.program_slug, termin_id: izbrana.id, datum: zaDatum }),
       });
       const d = await r.json();
       setSrecanje(d.srecanje);
@@ -380,14 +406,45 @@ export default function PrisotnostPage() {
   if (!izbrana) {
     return (
       <div>
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
-            <CheckCircle2 size={26} className="text-brand-orange" /> Prisotnost
-          </h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Klikni skupino, da vpišeš prisotnost za vadbo.
-          </p>
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy flex items-center gap-2">
+              <CheckCircle2 size={26} className="text-brand-orange" /> Prisotnost
+            </h1>
+            <p className="text-sm text-slate-600 mt-1">Tapni svojo skupino in označi otroke.</p>
+          </div>
+          <Link
+            href={`/admin/prisotnost/skupine${filterProgram ? `?program=${filterProgram}` : ""}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-brand-navy hover:border-brand-orange"
+          >
+            <Settings2 size={15} /> Skupine in ekipe
+          </Link>
         </div>
+
+        {/* Danes na sporedu — skupine, ki imajo danes vadbo */}
+        {!nalagamPregled && skupine.some((x) => jeDanes(x.dan) && x.st_otrok > 0 && jeAktualna(x)) && (
+          <div className="mb-5">
+            <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-orange">Danes · {danesDan()}</h2>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {skupine
+                .filter((x) => jeDanes(x.dan) && x.st_otrok > 0 && jeAktualna(x))
+                .map((x) => (
+                  <button
+                    key={x.id}
+                    onClick={() => { setIskanjeSkupine(""); odpriSkupino(x); }}
+                    className="flex items-center gap-3 rounded-2xl bg-brand-navy px-4 py-3.5 text-left text-white hover:bg-[#0B1F3A]"
+                  >
+                    <CheckCircle2 size={22} className="shrink-0 text-brand-orange" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-bold">{x.naziv}</span>
+                      <span className="block truncate text-xs text-white/70">{[programNaziv(x.program_slug), x.ura].filter(Boolean).join(" · ")}</span>
+                    </span>
+                    <span className="text-sm font-bold">{x.st_otrok}</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
 
         <div className="mb-4">
           <IskalnikOtrok vrednost={iskanje} onChange={setIskanje} />
@@ -437,16 +494,19 @@ export default function PrisotnostPage() {
         )}
 
         <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-5 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
-          <select
-            value={filterProgram}
-            onChange={(e) => setFilterProgram(e.target.value)}
-            className={S}
-          >
-            <option value="">Vsi programi</option>
-            {programi.map((p) => (
-              <option key={p.slug} value={p.slug}>{p.naziv}</option>
+          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:w-full">
+            {[{ slug: "", naziv: "Vsi programi" }, ...programi.filter((p) => skupine.some((x) => x.program_slug === p.slug && x.st_otrok > 0))].map((p) => (
+              <button
+                key={p.slug}
+                onClick={() => setFilterProgram(p.slug)}
+                className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-bold ${
+                  filterProgram === p.slug ? "border-brand-navy bg-brand-navy text-white" : "border-slate-200 bg-white text-slate-600"
+                }`}
+              >
+                {p.naziv}
+              </button>
             ))}
-          </select>
+          </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -564,19 +624,31 @@ export default function PrisotnostPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/70 p-4 mb-4 flex flex-col sm:flex-row gap-3 sm:items-end">
-        <div className="flex-1">
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Datum vadbe</label>
-          <input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} className={`${S} w-full`} />
-        </div>
+      {!(srecanje && srecanje.datum.slice(0, 10) === danes()) && (
         <button
-          onClick={odpriVadbo}
-          disabled={!datum || nalagam}
-          className="inline-flex items-center justify-center gap-2 bg-brand-orange text-white px-4 py-3 rounded-lg text-sm font-bold disabled:opacity-50"
+          onClick={() => { setDatum(danes()); odpriVadbo(danes()); }}
+          disabled={nalagam}
+          className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-orange px-4 py-4 text-base font-extrabold text-white shadow-lg shadow-brand-orange/30 disabled:opacity-50"
         >
-          {nalagam ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} Odpri vadbo
+          {nalagam ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={20} />}
+          Današnja vadba · {slDatum(danes())}
         </button>
-      </div>
+      )}
+      <details className="mb-4 rounded-2xl border border-slate-200/70 bg-white">
+        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-600">
+          <CalendarDays size={14} className="mr-1.5 inline -mt-0.5" /> Vadba na drug datum <ChevronDown size={14} className="inline" />
+        </summary>
+        <div className="flex gap-2 px-4 pb-4">
+          <input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} className={`${S} flex-1`} />
+          <button
+            onClick={() => odpriVadbo()}
+            disabled={!datum || nalagam}
+            className="inline-flex items-center justify-center gap-2 bg-brand-navy text-white px-4 rounded-lg text-sm font-bold disabled:opacity-50"
+          >
+            <Plus size={16} /> Odpri
+          </button>
+        </div>
+      </details>
 
       <div className="flex gap-2 mb-4">
         {([
@@ -616,7 +688,7 @@ export default function PrisotnostPage() {
 
       {zavihek === "vadba" && !srecanje && (
         <div className="bg-white rounded-2xl border border-slate-200/70 py-14 text-center text-sm text-slate-400">
-          Izberi datum in klikni <strong className="text-slate-600">Odpri vadbo</strong>, ali klikni enega od
+          Tapni <strong className="text-slate-600">Današnja vadba</strong> zgoraj ali izberi enega od
           datumov zgoraj.
         </div>
       )}
@@ -663,7 +735,14 @@ export default function PrisotnostPage() {
             </p>
           )}
 
-          <div className="grid sm:grid-cols-[1fr_auto] gap-4 mb-4">
+          <details className="mb-4 rounded-xl border border-slate-200/70 bg-slate-50/60" open={izbraniUcitelji.length === 0}>
+            <summary className="cursor-pointer list-none px-3 py-2.5 text-sm">
+              <span className="font-semibold text-slate-600">Učitelji: </span>
+              <span className="font-bold text-brand-navy">{izbraniUcitelji.join(", ") || "ni izbranih"}</span>
+              <span className="text-slate-400"> · {srecanje.trajanje_min} min</span>
+              <ChevronDown size={14} className="ml-1 inline text-slate-400" />
+            </summary>
+          <div className="grid sm:grid-cols-[1fr_auto] gap-4 px-3 pb-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-2">
                 Učitelji na tej vadbi
@@ -740,6 +819,7 @@ export default function PrisotnostPage() {
               />
             </div>
           </div>
+          </details>
 
           <div className="border-t border-slate-100 pt-4">
             {vrstice.length > 5 && (
@@ -829,7 +909,7 @@ export default function PrisotnostPage() {
 
           {/* Shranjevanje */}
           {urejanje && (
-          <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 px-5 py-4 bg-white border-t border-slate-200 rounded-b-2xl flex flex-wrap items-center gap-3">
+          <div className="sticky bottom-16 lg:bottom-0 z-10 -mx-5 -mb-5 mt-5 px-5 py-4 bg-white border-t border-slate-200 rounded-b-2xl flex flex-wrap items-center gap-3">
             <button
               onClick={shrani}
               disabled={!spremenjeno || shranjujem}

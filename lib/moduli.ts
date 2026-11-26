@@ -10,6 +10,8 @@ export async function zagotoviModule() {
 
   // Oznaka termina za ciljano pošiljanje emailov
   await sql`ALTER TABLE termini ADD COLUMN IF NOT EXISTS oznaka TEXT;`;
+  // Stalni učitelj skupine (privzeto se vpiše na vsako vadbo te skupine)
+  await sql`ALTER TABLE termini ADD COLUMN IF NOT EXISTS ucitelj TEXT;`;
 
   // Povezava prijave na konkreten termin + oznaka, ki jo je prijava dobila
   await sql`ALTER TABLE prijave ADD COLUMN IF NOT EXISTS termin_id INT;`;
@@ -241,9 +243,11 @@ export async function odpriSrecanje(program_slug: string, termin_id: number, dat
     SELECT * FROM srecanja WHERE termin_id = ${termin_id} AND datum = ${datum};`;
   let srecanje = obstoj.rows[0];
   if (!srecanje) {
+    const t = await sql<{ ucitelj: string | null }>`SELECT ucitelj FROM termini WHERE id = ${termin_id};`;
+    const privzetiUcitelj = t.rows[0]?.ucitelj || "";
     const nov = await sql<Srecanje>`
-      INSERT INTO srecanja (program_slug, termin_id, datum)
-      VALUES (${program_slug}, ${termin_id}, ${datum})
+      INSERT INTO srecanja (program_slug, termin_id, datum, ucitelji)
+      VALUES (${program_slug}, ${termin_id}, ${datum}, ${privzetiUcitelj})
       RETURNING *;`;
     srecanje = nov.rows[0];
   }
@@ -900,4 +904,72 @@ export async function popraviOznakeZaNazaj(program_slug: string) {
     )
     SELECT COUNT(*)::int AS st FROM posodobljeni;`;
   return r.rows[0]?.st ?? 0;
+}
+
+
+// ---------- SKUPINE (razdelitev otrok programa v skupine / ekipe) ----------
+// Skupina je termin programa. Nove skupine, ki jih naredi Zoja, so skrite s prijavnice
+// in javne strani (aktiven = false, na_strani = false) — služijo samo za vodenje.
+
+export async function skupinePrograma(program_slug: string) {
+  await zagotoviModule();
+  const skupine = await sql`
+    SELECT t.id, t.naziv, t.ucitelj, t.dan, t.ura, t.lokacija, t.aktiven, t.na_strani,
+           t.datum_do::text AS datum_do,
+           COUNT(DISTINCT p.id) FILTER (WHERE COALESCE(p.status,'') <> 'preklicano')::int AS st_otrok,
+           COUNT(DISTINCT s.id)::int AS st_vadb
+    FROM termini t
+    LEFT JOIN prijave p ON p.termin_id = t.id
+    LEFT JOIN srecanja s ON s.termin_id = t.id
+    WHERE t.program_slug = ${program_slug}
+    GROUP BY t.id
+    ORDER BY t.vrstni_red, t.id;`;
+  const otroci = await sql`
+    SELECT p.id, p.otrok_ime, p.otrok_priimek, p.otrok_rojstvo::text AS otrok_rojstvo,
+           p.otrok_znanje, p.termin_id, p.status, p.dodatno
+    FROM prijave p
+    WHERE p.program = ${program_slug} AND COALESCE(p.status,'') <> 'preklicano'
+    ORDER BY p.otrok_priimek, p.otrok_ime;`;
+  return { skupine: skupine.rows, otroci: otroci.rows };
+}
+
+export async function ustvariSkupino(d: {
+  program_slug: string; naziv: string; ucitelj?: string | null; dan?: string | null; ura?: string | null; lokacija?: string | null;
+}) {
+  await zagotoviModule();
+  const red = await sql`SELECT COALESCE(MAX(vrstni_red), 0)::int + 1 AS r FROM termini WHERE program_slug = ${d.program_slug};`;
+  const r = await sql`
+    INSERT INTO termini (program_slug, naziv, ucitelj, dan, ura, lokacija, status, aktiven, na_strani, vrstni_red)
+    VALUES (${d.program_slug}, ${d.naziv}, ${d.ucitelj || null}, ${d.dan || null}, ${d.ura || null}, ${d.lokacija || null},
+            'odprt', false, false, ${red.rows[0].r})
+    RETURNING id;`;
+  return r.rows[0].id as number;
+}
+
+export async function urediSkupino(id: number, d: { naziv: string; ucitelj?: string | null; dan?: string | null; ura?: string | null; lokacija?: string | null }) {
+  await zagotoviModule();
+  await sql`
+    UPDATE termini SET naziv = ${d.naziv}, ucitelj = ${d.ucitelj || null}, dan = ${d.dan || null},
+      ura = ${d.ura || null}, lokacija = ${d.lokacija || null}
+    WHERE id = ${id};`;
+  // Otroci v skupini dobijo novo ime skupine
+  await sql`UPDATE prijave SET termin = ${d.naziv} WHERE termin_id = ${id};`;
+}
+
+// Izbriše skupino samo, če nima vadb; otroci gredo nazaj med "brez skupine".
+export async function izbrisiSkupino(id: number) {
+  await zagotoviModule();
+  const v = await sql`SELECT COUNT(*)::int AS c FROM srecanja WHERE termin_id = ${id};`;
+  if (v.rows[0].c > 0) throw new Error("Skupina že ima vpisane vadbe, zato je ni mogoče izbrisati.");
+  await sql`UPDATE prijave SET termin_id = NULL, termin = NULL WHERE termin_id = ${id};`;
+  await sql`DELETE FROM termini WHERE id = ${id};`;
+}
+
+// Premakne več otrok naenkrat v skupino (ali med "brez skupine", če je termin_id null).
+export async function premakniVecOtrok(ids: number[], termin_id: number | null) {
+  await zagotoviModule();
+  for (const id of ids) {
+    if (termin_id) await premakniOtroka(id, termin_id);
+    else await sql`UPDATE prijave SET termin_id = NULL, termin = NULL, oznaka = NULL WHERE id = ${id};`;
+  }
 }

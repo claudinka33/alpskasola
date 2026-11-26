@@ -41,6 +41,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       label: "Vodenje skupin",
       postavke: [
         { kljuc: "prisotnost", href: "/admin/prisotnost", label: "Prisotnost" },
+        { kljuc: "prisotnost", href: "/admin/prisotnost/skupine", label: "Skupine in ekipe" },
         { kljuc: "placila", href: "/admin/placila", label: "Plačila" },
         { kljuc: "ure", href: "/admin/ure", label: "Ure učiteljev" },
       ].filter((p) => vidi(p.kljuc)),

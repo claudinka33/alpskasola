@@ -18,7 +18,7 @@ const IKONE: Record<string, any> = {
   admin: LayoutDashboard, tecajniki: UserRound, prijavnica: ClipboardList, email: Mail, prijave: FileText,
   izvoz: FileDown, prisotnost: CheckCircle2, placila: Euro, ure: Clock, ekipa: Mountain, kontakti: Contact,
   kampanje: Send, datoteke: HardDrive, termini: ClipboardList, cenik: Tag, galerija: Images,
-  "rojstni-dan": ClipboardList, programi: Settings, admini: Users,
+  "rojstni-dan": ClipboardList, programi: Settings, admini: Users, skupine: Users,
 };
 const ikona = (href: string) => IKONE[href.split("/").filter(Boolean).pop() || "admin"] || FileText;
 
