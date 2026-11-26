@@ -39,6 +39,7 @@ const vsebina: TecajVsebina = {
     slika: "/mini-alpska-sola/11.jpg",
     slikaAlt: "Najmlajši smučarji v Mini alpski šoli",
   },
+  alpi: "skok",
   fakti: [
     {
       icon: CalendarDays,

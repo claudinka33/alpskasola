@@ -40,6 +40,7 @@ const vsebina: TecajVsebina = {
     slika: "/tecaj-smucanja/03.jpg",
     slikaAlt: "Otroci na tečaju smučanja na Rogli",
   },
+  alpi: "smuca",
   fakti: [
     {
       icon: CalendarDays,

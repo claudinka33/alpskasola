@@ -53,6 +53,7 @@ export default function ONasPage() {
     <main>
       <Navbar />
       <PageHero
+        alpi="maha"
         badge="Spoznajte nas"
         title="O Alpski šoli Rogla"
         subtitle="Dobrodošli na spletni strani Alpske šole Rogla — največje šole smučanja v Sloveniji."

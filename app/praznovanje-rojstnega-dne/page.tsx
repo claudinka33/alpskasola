@@ -64,6 +64,7 @@ export default function RojstniDanPage() {
     <main>
       <Navbar />
       <PageHero
+        alpi="skok"
         badge="🎉 Praznujmo skupaj"
         title="Rojstni dan z Alpsko šolo"
         subtitle="3 različni paketi praznovanj — izberite tistega, ki bo slavljencu najbolj všeč. Mi poskrbimo za vse, vi pa samo prinesete nasmeh."

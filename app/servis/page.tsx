@@ -40,6 +40,7 @@ export default function ServisPage() {
     <main>
       <Navbar />
       <PageHero
+        alpi="servis"
         badge="Servis"
         title="Servis smuči in desk"
         subtitle="Profesionalna priprava smuči in desk z izkušenimi serviserji. Vaša oprema bo pripravljena na vsako sezono."

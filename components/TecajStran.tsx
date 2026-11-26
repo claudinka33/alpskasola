@@ -10,6 +10,7 @@ import ProgramCta from "@/components/ProgramCta";
 import TerminiSekcija from "@/components/TerminiSekcija";
 import CenikSekcija from "@/components/CenikSekcija";
 import GalerijaSekcija from "@/components/GalerijaSekcija";
+import type { AlpiPoza } from "@/components/Alpi";
 import type { Slika } from "@/components/GalerijaMreza";
 import { Check, ArrowRight, type LucideIcon } from "lucide-react";
 
@@ -33,6 +34,8 @@ export type TecajVsebina = {
   galerija?: { naslov: string; podnaslov: string; slike: Slika[] };
   vprasanja: { v: string; o: string }[];
   cta: { naslov: string; podnaslov: string };
+  // Poza maskote Alpija v glavi strani
+  alpi?: AlpiPoza;
 };
 
 export default function TecajStran({ v }: { v: TecajVsebina }) {
@@ -41,7 +44,7 @@ export default function TecajStran({ v }: { v: TecajVsebina }) {
   return (
     <main>
       <Navbar />
-      <PageHero badge={v.hero.badge} title={v.hero.naslov} subtitle={v.hero.podnaslov} />
+      <PageHero badge={v.hero.badge} title={v.hero.naslov} subtitle={v.hero.podnaslov} alpi={v.alpi ?? "maha"} />
 
       {/* Uvod */}
       <section className="bg-white py-10 lg:py-16">

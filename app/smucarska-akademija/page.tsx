@@ -157,6 +157,7 @@ export default function SmucarskaAkademijaPage() {
     <main>
       <Navbar />
       <PageHero
+        alpi="skok"
         badge="Celoletni program"
         title="Smučarska akademija"
         subtitle="Akademija je celoletni program treningov za mlade smučarje, ki si želijo usvojiti čim več znanja na področju smučanja in učenja."
