@@ -118,10 +118,36 @@ function Sekcija({ id, ime, st, odprta, preklopi, children }: {
   );
 }
 
-function Kartica({ id, nazaj }: { id: number; nazaj: () => void }) {
+function Kartica({ id, nazaj, osvezi }: { id: number; nazaj: () => void; osvezi: () => void }) {
   const [d, setD] = useState<any>(null);
   const [napaka, setNapaka] = useState("");
   const [zaprte, setZaprte] = useState<Record<string, boolean>>({});
+  const [shranjujem, setShranjujem] = useState(false);
+  const [sporocilo, setSporocilo] = useState("");
+
+  // Sprememba statusa — ob "Potrjeno" sistem staršu pošlje potrditveni e-mail
+  const spremeniStatus = async (nov: string) => {
+    if (!d || nov === d.prijava.status) return;
+    if (nov === "potrjeno" && !confirm(`Potrdim prijavo? Staršu se pošlje e-mail s potrditvijo na ${d.prijava.email || "(ni e-pošte)"}.`)) return;
+    if (nov === "preklicano" && !confirm("Res prekličem to prijavo?")) return;
+    setShranjujem(true);
+    setSporocilo("");
+    try {
+      const r = await fetch("/api/prijave/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: d.prijava.id, status: nov }),
+      });
+      if (!r.ok) throw new Error();
+      setD({ ...d, prijava: { ...d.prijava, status: nov } });
+      setSporocilo(nov === "potrjeno" ? "✓ Prijava potrjena — staršu je poslan e-mail." : "✓ Status shranjen.");
+      osvezi();
+    } catch {
+      setSporocilo("Statusa ni bilo mogoče shraniti. Poskusi znova.");
+    } finally {
+      setShranjujem(false);
+    }
+  };
 
   useEffect(() => {
     setD(null);
@@ -198,6 +224,37 @@ function Kartica({ id, nazaj }: { id: number; nazaj: () => void }) {
           <button onClick={() => window.print()} className={gumb}><Printer size={12} /> Natisni</button>
           <Link href={`/admin/prijave/${p.id}`} className={gumb}><ExternalLink size={12} /> Prijava</Link>
         </div>
+      </div>
+
+      {/* Status prijave — tu Zoja potrdi prijavo (pošlje e-mail staršu) */}
+      <div className="flex flex-wrap items-center gap-2 rounded border border-[#DDE3EA] bg-white px-3 py-2 print:hidden">
+        {p.status === "nova" ? (
+          <button
+            onClick={() => spremeniStatus("potrjeno")}
+            disabled={shranjujem}
+            className="inline-flex h-8 items-center gap-1.5 rounded bg-brand-orange px-3 text-[12px] font-bold text-white hover:bg-[#C2410C] disabled:opacity-50"
+          >
+            {shranjujem ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />} Potrdi prijavo in pošlji e-mail
+          </button>
+        ) : (
+          <span className="text-[12px] font-semibold text-brand-navy">Status:</span>
+        )}
+        <div className="flex flex-wrap gap-1">
+          {Object.entries(STATUSI).map(([k, s]) => (
+            <button
+              key={k}
+              onClick={() => spremeniStatus(k)}
+              disabled={shranjujem}
+              title={k === "potrjeno" ? "Ob potrditvi se staršu pošlje e-mail" : undefined}
+              className={`h-7 rounded px-2 text-[11px] font-semibold disabled:opacity-50 ${
+                p.status === k ? `${s.slog} ring-1 ring-current` : "bg-[#F1F4F8] text-[#5B6B7B] hover:bg-[#E2E8F0]"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        {sporocilo && <span className={`text-[12px] ${sporocilo.startsWith("✓") ? "text-[#15803D]" : "text-[#991B1B]"}`}>{sporocilo}</span>}
       </div>
 
       {/* Info okvirčki */}
@@ -505,7 +562,7 @@ function Tecajniki() {
       {/* Kartica */}
       <div className={`${aktivenId ? "block" : "hidden lg:block"} min-w-0 flex-1`}>
         {aktivenId ? (
-          <Kartica id={aktivenId} nazaj={nazaj} />
+          <Kartica id={aktivenId} nazaj={nazaj} osvezi={nalozi} />
         ) : (
           <div className="rounded border border-[#DDE3EA] bg-white">
             <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-t border-b border-[#DDE3EA] bg-[#F6F8FB] px-2.5 py-1.5">

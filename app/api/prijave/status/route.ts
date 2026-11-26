@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
 import { posodobiStatus, pridobiProgrami, Prijava } from "@/lib/db";
 import { posljiPotrjenoStarsu } from "@/lib/email";
+import { pridobiTrenutniAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  // Status lahko spreminja samo prijavljen admin
+  if (!(await pridobiTrenutniAdmin())) {
+    return NextResponse.json({ error: "Ni dovoljenja" }, { status: 401 });
+  }
   try {
     const { id, status } = await req.json();
     if (!id || !status) {
