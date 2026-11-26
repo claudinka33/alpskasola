@@ -96,7 +96,7 @@ const vsebina: TecajVsebina = {
     },
     {
       v: "Kaj potrebujejo otroci s sabo?",
-      o: "Smuči, palice, smučarske čevlje, čelado, očala in smučarske rokavice. V nahrbtniku lahko imajo dodatne nogavice in prigrizek.",
+      o: "Smuči, palice, smučarske čevlje, čelado, očala in smučarske rokavice. V nahrbtniku naj imajo rezervne rokavice, dodatne nogavice, nekaj suhega za preobleči (majica, spodnja plast) in prigrizek.",
     },
     {
       v: "Kje imajo otroci kosilo?",
