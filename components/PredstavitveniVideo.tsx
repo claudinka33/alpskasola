@@ -57,18 +57,53 @@ export default function PredstavitveniVideo() {
 
   return (
     <section className="bg-white py-14 lg:py-20">
-      <div className="mx-auto max-w-6xl px-4 lg:px-8">
-        <div className="mb-8 text-center lg:mb-10">
+      <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12 lg:px-8">
+        {/* Besedilo + izbira videa */}
+        <div>
           <div className="mb-3 inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-brand-orange">
             <span className="h-px w-6 bg-brand-orange" />
             To smo mi
-            <span className="h-px w-6 bg-brand-orange" />
           </div>
-          <h2 className="text-3xl font-extrabold leading-[1.1] tracking-tight text-brand-navy lg:text-5xl">
+          <h2 className="mb-3 text-3xl font-extrabold leading-[1.1] tracking-tight text-brand-navy lg:text-4xl">
             Spoznajte Alpsko šolo
           </h2>
+          <p className="mb-6 text-base leading-relaxed text-slate-600">
+            Poglejte, kako je videti dan z nami — na snegu, na pripravah in na poletnih taborih.
+          </p>
+          <div className="space-y-2">
+            {videi.map((x, i) => (
+              <button
+                key={x.id}
+                type="button"
+                onClick={() => {
+                  setIzbran(i);
+                  setNalozi(true);
+                }}
+                className={`flex w-full items-center gap-3 rounded-xl border p-2 pr-4 text-left transition ${
+                  i === izbran
+                    ? "border-brand-orange bg-orange-50"
+                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <span className="relative block h-12 w-20 shrink-0 overflow-hidden rounded-lg">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://i.ytimg.com/vi/${x.id}/mqdefault.jpg`}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                  <span className="absolute inset-0 grid place-items-center bg-brand-navy/30">
+                    <Play size={14} fill="white" className="text-white" />
+                  </span>
+                </span>
+                <span className="text-sm font-bold text-brand-navy">{x.naslov}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* Video */}
         <div
           ref={ovoj}
           className="relative aspect-video overflow-hidden rounded-2xl bg-brand-navy shadow-xl ring-1 ring-slate-200"
@@ -95,41 +130,6 @@ export default function PredstavitveniVideo() {
               className="absolute inset-0 h-full w-full object-cover"
             />
           )}
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-3 lg:gap-4">
-          {videi.map((x, i) => (
-            <button
-              key={x.id}
-              type="button"
-              onClick={() => {
-                setIzbran(i);
-                setNalozi(true);
-              }}
-              className={`group relative overflow-hidden rounded-xl text-left ring-2 transition ${
-                i === izbran ? "ring-brand-orange" : "ring-transparent hover:ring-slate-300"
-              }`}
-            >
-              <span className="relative block aspect-video">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://i.ytimg.com/vi/${x.id}/mqdefault.jpg`}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <span className="absolute inset-0 bg-brand-navy/30" />
-                {i !== izbran && (
-                  <span className="absolute left-1/2 top-1/2 grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-brand-orange text-white">
-                    <Play size={14} fill="currentColor" className="ml-0.5" />
-                  </span>
-                )}
-              </span>
-              <span className="block bg-white px-2 py-2 text-xs font-bold text-brand-navy sm:text-sm">
-                {x.naslov}
-              </span>
-            </button>
-          ))}
         </div>
       </div>
     </section>

@@ -20,9 +20,9 @@ const programs = [
     title: "Tečaj plavanja",
     description: "Varno in zabavno učenje plavanja v Termah Zreče.",
     href: "/plavalni-tecaj",
-    tag: "★ POLETNI HIT",
+    tag: null,
     accent: "bg-cyan-100 text-cyan-600",
-    image: "/plavalni-tecaj.png",
+    image: "/plavalni-tecaj/04.jpg",
   },
   {
     icon: Cake,
@@ -47,7 +47,7 @@ const programs = [
     title: "Alpska šola smučanja",
     description: "Za otroke od 6. leta — od začetnikov do izkušenih.",
     href: "/sola-smucanja",
-    tag: null,
+    tag: "PRIJAVE ODPRTE",
     accent: "bg-blue-100 text-blue-600",
     image: "/tecaj-smucanja/03.jpg",
   },
@@ -56,7 +56,7 @@ const programs = [
     title: "Alpska šola bordanja",
     description: "Za mlade deskarje od 5. leta naprej.",
     href: "/tecaj-bordanja",
-    tag: null,
+    tag: "PRIJAVE ODPRTE",
     accent: "bg-sky-100 text-sky-600",
     image: "/tecaj-bordanja/07.jpg",
   },
@@ -65,7 +65,7 @@ const programs = [
     title: "Mini alpska šola",
     description: "Prvi koraki na smučeh za malčke od 4 do 6 let.",
     href: "/mini-alpska-sola",
-    tag: null,
+    tag: "PRIJAVE ODPRTE",
     accent: "bg-rose-100 text-rose-600",
     image: "/mini-alpska-sola/01.jpg",
   },
@@ -94,7 +94,7 @@ const programs = [
     href: "/sola-rolanja",
     tag: null,
     accent: "bg-teal-100 text-teal-600",
-    image: null, // TODO: dodaj fotografijo rolanja, ko jo dobimo
+    image: "/sola-rolanja/01.jpg", // TODO: dodaj fotografijo rolanja, ko jo dobimo
   },
   {
     icon: Wrench,
@@ -116,75 +116,124 @@ const programs = [
   },
 ];
 
+// Razvrstitev na domači strani (po href): zima, vse leto, storitve
+const ZIMA = ["/mini-alpska-sola", "/sola-smucanja", "/tecaj-bordanja", "/smucarska-akademija", "/ski-racing-team"];
+const VSE_LETO = ["/plavalni-tecaj", "/sola-rolanja", "/sportna-abeceda", "/praznovanje-rojstnega-dne"];
+const STORITVE = ["/servis", "/izposoja-opreme"];
+const po = (seznam: string[]) =>
+  seznam.map((h) => programs.find((p) => p.href === h)).filter(Boolean) as typeof programs;
+
+function Kartica({
+  program,
+  className = "",
+  siroka = false,
+}: {
+  program: (typeof programs)[number];
+  className?: string;
+  siroka?: boolean;
+}) {
+  const Icon = program.icon;
+  return (
+    <Link
+      href={program.href}
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-brand-orange/40 hover:shadow-xl hover:shadow-brand-navy/5 ${className}`}
+    >
+      <div className={`relative overflow-hidden bg-gradient-to-br ${siroka ? "aspect-[4/3] lg:aspect-[2/1]" : "aspect-[4/3]"} from-blue-50 to-slate-100`}>
+        {program.image ? (
+          <img
+            src={program.image}
+            alt={program.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <div className={`flex h-20 w-20 items-center justify-center rounded-3xl ${program.accent}`}>
+              <Icon size={40} />
+            </div>
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-brand-navy/80 to-transparent" />
+        <h3 className="absolute bottom-3 left-4 right-4 text-lg font-extrabold leading-snug text-white drop-shadow">
+          {program.title}
+        </h3>
+        {program.tag && (
+          <span className="absolute right-3 top-3 rounded-full bg-brand-orange px-2.5 py-1 text-[10px] font-bold tracking-wider text-white shadow-lg">
+            {program.tag}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-1 items-end justify-between gap-3 p-4">
+        <p className="text-sm leading-relaxed text-slate-600">{program.description}</p>
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-orange-50 text-brand-orange transition group-hover:bg-brand-orange group-hover:text-white">
+          <ArrowRight size={15} />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function Naslov({ znacka, naslov }: { znacka: string; naslov: string }) {
+  return (
+    <div className="mb-5 flex items-end justify-between gap-4 border-b border-slate-200 pb-3">
+      <div>
+        <div className="mb-1 text-xs font-bold uppercase tracking-widest text-brand-orange">{znacka}</div>
+        <h3 className="text-2xl font-extrabold tracking-tight text-brand-navy lg:text-3xl">{naslov}</h3>
+      </div>
+    </div>
+  );
+}
+
 export default function Programs() {
   return (
-    <section className="bg-white py-12 lg:py-20">
-      <div className="max-w-7xl 2xl:max-w-[88rem] mx-auto px-5 sm:px-6 lg:px-8">
-        <div className="text-center mb-8 lg:mb-12">
-          <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
-            <span className="w-6 h-px bg-brand-orange" />
+    <section id="programi" className="scroll-mt-24 bg-white py-14 lg:py-20">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 2xl:max-w-[88rem]">
+        <div className="mb-10 text-center lg:mb-14">
+          <div className="mb-3 inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-brand-orange">
+            <span className="h-px w-6 bg-brand-orange" />
             Naši programi
-            <span className="w-6 h-px bg-brand-orange" />
+            <span className="h-px w-6 bg-brand-orange" />
           </div>
-          <h2 className="text-4xl lg:text-5xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-3">
+          <h2 className="mb-3 text-4xl font-extrabold leading-[1.1] tracking-tight text-brand-navy lg:text-5xl">
             Z nami v gibanju vse leto
           </h2>
-          <p className="text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
-            Od prvih korakov na smučeh do tekmovalne kariere. Plavanje, rolanje,
-            športna abeceda — z nami otroci ostajajo v gibanju vse leto.
+          <p className="mx-auto max-w-xl text-base leading-relaxed text-slate-600">
+            Od prvih korakov na smučeh do tekmovalne kariere. Pozimi na Rogli, poleti v vodi, na rolerjih in igrišču.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-          {programs.map((program, i) => {
-            const Icon = program.icon;
+        <Naslov znacka="❄️ Zima na Rogli" naslov="Smučanje in bordanje" />
+        {/* Prvi trije čez 3 stolpce, zadnja dva (akademija, tekmovalne) širše čez 2 */}
+        <div className="mb-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-6">
+          {po(ZIMA).map((p, i) => (
+            <Kartica key={p.href} program={p} siroka={i >= 3} className={i < 3 ? "lg:col-span-2" : "lg:col-span-3"} />
+          ))}
+        </div>
+
+        <Naslov znacka="☀️ Poleti in vse leto" naslov="Plavanje, rolanje in igra" />
+        <div className="mb-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {po(VSE_LETO).map((p) => (
+            <Kartica key={p.href} program={p} />
+          ))}
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {po(STORITVE).map((p) => {
+            const Icon = p.icon;
             return (
               <Link
-                key={i}
-                href={program.href}
-                className="group relative bg-white rounded-2xl border border-slate-200/70 overflow-hidden hover:border-brand-orange/40 hover:shadow-xl hover:shadow-brand-navy/5 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                key={p.href}
+                href={p.href}
+                className="group flex items-center gap-4 rounded-2xl border border-slate-200/70 bg-slate-50 p-3 pr-5 transition hover:border-brand-orange/40 hover:bg-white hover:shadow-lg"
               >
-                {/* Fotografija */}
-                <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-blue-50 to-slate-100">
-                  {program.image ? (
-                    <img
-                      src={program.image}
-                      alt={program.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className={`w-20 h-20 rounded-3xl flex items-center justify-center ${program.accent}`}>
-                        <Icon size={40} />
-                      </div>
-                    </div>
-                  )}
-                  {program.tag && (
-                    <span className="absolute top-3 right-3 bg-brand-orange text-white px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider shadow-lg">
-                      {program.tag}
-                    </span>
-                  )}
-                </div>
-
-                <div className="p-5 lg:p-6 flex flex-col flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${program.accent}`}
-                    >
-                      <Icon size={18} />
-                    </div>
-                    <h3 className="text-lg font-bold text-brand-navy leading-snug">
-                      {program.title}
-                    </h3>
+                <img src={p.image!} alt={p.title} loading="lazy" className="h-16 w-20 rounded-xl object-cover" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 font-bold text-brand-navy">
+                    <Icon size={16} className="text-brand-orange" /> {p.title}
                   </div>
-                  <p className="text-sm text-slate-600 mb-4 leading-relaxed flex-1">
-                    {program.description}
-                  </p>
-                  <div className="flex items-center gap-1.5 text-sm font-semibold text-brand-orange group-hover:gap-2.5 transition-all">
-                    Več o programu <ArrowRight size={15} />
-                  </div>
+                  <div className="text-sm text-slate-600">{p.description}</div>
                 </div>
+                <ArrowRight size={18} className="text-brand-orange transition-transform group-hover:translate-x-1" />
               </Link>
             );
           })}
