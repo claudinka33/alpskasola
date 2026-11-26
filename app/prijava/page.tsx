@@ -8,11 +8,11 @@ import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const znanja = [
-  { value: "zacetnik", label: "Začetnik" },
-  { value: "osnovno", label: "Osnovno znanje" },
-  { value: "srednje", label: "Srednje znanje" },
-  { value: "napredno", label: "Napredno" },
-  { value: "tekmovalno", label: "Tekmovalna raven" },
+  { value: "zacetnik", label: "Začetnik", opis: "Še ni bil/a na snegu ali šele začenja" },
+  { value: "osnovno", label: "Osnovno znanje", opis: "Se ustavi in zavija na lažjih progah" },
+  { value: "srednje", label: "Srednje znanje", opis: "Varno vijuga na srednje zahtevnih progah" },
+  { value: "napredno", label: "Napredno", opis: "Obvlada tudi zahtevne proge" },
+  { value: "tekmovalno", label: "Tekmovalna raven", opis: "Trenira ali tekmuje" },
 ];
 
 const paketiRojstniDan = [
@@ -497,19 +497,37 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                 <F label="Priimek *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
                 <F label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
                 {!jeRojstniDan && polje("otrok_znanje") && (
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block text-sm font-semibold text-brand-navy mb-1.5">
                       Predznanje{polje("otrok_znanje")!.obvezno ? " *" : ""}
                     </label>
-                    <select
-                      value={form.otrok_znanje}
-                      onChange={(e) => update("otrok_znanje", e.target.value)}
-                      required={polje("otrok_znanje")!.obvezno}
-                      className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none text-sm bg-white"
-                    >
-                      <option value="">— izberi —</option>
-                      {znanja.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
-                    </select>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      {znanja.map((z) => {
+                        const izbrano = form.otrok_znanje === z.value;
+                        return (
+                          <label
+                            key={z.value}
+                            className={`flex items-center gap-3 rounded-lg border-2 bg-white px-3.5 py-2.5 cursor-pointer transition-colors ${
+                              izbrano ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="otrok_znanje"
+                              value={z.value}
+                              checked={izbrano}
+                              required={polje("otrok_znanje")!.obvezno}
+                              onChange={() => update("otrok_znanje", z.value)}
+                              className="w-4 h-4 accent-brand-orange shrink-0"
+                            />
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-brand-navy">{z.label}</span>
+                              <span className="block text-xs text-slate-500">{z.opis}</span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
