@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import TecajStran, { type TecajVsebina } from "@/components/TecajStran";
-import { Clock, Medal, Bus, CalendarDays } from "lucide-react";
+import { Clock, Medal, MapPin, CalendarDays } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -9,7 +9,7 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: "Mini alpska šola — smučanje za otroke 4–6 let | Alpska šola Rogla",
   description:
-    "Mini alpska šola: smučanje za najmlajše od 4. do 6. leta na Rogli. 6 sobot od 9.30 do 13.00 in zaključna prireditev z medaljami.",
+    "Mini alpska šola: smučanje za najmlajše od 4. do 6. leta na Rogli. 7 sobot (zadnja z zaključno prireditvijo) od 9.30 do 13.00, začetek 9. 1. 2027.",
 };
 
 // SLIKE: zamenjaj poti, ko dobimo nove fotografije (naloži jih v /public/mini-alpska-sola/)
@@ -26,12 +26,13 @@ const vsebina: TecajVsebina = {
     naslov: "Smučanje skozi igro",
     odstavki: [
       "Program, prilagojen najmlajšim smučarjem od 4. do 6. leta. Skozi igro na snegu se otroci navadijo na smučarsko opremo, naredijo prve zavoje in osvojijo vožnjo z žičnico.",
-      "Urnik je krajši in prilagojen zbranosti malčkov — smučamo ob sobotah od 9.30 do 13.00, sezono pa zaključimo s prireditvijo in podelitvijo medalj.",
+      "Urnik je krajši in prilagojen zbranosti malčkov — smučamo ob sobotah od 9.30 do 13.00, vmes je od 11.00 do 11.30 odmor, ko malčke prevzamete starši. Sezono zaključimo s prireditvijo in podelitvijo medalj.",
     ],
     poudarki: [
-      "Paket 6 sobot + zaključna prireditev",
-      "Smučamo ob sobotah 9.30 – 13.00",
-      "Organiziran avtobus: Celje, Arclin, Frankolovo, Zreče",
+      "Paket 7 sobot, zadnja z zaključno prireditvijo",
+      "Začnemo v soboto, 9. 1. 2027",
+      "Smučamo ob sobotah 9.30 – 13.00 (odmor 11.00 – 11.30)",
+      "Zbirno mesto: vrh Uniorčka",
       "Medalja in FIS brošura",
       "Učenje skozi igro v majhnih skupinah",
     ],
@@ -39,9 +40,9 @@ const vsebina: TecajVsebina = {
     slikaAlt: "Najmlajši smučarji v Mini alpski šoli",
   },
   fakti: [
-    { icon: CalendarDays, naslov: "6 sobot", besedilo: "Plus zaključna prireditev ob koncu sezone." },
+    { icon: CalendarDays, naslov: "7 sobot", besedilo: "Od 9. 1. 2027, zadnja z zaključno prireditvijo." },
     { icon: Clock, naslov: "9.30 – 13.00", besedilo: "Krajši urnik, prilagojen malčkom." },
-    { icon: Bus, naslov: "Organiziran prevoz", besedilo: "Celje (Zlatorog), Arclin (Spar), Frankolovo, Zreče." },
+    { icon: MapPin, naslov: "Vrh Uniorčka", besedilo: "Zbirno mesto na Rogli — otroke pripeljete starši." },
     { icon: Medal, naslov: "Medalja", besedilo: "Medalja in FIS brošura za vsakega otroka." },
   ],
   koraki: [
@@ -70,7 +71,7 @@ const vsebina: TecajVsebina = {
       { url: "/mini-alpska-sola/21.jpg", naslov: "V vrsti pri vlečnici", w: 1050, h: 1400 },
       { url: "/mini-alpska-sola/06.jpg", naslov: "Prvi spusti", w: 1050, h: 1400 },
       { url: "/mini-alpska-sola/18.jpg", naslov: "Roke v zrak", w: 1050, h: 1400 },
-      { url: "/mini-alpska-sola/16.jpg", naslov: "Prihod z avtobusom", w: 720, h: 960 },
+      { url: "/mini-alpska-sola/16.jpg", naslov: "Prihod na Roglo", w: 720, h: 960 },
       { url: "/mini-alpska-sola/28.jpg", naslov: "Tek po snegu", w: 1344, h: 1349 },
       { url: "/mini-alpska-sola/08.jpg", naslov: "Na sedežnici", w: 1050, h: 1400 },
       { url: "/mini-alpska-sola/27.jpg", naslov: "Učiteljica pokaže, malčki ponovijo", w: 1393, h: 1400 },
@@ -83,7 +84,7 @@ const vsebina: TecajVsebina = {
       { url: "/mini-alpska-sola/31.jpg", naslov: "Smuči v roke", w: 1050, h: 1400 },
       { url: "/mini-alpska-sola/09.jpg", naslov: "V vrsti za učiteljico", w: 1050, h: 1400 },
       { url: "/mini-alpska-sola/13.jpg", naslov: "Prvič na vlečnici", w: 1050, h: 1400 },
-      { url: "/mini-alpska-sola/25.jpg", naslov: "Skupaj ob avtobusu", w: 1120, h: 1400 },
+      { url: "/mini-alpska-sola/25.jpg", naslov: "Skupaj pred začetkom", w: 1120, h: 1400 },
       { url: "/mini-alpska-sola/07.jpg", naslov: "Mali smučar", w: 1050, h: 1400 },
       { url: "/mini-alpska-sola/12.jpg", naslov: "Med zastavicami", w: 1050, h: 1400 },
     ],
@@ -98,8 +99,16 @@ const vsebina: TecajVsebina = {
       o: "Malčki se hitreje utrudijo, zato je urnik krajši. Tako ostanejo zbrani, varni in se smučanja veselijo vsako soboto znova.",
     },
     {
-      v: "Kje lahko otrok vstopi na avtobus?",
-      o: "Vstopne točke so Celje (Zlatorog), Arclin (Spar), Frankolovo (glavna avtobusna) in Zreče (glavna avtobusna). Vstopno točko izberete na prijavnici.",
+      v: "Kje se dobimo? Je organiziran prevoz?",
+      o: "Dobimo se na zbirnem mestu na vrhu Uniorčka na Rogli. Pri Mini alpski šoli avtobusa ni — otroke pripeljete in prevzamete starši.",
+    },
+    {
+      v: "Kako poteka sobota?",
+      o: "Smučamo od 9.30 do 13.00. Od 11.00 do 11.30 je odmor: malčke takrat prevzamete starši in jih ob 11.30 pripeljete nazaj na zbirno mesto.",
+    },
+    {
+      v: "Koliko stane in kdaj začnemo?",
+      o: "Paket 7 sobot z zaključno prireditvijo stane 380 €. Začnemo v soboto, 9. 1. 2027. Smučarska karta ni vključena.",
     },
     {
       v: "Kaj potrebujejo otroci s sabo?",
@@ -107,11 +116,11 @@ const vsebina: TecajVsebina = {
     },
     {
       v: "Ali otrok potrebuje smučarsko karto?",
-      o: "Za podrobnosti o karti nas pokličite na 064 230 888 — z veseljem vam svetujemo.",
+      o: "Da, karta ni vključena v paket. Pri nas jo lahko kupite po promocijski ceni 29 € (redna cena je 32 €) — na prijavnici označite, če jo želite.",
     },
     {
       v: "Kako je v primeru slabega vremena?",
-      o: "Vsakodnevno spremljamo vreme in razmere. V primeru slabega vremena starše pravočasno obvestimo na spletni strani in osebno.",
+      o: "Vreme in razmere spremljamo sproti. Če je tečaj zaradi slabega vremena odpovedan, vas obvestimo že v petek po e-pošti in SMS-u.",
     },
   ],
   cta: { naslov: "Prijava v Mini alpsko šolo", podnaslov: "Mesta so omejena. Rezervirajte mesto za vašega malčka." },

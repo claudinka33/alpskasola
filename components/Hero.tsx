@@ -31,8 +31,8 @@ export default function Hero() {
           </h1>
 
           <p className="mb-7 max-w-lg text-base leading-relaxed text-white/85 lg:text-lg">
-            Smučanje in bordanje na Rogli za otroke od 4. leta naprej — v majhnih skupinah,
-            z izkušenimi učitelji in organiziranim avtobusom.
+            Smučanje in bordanje na Rogli za otroke od 4. leta naprej — v majhnih skupinah
+            in z izkušenimi učitelji. Začnemo v soboto, 9. 1. 2027.
           </p>
 
           {/* Hitra izbira zimskih programov */}
@@ -40,7 +40,7 @@ export default function Hero() {
             {[
               { href: "/mini-alpska-sola", naslov: "Mini alpska šola", leta: "4 – 6 let" },
               { href: "/sola-smucanja", naslov: "Alpska šola smučanja", leta: "od 6 let" },
-              { href: "/tecaj-bordanja", naslov: "Alpska šola bordanja", leta: "od 5 let" },
+              { href: "/tecaj-bordanja", naslov: "Alpska šola bordanja", leta: "od 6 let" },
             ].map((p) => (
               <Link
                 key={p.href}
@@ -75,7 +75,7 @@ export default function Hero() {
               <Shield size={16} className="text-brand-orange" /> Varnost na prvem mestu
             </div>
             <div className="flex items-center gap-2 text-xs font-medium text-white/85">
-              <Bus size={16} className="text-brand-orange" /> Avtobus iz Celja, Arclina, Frankolovega, Zreč
+              <Bus size={16} className="text-brand-orange" /> Avtobus iz Celja, Arclina, Frankolovega, Zreč (smučanje, bordanje)
             </div>
             <div className="flex items-center gap-2 text-xs font-medium text-white/85">
               <Medal size={16} className="text-brand-orange" /> 15+ let izkušenj

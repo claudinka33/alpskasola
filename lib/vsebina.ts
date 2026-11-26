@@ -79,6 +79,7 @@ export async function zagotoviVsebino() {
   try {
     await uvoziVstopnoTockoAvtobus("avtobus-vstopna-tocka-v1", ["sola-smucanja", "tecaj-bordanja"]);
     await uvoziVstopnoTockoAvtobus("avtobus-vstopna-tocka-mini-v1", ["mini-alpska-sola"]);
+    await zima2027Podatki();
   } catch (e) {
     console.error("uvoz vstopne točke:", e);
   }
@@ -268,6 +269,46 @@ async function preimenujAlpskaSola() {
   await sql`UPDATE programi SET naziv = 'Alpska šola smučanja' WHERE slug = 'sola-smucanja';`;
   await sql`UPDATE programi SET naziv = 'Alpska šola bordanja' WHERE slug = 'tecaj-bordanja';`;
   await sql`UPDATE programi SET naziv = 'Mini alpska šola' WHERE slug = 'mini-alpska-sola';`;
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Podatki za zimo 2026/27 (Damjan, Zoja — 26. 11. 2026):
+// Mini: 7 sobot z zaključno, 380 €, brez avtobusa, zbirno mesto vrh Uniorčka, karta 29 € (redna 32 €).
+// Alpska šola smučanja / bordanja: 8 sobot z zaključno, 500 €, avtobus, od 6. leta. Začetek 9. 1. 2027.
+async function zima2027Podatki() {
+  const KLJUC = "zima-2027-podatki-v1";
+  if (await seedOpravljen(KLJUC)) return;
+
+  // Cenik
+  await sql`
+    UPDATE cenik SET cena = '380€', podnaslov = 'Paket 7 sobot z zaključno prireditvijo',
+      vkljuceno = ${"7 sobot, zadnja z zaključno prireditvijo\nStarost 4 – 6 let\nZačnemo 9. 1. 2027\nSobote 9.30 – 13.00 (odmor 11.00 – 11.30)\nZbirno mesto: vrh Uniorčka\nMedalja in FIS brošura\nKarta ni v paketu (pri nas 29 €)"}
+    WHERE naziv ILIKE '%MINI%';`;
+  await sql`
+    UPDATE cenik SET cena = '500€', podnaslov = 'Paket 8 sobot z zaključno prireditvijo',
+      vkljuceno = ${"8 sobot od 9h do 15h, z zaključno prireditvijo\nOrganiziran avtobus: Celje, Arclin, Frankolovo, Zreče\nKosilo v hotelu Planja\nMedalja + FIS brošura\nZačnemo 9. 1. 2027\nKarta ni v paketu (pri nas 29 €, redna 32 €)"}
+    WHERE naziv NOT ILIKE '%MINI%'
+      AND (naziv ILIKE '%ŠOLA SMUČANJA%' OR naziv ILIKE '%ŠOLA BORDANJA%' OR naziv ILIKE '%TEČAJ BORDANJA%' OR naziv ILIKE '%TEČAJ SMUČANJA%');`;
+  // Stara cena karte povsod, kjer še piše
+  await sql`UPDATE cenik SET vkljuceno = replace(vkljuceno, '27,50€', '29 €'), opomba = replace(opomba, '27,50€', '29 €') WHERE vkljuceno LIKE '%27,50%' OR opomba LIKE '%27,50%';`;
+  await sql`UPDATE cenik_sekcija SET opomba_spodaj = replace(replace(opomba_spodaj, '27,50€', '29 €'), '27,50 €', '29 €') WHERE opomba_spodaj LIKE '%27,50%';`;
+
+  await sql`UPDATE programi SET opis = 'Mini alpska šola za otroke od 4. do 6. leta — 7 sobot od 9.30 do 13.00' WHERE slug = 'mini-alpska-sola';`;
+  await sql`UPDATE programi SET opis = 'Alpska šola bordanja za otroke od 6. leta naprej — 8 sobot od 9h do 15h' WHERE slug = 'tecaj-bordanja';`;
+
+  // Prijavnica Mini alpske: brez avtobusa, namesto tega kljukica za karto
+  await zagotoviTabele();
+  await sql`DELETE FROM form_polja WHERE program_slug = 'mini-alpska-sola' AND kljuc = 'vstopna_tocka';`;
+  await zagotoviPoljaZaProgram("mini-alpska-sola");
+  const ze = await sql`SELECT 1 FROM form_polja WHERE program_slug = 'mini-alpska-sola' AND kljuc = 'karta';`;
+  if (ze.rows.length === 0) {
+    await sql`UPDATE form_polja SET vrstni_red = vrstni_red + 1 WHERE program_slug = 'mini-alpska-sola' AND vrstni_red >= 1;`;
+    await sql`
+      INSERT INTO form_polja (program_slug, kljuc, label, tip, moznosti, obvezno, viden, vrstni_red, sistemsko)
+      VALUES ('mini-alpska-sola', 'karta', 'Želim smučarsko karto po promocijski ceni 29 € (redna cena 32 €)', 'checkbox', NULL, false, true, 1, false)
+      ON CONFLICT (program_slug, kljuc) DO NOTHING;`;
+  }
+
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 
