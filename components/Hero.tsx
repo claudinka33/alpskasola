@@ -6,7 +6,7 @@ import Alpi, { AlpiOblacek } from "@/components/Alpi";
 // Fotografije zamenjaš tukaj (poti do slik v /public).
 const kolaz = {
   velika: { src: "/mini-alpska-sola/23.jpg", alt: "Malčki Mini alpske šole mečejo sneg v zrak" },
-  zgoraj: { src: "/tecaj-smucanja/08.jpg", alt: "Zaključek sezone z medaljami" },
+  zgoraj: { src: "/tecaj-smucanja/05.jpg", alt: "Otroci Alpske šole smučanja na zasneženi progi" },
   spodaj: { src: "/tecaj-bordanja/07.jpg", alt: "Alpska šola bordanja na Rogli" },
 };
 
