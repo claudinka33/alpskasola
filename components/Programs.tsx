@@ -85,7 +85,7 @@ const programs = [
     href: "/smucarska-akademija",
     tag: null,
     accent: "bg-violet-100 text-violet-600",
-    image: "/akademija-galerija/snezni-hrib.jpg",
+    image: "/akademija-galerija/tekmovalci-smuci.jpg",
   },
   {
     icon: Bike,
