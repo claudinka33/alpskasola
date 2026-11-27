@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ure });
     }
     if (s.get("povzetek")) {
-      return NextResponse.json({ povzetek: await povzetekPrisotnosti(parseInt(s.get("povzetek")!)) });
+      return NextResponse.json({ povzetek: await povzetekPrisotnosti(parseInt(s.get("povzetek")!), s.get("mesec") || undefined) });
     }
     if (s.get("srecanje")) {
       const id = parseInt(s.get("srecanje")!);

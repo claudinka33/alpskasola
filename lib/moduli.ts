@@ -602,7 +602,9 @@ export async function pregledTable() {
 }
 
 // Povzetek prisotnosti po otroku za en termin
-export async function povzetekPrisotnosti(termin_id: number) {
+// mesec: "YYYY-MM" -> šteje samo vadbe v tem mesecu (za obračun plačil)
+export async function povzetekPrisotnosti(termin_id: number, mesec?: string) {
+  const od = mesec && /^\d{4}-\d{2}$/.test(mesec) ? `${mesec}-01` : null;
   await zagotoviModule();
   const r = await sql<{
     prijava_id: number;
@@ -613,11 +615,12 @@ export async function povzetekPrisotnosti(termin_id: number) {
   }>`
     SELECT p.id AS prijava_id, p.otrok_ime, p.otrok_priimek,
            p.starsi_ime, p.starsi_priimek, p.email, p.telefon,
-           COUNT(pr.id)::int AS skupaj,
-           COUNT(pr.id) FILTER (WHERE pr.prisoten)::int AS prisoten
+           COUNT(s.id)::int AS skupaj,
+           COUNT(s.id) FILTER (WHERE pr.prisoten)::int AS prisoten
     FROM prijave p
     LEFT JOIN prisotnost pr ON pr.prijava_id = p.id
     LEFT JOIN srecanja s ON s.id = pr.srecanje_id AND s.termin_id = ${termin_id}
+      AND (${od}::date IS NULL OR (s.datum >= ${od}::date AND s.datum < (${od}::date + INTERVAL '1 month')))
     WHERE p.termin_id = ${termin_id}
     GROUP BY p.id, p.otrok_ime, p.otrok_priimek, p.starsi_ime, p.starsi_priimek, p.email, p.telefon
     ORDER BY p.otrok_priimek, p.otrok_ime;`;

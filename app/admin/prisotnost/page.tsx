@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Loader2,
   CheckCircle2,
@@ -70,6 +70,15 @@ const danesDan = () => DNEVI_TEDNA[new Date().getDay()];
 const jeDanes = (dan?: string | null) =>
   !!dan && dan.toLowerCase().replace(/[^a-zčšž]/g, "").startsWith(danesDan().toLowerCase().slice(0, 3));
 
+const IMENA_MESECEV = ["januar", "februar", "marec", "april", "maj", "junij", "julij", "avgust", "september", "oktober", "november", "december"];
+const imeMeseca = (m: string) => `${IMENA_MESECEV[parseInt(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
+// Meseci, v katerih so bile vadbe (najnovejši prvi) + tekoči mesec
+const meseciVadb = (sr: { datum: string }[]) => {
+  const set = new Set(sr.map((x) => x.datum.slice(0, 7)));
+  set.add(new Date().toLocaleDateString("sv-SE").slice(0, 7));
+  return Array.from(set).sort().reverse();
+};
+
 export default function PrisotnostPage() {
   const [skupine, setSkupine] = useState<Skupina[]>([]);
   const [programi, setProgrami] = useState<Program[]>([]);
@@ -89,6 +98,17 @@ export default function PrisotnostPage() {
   const [vrstice, setVrstice] = useState<Vrstica[]>([]);
   const [povzetek, setPovzetek] = useState<Povzetek[]>([]);
   const [zavihek, setZavihek] = useState<"vadba" | "povzetek">("vadba");
+  // % prisotnosti po mesecih ("" = vse vadbe); privzeto tekoči mesec
+  const [mesec, setMesec] = useState<string>(() => new Date().toLocaleDateString("sv-SE").slice(0, 7));
+  const mesecRef = useRef(mesec);
+  mesecRef.current = mesec;
+  const izberiMesec = async (m: string) => {
+    setMesec(m);
+    mesecRef.current = m;
+    if (!izbrana) return;
+    const d = await fetch(`/api/prisotnost?povzetek=${izbrana.id}&mesec=${m}`).then((r) => r.json());
+    setPovzetek(d.povzetek || []);
+  };
 
   const [nalagam, setNalagam] = useState(false);
   const [novUcitelj, setNovUcitelj] = useState("");
@@ -199,7 +219,7 @@ export default function PrisotnostPage() {
     setDatum(danes());
     const [sr, pv] = await Promise.all([
       fetch(`/api/prisotnost?termin=${s.id}`).then((r) => r.json()),
-      fetch(`/api/prisotnost?povzetek=${s.id}`).then((r) => r.json()),
+      fetch(`/api/prisotnost?povzetek=${s.id}&mesec=${mesecRef.current}`).then((r) => r.json()),
     ]);
     setSrecanja(sr.srecanja || []);
     setJeAdmin(!!sr.admin);
@@ -303,7 +323,7 @@ export default function PrisotnostPage() {
       if (izbrana) {
         const [sr, pv] = await Promise.all([
           fetch(`/api/prisotnost?termin=${izbrana.id}`).then((r) => r.json()),
-          fetch(`/api/prisotnost?povzetek=${izbrana.id}`).then((r) => r.json()),
+          fetch(`/api/prisotnost?povzetek=${izbrana.id}&mesec=${mesecRef.current}`).then((r) => r.json()),
         ]);
         setSrecanja(sr.srecanja || []);
         setPovzetek(pv.povzetek || []);
@@ -374,7 +394,7 @@ export default function PrisotnostPage() {
     setPremik(null);
     if (srecanje) await naloziVrstice(srecanje.id);
     if (izbrana) {
-      const d = await fetch(`/api/prisotnost?povzetek=${izbrana.id}`).then((r) => r.json());
+      const d = await fetch(`/api/prisotnost?povzetek=${izbrana.id}&mesec=${mesecRef.current}`).then((r) => r.json());
       setPovzetek(d.povzetek || []);
     }
   };
@@ -392,7 +412,7 @@ export default function PrisotnostPage() {
     setVrstice([]);
     const [sr, pv] = await Promise.all([
       fetch(`/api/prisotnost?termin=${izbrana.id}`).then((r) => r.json()),
-      fetch(`/api/prisotnost?povzetek=${izbrana.id}`).then((r) => r.json()),
+      fetch(`/api/prisotnost?povzetek=${izbrana.id}&mesec=${mesecRef.current}`).then((r) => r.json()),
     ]);
     setSrecanja(sr.srecanja || []);
     setPovzetek(pv.povzetek || []);
@@ -939,6 +959,20 @@ export default function PrisotnostPage() {
 
       {zavihek === "povzetek" && (
         <div className="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
+          {/* Izbira meseca — za obračun plačil po mesecih */}
+          <div className="flex gap-1.5 overflow-x-auto border-b border-slate-100 p-3">
+            {[...meseciVadb(srecanja), ""].map((m) => (
+              <button
+                key={m || "vse"}
+                onClick={() => izberiMesec(m)}
+                className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-bold ${
+                  mesec === m ? "border-brand-navy bg-brand-navy text-white" : "border-slate-200 bg-white text-slate-600"
+                }`}
+              >
+                {m ? imeMeseca(m) : "Vse vadbe"}
+              </button>
+            ))}
+          </div>
           {povzetek.length > 5 && (
             <div className="p-3 border-b border-slate-100">
               <IskalnikOtrok vrednost={iskanjeSkupine} onChange={setIskanjeSkupine} />
