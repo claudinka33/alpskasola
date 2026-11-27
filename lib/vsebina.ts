@@ -83,6 +83,7 @@ export async function zagotoviVsebino() {
     await zima2027CenikV2();
     await prijavnicaAlergije();
     await prijavnicaKartaAlpska();
+    await vrstniRedPrijavnice();
   } catch (e) {
     console.error("uvoz vstopne točke:", e);
   }
@@ -361,6 +362,18 @@ async function prijavnicaKartaAlpska() {
       VALUES (${slug}, 'karta', 'Želim smučarsko karto po promocijski ceni 29 € (redna cena 32 €)', 'checkbox', NULL, false, true, ${max.rows[0].m + 1}, false)
       ON CONFLICT (program_slug, kljuc) DO UPDATE SET viden = true;`;
   }
+  await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
+}
+
+// Prijavnica: najprej Mini alpska šola, Alpska šola smučanja, Alpska šola bordanja (enkratno)
+async function vrstniRedPrijavnice() {
+  const KLJUC = "prijavnica-vrstni-red-v1";
+  if (await seedOpravljen(KLJUC)) return;
+  await sql`ALTER TABLE programi ADD COLUMN IF NOT EXISTS vrstni_red INT;`;
+  await sql`UPDATE programi SET vrstni_red = COALESCE(vrstni_red, 100) + 3 WHERE slug NOT IN ('mini-alpska-sola', 'sola-smucanja', 'tecaj-bordanja');`;
+  await sql`UPDATE programi SET vrstni_red = 1 WHERE slug = 'mini-alpska-sola';`;
+  await sql`UPDATE programi SET vrstni_red = 2 WHERE slug = 'sola-smucanja';`;
+  await sql`UPDATE programi SET vrstni_red = 3 WHERE slug = 'tecaj-bordanja';`;
   await sql`INSERT INTO vsebina_seed (kljuc) VALUES (${KLJUC}) ON CONFLICT DO NOTHING;`;
 }
 

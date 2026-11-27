@@ -113,6 +113,24 @@ function PrijavnaStranContent() {
   };
   const [termini, setTermini] = useState<Termin[]>([]);
   const [izbranTermin, setIzbranTermin] = useState<Termin | null>(null);
+  // Paket iz cenika (kadar program nima razpisanih terminov) — samodejno izbran
+  type Paket = { id: number; naziv: string; podnaslov: string | null; cena: string | null };
+  const [paketi, setPaketi] = useState<Paket[]>([]);
+  const [izbranPaket, setIzbranPaket] = useState<Paket | null>(null);
+  useEffect(() => {
+    setPaketi([]);
+    setIzbranPaket(null);
+    if (!form.program || jeRojstniDan) return;
+    fetch(`/api/cenik?program=${encodeURIComponent(form.program)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        const seznam: Paket[] = (d.cenik || []).filter((c: any) => c.aktiven !== false);
+        setPaketi(seznam);
+        setIzbranPaket(seznam[0] || null);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.program]);
 
   useEffect(() => {
     setTermini([]);
@@ -242,7 +260,9 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
         body: JSON.stringify({
           ...form,
           opomba: opombaFull,
-          dodatno: dodatnoVal,
+          dodatno: izbranPaket && termini.length === 0
+            ? { ...dodatnoVal, Paket: [izbranPaket.naziv, izbranPaket.podnaslov, izbranPaket.cena].filter(Boolean).join(" · ") }
+            : dodatnoVal,
           termin: izbranTermin
             ? `${izbranTermin.naziv}${datumObseg(izbranTermin) ? " (" + datumObseg(izbranTermin) + ")" : ""}`
             : null,
@@ -314,6 +334,33 @@ ${form.opomba ? "Opomba starša: " + form.opomba : ""}`;
                 {programi.map((p) => <option key={p.slug} value={p.slug}>{p.naziv}</option>)}
               </select>
             </div>
+
+            {/* Paket iz cenika — kadar program nima terminov */}
+            {termini.length === 0 && paketi.length > 0 && !jeRojstniDan && (
+              <div className="mb-5">
+                <h2 className="text-base font-bold text-brand-navy mb-2">📦 Paket</h2>
+                <div className="space-y-2">
+                  {paketi.map((pk) => {
+                    const izbran = izbranPaket?.id === pk.id;
+                    return (
+                      <label
+                        key={pk.id}
+                        className={`flex items-center gap-3 rounded-xl border-2 px-3 py-2.5 cursor-pointer transition-colors ${
+                          izbran ? "border-brand-orange bg-orange-50" : "border-slate-200 hover:border-brand-orange/50"
+                        }`}
+                      >
+                        <input type="radio" name="paket" checked={izbran} onChange={() => setIzbranPaket(pk)} className="w-4 h-4 accent-brand-orange shrink-0" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-bold text-brand-navy">{pk.naziv}</span>
+                          {pk.podnaslov && <span className="block text-xs text-slate-600">{pk.podnaslov}</span>}
+                        </span>
+                        {pk.cena && <span className="shrink-0 text-base font-extrabold text-brand-orange">{pk.cena}</span>}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Termini (razpisani v CRM) */}
             {termini.length > 0 && (
@@ -697,7 +744,9 @@ function F({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
+        className={`w-full px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm bg-white ${
+          type === "date" ? "block min-w-0 max-w-full appearance-none text-left min-h-[40px] [&::-webkit-date-and-time-value]:text-left" : ""
+        }`}
       />
     </div>
   );

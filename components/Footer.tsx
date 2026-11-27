@@ -14,7 +14,7 @@ export default function Footer() {
   return (
     <div className="relative">
       {/* Alpi pokuka izza noge strani */}
-      <Alpi poza="maha" className="absolute right-4 sm:right-10 lg:right-[10%] -top-24 sm:-top-32 h-24 sm:h-32 w-auto z-20" />
+      <Alpi poza="maha" className="absolute right-4 top-4 sm:top-auto sm:right-10 lg:right-[10%] sm:-top-32 h-20 sm:h-32 w-auto z-20" />
     <footer className="relative bg-brand-navy-dark text-slate-400 pt-14 pb-6">
       <div className="max-w-7xl 2xl:max-w-[88rem] mx-auto px-5 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-10 mb-8">
